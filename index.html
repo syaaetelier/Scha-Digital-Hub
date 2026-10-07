@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..800;1,400..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Sacramento&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS via CDN with Custom Config -->
+  <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -54,7 +54,6 @@
   </script>
 
   <style>
-    /* CSS Restraints & Utilities */
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
@@ -77,7 +76,6 @@
       background: linear-gradient(135deg, #93c5fd 0%, #c084fc 50%, #f472b6 100%);
       background-attachment: fixed;
     }
-    /* Hide scrollbars for slick look */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -91,7 +89,7 @@
 
   <!-- APP ROOT CONTAINER -->
   <div id="app" class="w-full max-w-md md:max-w-4xl mx-auto min-h-screen min-h-[100dvh] flex flex-col relative pb-20">
-    <!-- Dynamic Views Will Render Here -->
+    <!-- Dynamic Views Rendered Here -->
   </div>
 
   <!-- PERSISTENT BOTTOM NAVIGATION (ADMIN ONLY) -->
@@ -134,7 +132,6 @@
     </div>
     <div class="relative w-full flex-1 flex items-center justify-center my-auto overflow-hidden">
       <img id="image-viewer-img" src="" alt="Full view" class="max-h-[80vh] max-w-full object-contain rounded-lg transition-transform duration-300">
-      <!-- Arrows -->
       <button onclick="prevImage()" class="absolute left-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
       </button>
@@ -142,48 +139,29 @@
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
       </button>
     </div>
-    <div class="pb-4 text-xs text-white/70">Swipe or use arrows to view all images</div>
+    <div class="pb-4 text-xs text-white/70">Tatal atau guna anak panah untuk lihat gambar</div>
   </div>
 
   <!-- APPLICATION LOGIC & STATE MANAGEMENT -->
   <script>
-    // --- 1. GLOBAL STATE & DATABASE INITIALIZATION ---
-    const DB_KEY = 'SCHA_DIGITAL_DB_V1';
+    const DB_KEY = 'SCHA_DIGITAL_DB_V2';
     
     function getInitialDB() {
       return {
-        session: null, // { loggedIn: true, email: 'admin@scha.com', shopId: 'scha001' }
-        language: 'BM', // 'EN' or 'BM'
+        session: null,
+        language: 'BM',
         adminProfile: {
           email: 'admin@scha.com',
           password: 'password123',
           shopId: 'scha001',
           shopName: 'Scha Digital Learning Center',
-          welcomeGreeting: 'Welcome to My Shop',
+          welcomeGreeting: 'Selamat datang ke kedai kami!',
           logoUrl: 'https://cdn-icons-png.flaticon.com/512/3429/3429402.png'
         },
         categories: ['Prasekolah', 'Sekolah Rendah', 'Sekolah Menengah', 'Bundle', 'Apps'],
-        sources: ['bcl.my', 'Aeon', 'Bank Transfer', 'Cash', 'WhatsApp'],
-        products: [
-          {
-            id: 'PROD_001',
-            orderNo: 'QS001',
-            name: 'Kombo Latihan 3M & Ujian Diagnostik',
-            category: 'Prasekolah',
-            price: 15.00,
-            promo: 5.00,
-            totalPrice: 10.00,
-            images: ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&auto=format&fit=crop'],
-            video: '',
-            buyNowUrl: 'https://bcl.my/pay/kombo-3m',
-            whatsappUrl: 'https://wa.me/60123456789?text=Nak%20tanya%20Kombo%203M',
-            status: 'ACTIVE',
-            createdDate: '2026-10-05T08:00:00.000Z'
-          }
-        ],
-        sales: [
-          { id: 'SALE_001', date: '05/10/2026', orderNo: 'QS001', amount: 10.00, source: 'bcl.my', createdDate: '2026-10-05T09:30:00.000Z' }
-        ]
+        sources: ['bcl.my', 'Aeon', 'Pindahan Bank', 'Tunai', 'WhatsApp'],
+        products: [], // PRODUK Sedia Ada DIBUANG. Admin akan isi add product sendiri nanti.
+        sales: []     // REKOD JUALAN Awal Dikosongkan.
       };
     }
 
@@ -203,7 +181,7 @@
 
     let state = loadDB();
 
-    // Setup Dynamic PWA Manifest Data URL
+    // PWA Manifest Setup
     (function setupPWA() {
       const manifestObj = {
         name: "Scha Digital Learning Center",
@@ -222,7 +200,6 @@
       document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
     })();
 
-    // Helper functions
     function getCurrentFormattedDate() {
       const now = new Date();
       const dd = String(now.getDate()).padStart(2, '0');
@@ -237,7 +214,7 @@
       renderCurrentRoute();
     }
 
-    // --- 2. ROUTER & NAVIGATION ENGINE ---
+    // --- ROUTER & NAVIGATION ENGINE ---
     function navigate(path) {
       window.history.pushState({}, '', '#' + path);
       renderCurrentRoute();
@@ -257,7 +234,6 @@
       const bottomNav = document.getElementById('bottom-nav');
       let hash = window.location.hash.replace('#', '') || '/';
 
-      // Security Auth Check
       const isAuthenticated = state.session && state.session.loggedIn;
 
       if (!isAuthenticated && !hash.startsWith('/catalog') && hash !== '/register' && hash !== '/forgot-password') {
@@ -266,7 +242,6 @@
         hash = '/my-sales';
       }
 
-      // Hide/Show Bottom Nav for Admin vs Public
       if (isAuthenticated && !hash.startsWith('/catalog')) {
         bottomNav.classList.remove('hidden');
         updateBottomNavActiveState(hash);
@@ -274,7 +249,6 @@
         bottomNav.classList.add('hidden');
       }
 
-      // Route Dispatcher
       if (hash === '/login') {
         app.innerHTML = renderPage1Login();
       } else if (hash === '/forgot-password') {
@@ -295,7 +269,7 @@
       } else if (hash.startsWith('/catalog')) {
         const parts = hash.split('/');
         const shopId = parts[2];
-        const productId = parts[4]; // /catalog/scha001/product/PROD_001
+        const productId = parts[4]; 
         if (productId) {
           app.innerHTML = renderSingleProductPage(shopId, productId);
         } else {
@@ -322,18 +296,16 @@
           }
         }
       });
-      // Language labels update
       document.querySelectorAll('.nav-label').forEach(el => {
         el.innerText = el.getAttribute(`data-${state.language.toLowerCase()}`);
       });
     }
 
-    // --- 3. PAGE 1: ADMIN LOGIN & AUTHENTICATION VIEW ---
+    // --- PAGE 1: ADMIN LOGIN ---
     function renderPage1Login() {
       const lang = state.language;
       return `
         <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
-          <!-- Top Right Language Switch -->
           <div class="w-full flex justify-end mb-4">
             <div class="bg-white border-2 border-black rounded-full px-3 py-1 shadow-hard-sm flex space-x-2 text-xs font-bold">
               <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-pink-600 underline' : 'text-black'}">EN</button>
@@ -342,22 +314,16 @@
             </div>
           </div>
 
-          <!-- Main Login Card -->
           <div class="w-[88%] bg-pastel-peach/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 text-center flex flex-col items-center">
-            
-            <!-- Logo Section -->
             <div class="w-28 h-28 bg-pastel-coral rounded-2xl border-2 border-black/10 shadow-inner flex items-center justify-center p-2 mb-4 overflow-hidden relative group">
               <img id="admin-logo-img" src="${state.adminProfile.logoUrl}" alt="Logo" class="w-full h-full object-contain rounded-xl">
               <input type="file" id="logo-upload-input" accept="image/*" class="hidden" onchange="handleLogoChange(event)">
-              <button onclick="document.getElementById('logo-upload-input').click()" class="absolute inset-0 bg-black/40 text-white text-[10px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition">Upload Logo</button>
+              <button onclick="document.getElementById('logo-upload-input').click()" class="absolute inset-0 bg-black/40 text-white text-[10px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition">Muat Naik Logo</button>
             </div>
 
-            <!-- Title -->
             <h1 class="font-serif text-2xl font-bold text-black mb-6">Admin Portal</h1>
 
-            <!-- Form -->
             <form onsubmit="handleLogin(event)" class="w-full space-y-4">
-              <!-- Email Input -->
               <div class="relative w-full">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
@@ -365,7 +331,6 @@
                 <input type="email" id="login-email" required placeholder="Email" value="${state.adminProfile.email}" class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-300">
               </div>
 
-              <!-- Password Input -->
               <div class="relative w-full">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -378,21 +343,18 @@
 
               <div id="login-error" class="text-xs text-red-600 font-bold hidden"></div>
 
-              <!-- Forgot Password -->
               <div class="py-1">
                 <button type="button" onclick="navigate('/forgot-password')" class="font-serif text-xs text-black hover:underline">
                   ${lang === 'BM' ? 'Lupa kata laluan?' : 'Forgot password?'}
                 </button>
               </div>
 
-              <!-- Submit Button -->
               <button type="submit" id="login-btn" class="w-full py-3 bg-white rounded-2xl border border-black shadow-hard font-serif text-lg font-bold text-black hover:bg-slate-50 active:translate-y-0.5 transition">
                 ${lang === 'BM' ? 'Log Masuk' : 'Log In'}
               </button>
             </form>
           </div>
 
-          <!-- Register Section -->
           <div class="mt-6 text-center space-y-1">
             <p class="text-xs text-slate-700">${lang === 'BM' ? 'Belum ada akaun?' : "Don't have account?"}</p>
             <button onclick="navigate('/register')" class="text-xs font-bold text-black underline">
@@ -522,7 +484,7 @@
       navigate('/my-sales');
     }
 
-    // --- 4. PAGE 2: MY SALES DASHBOARD ---
+    // --- PAGE 2: MY SALES DASHBOARD ---
     let currentSalesFilter = 'THIS_MONTH';
 
     function renderPage2MySales() {
@@ -530,7 +492,6 @@
       const todayDate = getCurrentFormattedDate();
       const currentYear = new Date().getFullYear();
 
-      // Calculation Logic
       const now = new Date();
       const currentMonthNum = now.getMonth();
       const currentYearNum = now.getFullYear();
@@ -540,26 +501,20 @@
       let totalSalesThisMonth = 0;
       let totalRevenue = 0;
 
-      // Filter Calculations
       state.sales.forEach(s => {
         const [d, m, y] = s.date.split('/').map(Number);
-        const saleDate = new Date(y, m - 1, d);
-        
         totalRevenue += Number(s.amount);
 
-        // This Month Check
         if (m - 1 === currentMonthNum && y === currentYearNum) {
           totalOrderThisMonth += 1;
           totalSalesThisMonth += Number(s.amount);
         }
 
-        // Today Check
         if (d === now.getDate() && m - 1 === currentMonthNum && y === currentYearNum) {
           salesAmountToday += Number(s.amount);
         }
       });
 
-      // Monthly breakdown for Current Year
       const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const monthsBM = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
 
@@ -573,13 +528,11 @@
 
       return `
         <div class="p-4 space-y-4">
-          <!-- Header Card -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-start">
             <div>
               <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Jualan Saya' : 'My Sales'}</h1>
               <p class="text-xs text-slate-600 mt-1 font-semibold">${todayDate}</p>
             </div>
-            <!-- Language Switcher -->
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm flex space-x-1">
               <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold' : 'text-slate-500'}">EN</button>
               <span>|</span>
@@ -587,7 +540,6 @@
             </div>
           </div>
 
-          <!-- Sales Summary Filter Card -->
           <div class="bg-pastel-peach rounded-3xl p-4 border border-black/10 shadow-sm space-y-3">
             <h2 class="font-serif text-sm font-bold text-black">
               ${lang === 'BM' ? 'Penapis Ringkasan Prestasi Jualan' : 'Sales Performance Summary Filter'}
@@ -600,7 +552,6 @@
             </div>
           </div>
 
-          <!-- 4 Summary Cards (2x2 Grid) -->
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
               <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Pesanan Bulan Ini' : 'Total Order This Month'}</span>
@@ -620,7 +571,6 @@
             </div>
           </div>
 
-          <!-- Monthly Sales Section -->
           <div class="space-y-3 pt-2">
             <h2 class="font-serif text-center font-bold text-lg tracking-wide text-black">
               MONTHLY SALES ${currentYear}
@@ -643,20 +593,18 @@
       renderCurrentRoute();
     }
 
-    // --- 5. PAGE 3: ADD CATALOGUE ---
+    // --- PAGE 3: ADD CATALOGUE ---
     let tempAddProductMedia = [];
 
     function renderPage3AddCatalogue() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
       
-      // Auto Order No Generation
       const nextNum = state.products.length + 1;
       const autoOrderNo = `QS` + String(nextNum).padStart(3, '0');
 
       return `
         <div class="p-4 space-y-4">
-          <!-- Header -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
             <div>
               <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Tambah Katalog' : 'Add Catalogue'}</h1>
@@ -668,7 +616,6 @@
             </div>
           </div>
 
-          <!-- Main Add Form Card -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4 relative">
             <div class="flex justify-between items-center">
               <h2 class="font-serif font-bold text-lg text-black">+ ${lang === 'BM' ? 'Tambah Produk' : 'Add Product'}</h2>
@@ -678,7 +625,6 @@
             </div>
 
             <form onsubmit="handleSaveProduct(event)" class="space-y-3">
-              <!-- Name & Order Number -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Nama Produk' : 'Product Name'}</label>
@@ -690,12 +636,11 @@
                 </div>
               </div>
 
-              <!-- Category Dropdown & Add Category -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Kategori' : 'Category'}</label>
                   <select id="prod-category" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold">
-                    <option value="">--${lang === 'BM' ? 'Pilih Kategori' : 'All Category'}--</option>
+                    <option value="">--${lang === 'BM' ? 'Pilih Kategori' : 'Select Category'}--</option>
                     ${state.categories.map(c => `<option value="${c}">${c}</option>`).join('')}
                   </select>
                 </div>
@@ -708,7 +653,6 @@
                 </div>
               </div>
 
-              <!-- Pricing Inputs -->
               <div class="grid grid-cols-3 gap-2">
                 <div>
                   <label class="block text-[11px] font-bold mb-1">${lang === 'BM' ? 'Harga (RM)' : 'Price (RM)'}</label>
@@ -724,18 +668,14 @@
                 </div>
               </div>
 
-              <!-- Media Upload (Native Picker Support) -->
               <div>
                 <label class="block text-xs font-bold mb-1">
                   ${lang === 'BM' ? 'Muat Naik Gambar (Maks 6 gambar, 5MB, JPG/PNG)' : 'Image upload. Max 6 images. Size 5MB. PNG & JPG'}
                 </label>
                 <input type="file" id="media-picker" accept="image/*" multiple class="hidden" onchange="handleNativeImageUpload(event)">
-                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container">
-                  <!-- Slots will render dynamically -->
-                </div>
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container"></div>
               </div>
 
-              <!-- Video Upload -->
               <div>
                 <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Muat Naik Video (Maks 1 video, 2GB)' : 'Video upload. Max 1 video. Size 2GB'}</label>
                 <input type="file" id="video-picker" accept="video/*" class="hidden" onchange="handleVideoUpload(event)">
@@ -744,7 +684,6 @@
                 </div>
               </div>
 
-              <!-- URLs -->
               <div class="space-y-2 pt-2">
                 <div>
                   <label class="block text-xs font-bold mb-1">Buy Now Button URL</label>
@@ -756,7 +695,6 @@
                 </div>
               </div>
 
-              <!-- Submit -->
               <div class="flex justify-end pt-3">
                 <button type="submit" id="save-prod-btn" class="bg-pastel-coral px-8 py-3 rounded-full font-serif font-bold text-sm border border-black shadow-hard hover:bg-rose-300">
                   ${lang === 'BM' ? 'Simpan' : 'Save'}
@@ -885,8 +823,9 @@
       navigate('/manage-catalog');
     }
 
-    // --- 6. PAGE 4: MANAGE CATALOGUE ---
+    // --- PAGE 4: MANAGE CATALOGUE ---
     let filterCategoryValue = 'ALL';
+    let filterProductNameValue = 'ALL';
 
     function renderPage4ManageCatalogue() {
       const lang = state.language;
@@ -896,10 +835,12 @@
       if (filterCategoryValue !== 'ALL') {
         filteredProds = filteredProds.filter(p => p.category === filterCategoryValue);
       }
+      if (filterProductNameValue !== 'ALL') {
+        filteredProds = filteredProds.filter(p => p.id === filterProductNameValue);
+      }
 
       return `
         <div class="p-4 space-y-4">
-          <!-- Header -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
             <div>
               <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Urus Katalog' : 'Manage Catalogue'}</h1>
@@ -911,7 +852,6 @@
             </div>
           </div>
 
-          <!-- Main Content Card -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
             <div class="flex justify-between items-center">
               <h2 class="font-serif font-bold text-base text-black">+- Edit & Remove Product</h2>
@@ -920,24 +860,31 @@
               </button>
             </div>
 
-            <!-- Filters -->
+            <!-- 2 DROPDOWN FILTERS (Category & Product Name) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Kategori' : 'Category'}</label>
-                <select onchange="handleFilterCategoryChange(this.value)" class="w-full bg-pastel-coral px-4 py-2 rounded-full border-none text-xs font-bold">
-                  <option value="ALL">--All Category--</option>
+                <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Penapis Kategori' : 'Filter by Category'}</label>
+                <select onchange="handleManageCatFilter(this.value)" class="w-full bg-pastel-coral px-4 py-2 rounded-full border-none text-xs font-bold">
+                  <option value="ALL">-- ${lang === 'BM' ? 'Semua Kategori' : 'All Category'} --</option>
                   ${state.categories.map(c => `<option value="${c}" ${filterCategoryValue === c ? 'selected' : ''}>${c}</option>`).join('')}
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Penapis Nama Produk' : 'Filter by Product Name'}</label>
+                <select onchange="handleManageProdFilter(this.value)" class="w-full bg-pastel-coral px-4 py-2 rounded-full border-none text-xs font-bold">
+                  <option value="ALL">-- ${lang === 'BM' ? 'Semua Produk' : 'All Product'} --</option>
+                  ${state.products.map(p => `<option value="${p.id}" ${filterProductNameValue === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
                 </select>
               </div>
             </div>
 
             <!-- Product Grid -->
             <div class="grid grid-cols-2 gap-3 pt-2">
-              ${filteredProds.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">No products available.</div>` : ''}
+              ${filteredProds.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">${lang === 'BM' ? 'Tiada produk tersedia. Sila tambah produk di halaman + Katalog.' : 'No products available. Please add products in + Catalog page.'}</div>` : ''}
               ${filteredProds.map(p => `
                 <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
                   <div>
-                    <!-- Clickable Cover Image for Fullscreen Preview -->
                     <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden cursor-pointer relative group">
                       <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover group-hover:scale-105 transition">
                       <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full">🔍 View (${p.images.length})</span>
@@ -954,7 +901,6 @@
                     </div>
                   </div>
 
-                  <!-- Buttons & Actions -->
                   <div class="space-y-1.5 mt-3">
                     <a href="${p.buyNowUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">BUY NOW</a>
                     <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">WHATSAPP SELLER</a>
@@ -976,8 +922,13 @@
       `;
     }
 
-    function handleFilterCategoryChange(val) {
+    function handleManageCatFilter(val) {
       filterCategoryValue = val;
+      renderCurrentRoute();
+    }
+
+    function handleManageProdFilter(val) {
+      filterProductNameValue = val;
       renderCurrentRoute();
     }
 
@@ -990,7 +941,15 @@
     }
 
     function editProduct(prodId) {
-      alert('Editing capability loaded. Make adjustments in Add Catalogue or update inline.');
+      const prod = state.products.find(p => p.id === prodId);
+      if (prod) {
+        const newName = prompt(state.language === 'BM' ? 'Kemaskini Nama Produk:' : 'Update Product Name:', prod.name);
+        if (newName) {
+          prod.name = newName.trim();
+          saveDB(state);
+          renderCurrentRoute();
+        }
+      }
     }
 
     // --- FULLSCREEN IMAGE VIEWER MODAL LOGIC ---
@@ -1025,14 +984,13 @@
       updateImageViewerContent();
     }
 
-    // --- 7. PAGE 5: SALES RECORD ---
+    // --- PAGE 5: SALES RECORD ---
     function renderPage5SalesRecord() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
 
       return `
         <div class="p-4 space-y-4">
-          <!-- Header -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
             <div>
               <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Rekod Jualan' : 'Sales Record'}</h1>
@@ -1044,7 +1002,6 @@
             </div>
           </div>
 
-          <!-- Main Record Card -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
             <div class="flex justify-between items-start">
               <h2 class="font-serif font-bold text-xs text-black max-w-[70%]">
@@ -1056,22 +1013,31 @@
             </div>
 
             <!-- Table Header -->
-            <div class="bg-pastel-coral rounded-xl p-2.5 text-[11px] font-bold text-black grid grid-cols-4 text-center border border-black/10">
+            <div class="bg-pastel-coral rounded-xl p-2.5 text-[11px] font-bold text-black grid grid-cols-5 text-center border border-black/10">
               <div>Date</div>
               <div>Order No</div>
               <div>Amount</div>
               <div>Source</div>
+              <div>Action</div>
             </div>
 
-            <!-- Table Rows -->
-            <div class="space-y-1.5 max-h-48 overflow-y-auto">
-              ${state.sales.length === 0 ? `<div class="text-center text-xs text-slate-500 py-3">No sales record available.</div>` : ''}
+            <!-- Table Rows with EDIT & REMOVE BUTTONS -->
+            <div class="space-y-1.5 max-h-56 overflow-y-auto">
+              ${state.sales.length === 0 ? `<div class="text-center text-xs text-slate-500 py-3">${lang === 'BM' ? 'Tiada rekod jualan.' : 'No sales record available.'}</div>` : ''}
               ${state.sales.map(s => `
-                <div class="bg-pastel-pink/60 rounded-xl p-2 text-xs font-semibold text-slate-800 grid grid-cols-4 text-center items-center border border-black/5">
-                  <div>${s.date}</div>
-                  <div class="font-bold">${s.orderNo}</div>
-                  <div class="font-serif font-bold">RM ${Number(s.amount).toFixed(2)}</div>
-                  <div class="text-[10px] bg-white/60 px-1 py-0.5 rounded-full border border-black/10">${s.source}</div>
+                <div class="bg-pastel-pink/60 rounded-xl p-2 text-xs font-semibold text-slate-800 grid grid-cols-5 text-center items-center border border-black/5">
+                  <div class="text-[10px]">${s.date}</div>
+                  <div class="font-bold text-[10px]">${s.orderNo}</div>
+                  <div class="font-serif font-bold text-[11px]">RM ${Number(s.amount).toFixed(2)}</div>
+                  <div class="text-[9px] bg-white/60 px-1 py-0.5 rounded-full border border-black/10 truncate">${s.source}</div>
+                  <div class="flex justify-center items-center space-x-1.5">
+                    <button onclick="editSaleRecord('${s.id}')" title="Edit" class="p-1 bg-white rounded-full border border-black/20 text-blue-700 hover:bg-blue-50">
+                      ✎
+                    </button>
+                    <button onclick="removeSaleRecord('${s.id}')" title="Remove" class="p-1 bg-white rounded-full border border-black/20 text-red-600 hover:bg-red-50">
+                      🗑
+                    </button>
+                  </div>
                 </div>
               `).join('')}
             </div>
@@ -1093,6 +1059,7 @@
                   <div>
                     <label class="block text-[10px] font-bold mb-1">Order No</label>
                     <select id="manual-order" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                      ${state.products.length === 0 ? `<option value="QS000">Tiada Produk</option>` : ''}
                       ${state.products.map(p => `<option value="${p.orderNo}">${p.orderNo} -${p.name.substring(0,12)}...</option>`).join('')}
                     </select>
                   </div>
@@ -1111,7 +1078,6 @@
                   </div>
                 </div>
 
-                <!-- Add Source Inline -->
                 <div class="flex space-x-2 pt-1">
                   <input type="text" id="new-source-input" placeholder="+ Add Source" class="flex-1 bg-white px-3 py-1.5 rounded-full text-xs border border-black/20">
                   <button type="button" onclick="handleAddSource()" class="bg-pastel-coral px-3 py-1.5 rounded-full text-xs font-bold border border-black shadow-hard-sm">Save Source</button>
@@ -1127,6 +1093,26 @@
           </div>
         </div>
       `;
+    }
+
+    function editSaleRecord(saleId) {
+      const sale = state.sales.find(s => s.id === saleId);
+      if (sale) {
+        const newAmt = prompt(state.language === 'BM' ? 'Kemaskini Jumlah Jualan (RM):' : 'Update Sales Amount (RM):', sale.amount);
+        if (newAmt !== null) {
+          sale.amount = parseFloat(newAmt) || 0;
+          saveDB(state);
+          renderCurrentRoute();
+        }
+      }
+    }
+
+    function removeSaleRecord(saleId) {
+      if (confirm(state.language === 'BM' ? 'Adakah anda pasti mahu memadam rekod jualan ini?' : 'Are you sure you want to remove this sale record?')) {
+        state.sales = state.sales.filter(s => s.id !== saleId);
+        saveDB(state);
+        renderCurrentRoute();
+      }
     }
 
     function handleAddSource() {
@@ -1161,16 +1147,15 @@
       renderCurrentRoute();
     }
 
-    // --- 8. PAGE 6: SETTING ---
+    // --- PAGE 6: SETTING ---
     function renderPage6Setting() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
       const shopId = state.adminProfile.shopId || 'scha001';
-      const catalogueUrl = `${window.location.origin}${window.location.pathname}#/catalog/${shopId}`;
+      const entireCatalogueUrl = `${window.location.origin}${window.location.pathname}#/catalog/${shopId}`;
 
       return `
         <div class="p-4 space-y-4">
-          <!-- Header -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
             <div>
               <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Tetapan' : 'Setting'}</h1>
@@ -1182,7 +1167,6 @@
             </div>
           </div>
 
-          <!-- Main Setting Card -->
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
             <div class="flex justify-between items-center">
               <span class="font-serif font-bold text-sm text-black">Shop Configuration</span>
@@ -1192,7 +1176,6 @@
             </div>
 
             <form onsubmit="handleSaveSettings(event)" class="space-y-4">
-              <!-- Shop Name -->
               <div>
                 <label class="block font-serif font-bold text-xs text-black mb-1">
                   ${lang === 'BM' ? 'Nama kedai yang ingin dipaparkan di katalog' : 'Shop name you want to display at catalogue'}
@@ -1200,7 +1183,6 @@
                 <input type="text" id="setting-shop-name" value="${state.adminProfile.shopName}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
               </div>
 
-              <!-- Welcome Greetings -->
               <div>
                 <label class="block font-serif font-bold text-xs text-black mb-1">
                   ${lang === 'BM' ? 'Ucapan alu-aluan yang ingin dipaparkan di katalog' : 'Welcome greetings you want to display at catalogue'}
@@ -1208,20 +1190,19 @@
                 <input type="text" id="setting-greeting" value="${state.adminProfile.welcomeGreeting}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
               </div>
 
-              <!-- Catalogue Link Section -->
+              <!-- Entire Catalogue Link Section -->
               <div>
                 <label class="block font-serif font-bold text-xs text-black mb-1">
-                  ${lang === 'BM' ? 'Pautan Katalog Anda. Pautan ini dijana secara automatik.' : 'Your Catalogue Link. This link auto generate from your catalogue'}
+                  ${lang === 'BM' ? 'Pautan Keseluruhan Katalog Anda (Auto Generate)' : 'Your Catalogue Link. This link auto generate from your catalogue'}
                 </label>
                 <div class="flex items-center space-x-2">
-                  <input type="text" readonly value="${catalogueUrl}" class="flex-1 bg-pastel-coral/50 px-4 py-2.5 rounded-2xl border-none text-[11px] font-bold text-slate-700 truncate">
-                  <button type="button" onclick="copyCatalogueLink('${catalogueUrl}')" class="bg-pastel-pink border border-black/20 px-3 py-2 rounded-2xl font-serif font-bold text-[10px] shadow-hard-sm text-black text-center leading-tight">
+                  <input type="text" readonly value="${entireCatalogueUrl}" class="flex-1 bg-pastel-coral/50 px-4 py-2.5 rounded-2xl border-none text-[11px] font-bold text-slate-700 truncate">
+                  <button type="button" onclick="copyCatalogueLink('${entireCatalogueUrl}')" class="bg-pastel-pink border border-black/20 px-3 py-2 rounded-2xl font-serif font-bold text-[10px] shadow-hard-sm text-black text-center leading-tight">
                     Copy your<br>catalogue link
                   </button>
                 </div>
               </div>
 
-              <!-- Save Button -->
               <div class="flex justify-end pt-2">
                 <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-serif font-bold text-xs border border-black shadow-hard">
                   ${lang === 'BM' ? 'Simpan' : 'Save'}
@@ -1235,7 +1216,7 @@
 
     function copyCatalogueLink(url) {
       navigator.clipboard.writeText(url).then(() => {
-        alert(state.language === 'BM' ? 'Pautan katalog berjaya disalin!' : 'Catalogue link copied to clipboard!');
+        alert(state.language === 'BM' ? 'Pautan keseluruhan katalog berjaya disalin!' : 'Entire catalogue link copied to clipboard!');
       });
     }
 
@@ -1247,23 +1228,39 @@
       alert(state.language === 'BM' ? 'Tetapan disimpan!' : 'Settings saved successfully!');
     }
 
-    // --- 9. PAGE 7: PUBLIC CUSTOMER CATALOGUE VIEW ---
-    let customerCategoryFilter = 'ALL';
+    // --- PAGE 7: PUBLIC CUSTOMER CATALOGUE VIEW ---
+    let publicCategoryFilter = 'ALL';
+    let publicProductNameFilter = 'ALL';
 
     function renderPage7CustomerCatalog(shopId) {
+      const lang = state.language;
       const shopName = state.adminProfile.shopName || 'Scha Digital Learning Center';
-      const greeting = state.adminProfile.welcomeGreeting || 'Welcome to My Shop';
+      const greeting = state.adminProfile.welcomeGreeting || 'Selamat datang ke kedai kami!';
+      const isAdminLoggedIn = state.session && state.session.loggedIn;
 
       let activeProducts = state.products.filter(p => p.status === 'ACTIVE');
-      if (customerCategoryFilter !== 'ALL') {
-        activeProducts = activeProducts.filter(p => p.category === customerCategoryFilter);
+      if (publicCategoryFilter !== 'ALL') {
+        activeProducts = activeProducts.filter(p => p.category === publicCategoryFilter);
+      }
+      if (publicProductNameFilter !== 'ALL') {
+        activeProducts = activeProducts.filter(p => p.id === publicProductNameFilter);
       }
 
       return `
         <div class="bg-customer-gradient min-h-screen p-4 space-y-4 text-slate-800">
+          
+          <!-- BUTTON BACK HANYA UNTUK ADMIN SAHAJA (BUKAN PUBLIC CUSTOMER) -->
+          ${isAdminLoggedIn ? `
+            <div class="w-full flex justify-between items-center mb-2">
+              <button onclick="navigate('/my-sales')" class="bg-white/80 hover:bg-white text-black px-4 py-2 rounded-full text-xs font-bold shadow-md border border-black/10 flex items-center space-x-1">
+                <span>←</span> <span>${lang === 'BM' ? 'Kembali ke Dashboard Admin' : 'Back to Dashboard'}</span>
+              </button>
+              <span class="text-[10px] bg-black/20 text-white px-2.5 py-1 rounded-full font-bold">Admin Mode</span>
+            </div>
+          ` : ''}
+
           <!-- Shop Header -->
           <div class="bg-pastel-peach/95 rounded-3xl p-6 border border-white/50 shadow-lg text-center relative overflow-hidden">
-            <!-- Decorative Elements -->
             <span class="absolute top-2 left-3 text-lg opacity-80">✈️</span>
             <span class="absolute top-2 right-3 text-lg opacity-80">💌</span>
             <span class="absolute bottom-2 left-4 text-xs opacity-80">💖</span>
@@ -1280,48 +1277,52 @@
             </div>
           </div>
 
-          <!-- Filter Section -->
+          <!-- 2 DROPDOWN FILTERS (Filter by Category & Filter by Product Name) -->
           <div class="bg-pastel-peach/95 rounded-3xl p-4 border border-white/50 shadow-md space-y-3">
             <div>
               <label class="block text-xs font-bold mb-1 text-slate-800">Filter by Categories</label>
-              <select onchange="handleCustomerCatFilter(this.value)" class="w-full bg-pastel-pink/80 px-4 py-2 rounded-full border-none text-xs font-bold text-black">
+              <select onchange="handlePublicCatFilter(this.value)" class="w-full bg-pastel-pink/80 px-4 py-2 rounded-full border-none text-xs font-bold text-black">
                 <option value="ALL">-- All Categories --</option>
-                ${state.categories.map(c => `<option value="${c}" ${customerCategoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
+                ${state.categories.map(c => `<option value="${c}" ${publicCategoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold mb-1 text-slate-800">Filter by Products</label>
+              <select onchange="handlePublicProdFilter(this.value)" class="w-full bg-pastel-pink/80 px-4 py-2 rounded-full border-none text-xs font-bold text-black">
+                <option value="ALL">-- All Products --</option>
+                ${state.products.map(p => `<option value="${p.id}" ${publicProductNameFilter === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
               </select>
             </div>
           </div>
 
           <!-- Product Grid -->
           <div class="grid grid-cols-2 gap-3">
-            ${activeProducts.length === 0 ? `<div class="col-span-2 text-center text-xs text-white py-8 font-semibold">No products available.</div>` : ''}
+            ${activeProducts.length === 0 ? `<div class="col-span-2 text-center text-xs text-white py-8 font-semibold">${lang === 'BM' ? 'Tiada produk tersedia.' : 'No products available.'}</div>` : ''}
             ${activeProducts.map(p => `
               <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md flex flex-col justify-between relative">
                 <div>
-                  <!-- Image Preview -->
                   <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-pastel-pink/40 rounded-xl overflow-hidden cursor-pointer relative">
                     <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover">
                   </div>
 
-                  <!-- Info & Share -->
                   <div class="flex justify-between items-start mt-2">
                     <div class="text-[9px] font-extrabold text-black uppercase tracking-wider">
                       ${p.category} (${p.orderNo})
                     </div>
-                    <!-- Share Button -->
-                    <button onclick="shareProduct('${shopId}', '${p.id}', '${p.name}')" class="text-slate-800 hover:text-pink-600 p-0.5">
+                    <!-- Product-Specific Share Link Button -->
+                    <button onclick="shareProductLink('${shopId}', '${p.id}', '${p.name}')" title="Kongsi Produk Ini" class="text-slate-800 hover:text-pink-600 p-0.5">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                     </button>
                   </div>
 
                   <h3 class="font-serif font-bold text-xs text-black line-clamp-2 mt-0.5">${p.name}</h3>
 
-                  <!-- Price Badge -->
                   <div class="mt-2 inline-block bg-pastel-yellow px-2.5 py-1 rounded-lg border border-black/10">
                     <span class="font-bold text-xs text-red-600">RM ${p.totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
 
-                <!-- CTA Buttons -->
                 <div class="space-y-1.5 mt-3">
                   <button onclick="handleCustomerBuyNow('${p.buyNowUrl}', '${p.orderNo}',${p.totalPrice})" class="w-full py-1.5 bg-pastel-softPink rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm active:scale-95 transition">
                     Buy Now
@@ -1337,8 +1338,13 @@
       `;
     }
 
-    function handleCustomerCatFilter(val) {
-      customerCategoryFilter = val;
+    function handlePublicCatFilter(val) {
+      publicCategoryFilter = val;
+      renderCurrentRoute();
+    }
+
+    function handlePublicProdFilter(val) {
+      publicProductNameFilter = val;
       renderCurrentRoute();
     }
 
@@ -1346,10 +1352,9 @@
       if (buyUrl && buyUrl !== '#') {
         window.open(buyUrl, '_blank');
       } else {
-        alert('Directing to BCL payment gateway...');
+        alert('Membawa ke payment gateway BCL.my...');
       }
 
-      // Simulate BCL.my Payment Gateway Success Callback Recording
       setTimeout(() => {
         const autoSale = {
           id: 'SALE_' + Date.now(),
@@ -1364,7 +1369,7 @@
       }, 1000);
     }
 
-    function shareProduct(shopId, prodId, prodName) {
+    function shareProductLink(shopId, prodId, prodName) {
       const prodUrl = `${window.location.origin}${window.location.pathname}#/catalog/${shopId}/product/${prodId}`;
       if (navigator.share) {
         navigator.share({
@@ -1374,7 +1379,7 @@
         }).catch(() => {});
       } else {
         navigator.clipboard.writeText(prodUrl).then(() => {
-          alert('Pautan produk disalin!');
+          alert('Pautan khas produk berjaya disalin!');
         });
       }
     }
@@ -1382,14 +1387,14 @@
     function renderSingleProductPage(shopId, productId) {
       const product = state.products.find(p => p.id === productId);
       if (!product) {
-        return `<div class="p-8 text-center text-xs font-bold text-white">Product not found.</div>`;
+        return `<div class="p-8 text-center text-xs font-bold text-white">Produk tidak ditemui.</div>`;
       }
       return `
         <div class="bg-customer-gradient min-h-screen p-4 flex flex-col justify-center items-center">
           <div class="w-full max-w-sm bg-pastel-peach rounded-3xl p-5 border border-white/60 shadow-xl space-y-4">
             <div class="flex justify-between items-center">
               <span class="text-xs font-bold uppercase">${product.category}</span>
-              <button onclick="openCustomerCatalog()" class="text-xs font-bold underline">Close</button>
+              <button onclick="openCustomerCatalog()" class="text-xs font-bold underline">Lihat Semua Katalog</button>
             </div>
             <div class="w-full h-48 bg-white rounded-2xl overflow-hidden border border-black/10">
               <img src="${product.images[0] || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover">
@@ -1405,7 +1410,6 @@
       `;
     }
 
-    // Initialize Routing on Load
     window.addEventListener('DOMContentLoaded', () => {
       renderCurrentRoute();
     });
