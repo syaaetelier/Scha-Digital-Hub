@@ -6,7 +6,7 @@
   <title>Scha Digital Center</title>
   
   <!-- PWA & Mobile Meta Tags -->
-  <meta name="theme-color" content="#fbc2eb" />
+  <meta name="theme-color" content="#f1a1a8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Scha Center" />
@@ -17,12 +17,13 @@
 
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 50%, #fbc2eb 100%);
-      --card-bg: rgba(255, 255, 255, 0.9);
-      --card-pink: #fce4e8;
+      /* Dominan Pink dengan sedikit Soft Blue di bahagian bawah */
+      --bg-gradient: linear-gradient(180deg, #fce4e8 0%, #f7d6e0 65%, #e0f2fe 100%);
+      --card-bg: #ffffff;
+      --card-pink: #fcdbd0;
       --primary-pink: #f1a1a8;
       --dark-pink: #d96b78;
-      --btn-pink: #e08491;
+      --btn-pink: #f3a3ab;
       --text-main: #333333;
       --text-muted: #666666;
       --price-orange: #d97706;
@@ -41,7 +42,6 @@
 
     body {
       background: var(--bg-gradient);
-      background-attachment: fixed;
       min-height: 100vh;
       color: var(--text-main);
       display: flex;
@@ -57,7 +57,7 @@
       background: var(--bg-gradient);
       position: relative;
       padding-bottom: var(--nav-height);
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
     }
@@ -94,6 +94,7 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
       font-size: 12px;
       font-weight: 600;
+      margin-left: auto;
     }
 
     .lang-btn {
@@ -207,11 +208,11 @@
 
     /* Cards */
     .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(5px);
       border-radius: var(--border-radius);
       padding: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
     }
 
     /* Product Grid */
@@ -288,7 +289,7 @@
     }
 
     .btn-wa {
-      background: #25D366;
+      background: var(--btn-pink);
       color: #ffffff;
       border: none;
       padding: 6px;
@@ -462,9 +463,9 @@
       cursor: pointer;
     }
 
-    /* Welcome Header Customer */
+    /* Customer Welcome Header */
     .customer-welcome-card {
-      background: linear-gradient(135deg, #fce4e8 0%, #c2e9fb 100%);
+      background: linear-gradient(135deg, #fce4e8 0%, #fcdbd0 100%);
       border-radius: var(--border-radius);
       padding: 16px;
       text-align: center;
@@ -484,15 +485,13 @@
     
     <!-- Top Header -->
     <header class="app-header" id="main-header">
-      <div id="header-brand-container">
+      <div id="header-left-slot">
         <h1 class="brand-title" id="shop-name-header">Scha Digital Center</h1>
-        <div class="date-subtitle" id="current-date-display">--/--/----</div>
+        <div class="date-subtitle" id="current-date-display">05/10/2026</div>
       </div>
-      <div id="header-right-slot" style="margin-left: auto;">
-        <div class="lang-switcher">
-          <button class="lang-btn" id="lang-en-btn" onclick="setLanguage('EN')">EN</button>
-          <button class="lang-btn" id="lang-bm-btn" onclick="setLanguage('BM')">BM</button>
-        </div>
+      <div class="lang-switcher">
+        <button class="lang-btn" id="lang-en-btn" onclick="setLanguage('EN')">EN</button>
+        <button class="lang-btn" id="lang-bm-btn" onclick="setLanguage('BM')">BM</button>
       </div>
     </header>
 
@@ -514,9 +513,7 @@
           <input type="text" id="new-cat-input" class="form-input" placeholder="Nama Kategori" />
           <button class="btn-primary" style="width: auto; padding: 0 16px;" onclick="addCategory()" data-i18n="add">Tambah</button>
         </div>
-        <div id="category-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
-          <!-- List items rendered dynamically -->
-        </div>
+        <div id="category-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;"></div>
         <button class="btn-secondary" style="margin-top: 12px; width: 100%;" onclick="closeCategoryModal()" data-i18n="close">Tutup</button>
       </div>
     </div>
@@ -524,13 +521,15 @@
     <!-- MAIN CONTENT SCREENS -->
     <div class="screen-content">
 
-      <!-- 0. LOGIN SCREEN -->
-      <section id="screen-auth-login" class="hidden">
-        <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+      <!-- 0. LOGIN / AUTH SCREEN -->
+      <section id="screen-auth" class="hidden">
+        <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
           <i class="fa-solid fa-user-shield" style="font-size: 48px; color: var(--dark-pink); margin-bottom: 10px;"></i>
-          <h2 style="font-size: 20px;" data-i18n="adminPortal">Portal Pentadbir</h2>
+          <h2 style="font-size: 20px;" id="auth-screen-title" data-i18n="adminPortal">Portal Pentadbir</h2>
         </div>
-        <div class="card" style="display: flex; flex-direction: column; gap: 12px;">
+
+        <!-- FORM LOG IN -->
+        <div id="form-login-box" class="card" style="display: flex; flex-direction: column; gap: 12px;">
           <div class="form-group">
             <label class="form-label" data-i18n="email">E-mel</label>
             <input type="email" id="login-email" class="form-input" placeholder="email@domain.com" />
@@ -540,27 +539,17 @@
             <input type="password" id="login-password" class="form-input" placeholder="••••••••" />
           </div>
           <div style="text-align: right;">
-            <a href="javascript:void(0)" onclick="showAuthSubScreen('forgot')" style="font-size: 11px; color: var(--dark-pink); text-decoration: none;" data-i18n="forgotPassword">Lupa Kata Laluan?</a>
+            <a href="javascript:void(0)" onclick="switchAuthMode('forgot')" style="font-size: 11px; color: var(--dark-pink); text-decoration: none;" data-i18n="forgotPassword">Lupa Kata Laluan?</a>
           </div>
           <button class="btn-primary" onclick="handleLogin()" data-i18n="login">Log Masuk</button>
           <div style="text-align: center; font-size: 11px; margin-top: 8px;">
             <span data-i18n="noAccount">Tiada akaun?</span> 
-            <a href="javascript:void(0)" onclick="showAuthSubScreen('register')" style="color: var(--dark-pink); font-weight: 600;" data-i18n="registerHere">Daftar Sini</a>
+            <a href="javascript:void(0)" onclick="switchAuthMode('register')" style="color: var(--dark-pink); font-weight: 600;" data-i18n="registerHere">Daftar Sini</a>
           </div>
         </div>
-      </section>
 
-      <!-- 0.1 REGISTER SCREEN -->
-      <section id="screen-auth-register" class="hidden">
-        <div style="text-align: center; margin-top: 20px; margin-bottom: 15px;">
-          <i class="fa-solid fa-user-plus" style="font-size: 40px; color: var(--dark-pink); margin-bottom: 8px;"></i>
-          <h2 style="font-size: 18px;" data-i18n="firstTimeRegistration">Pendaftaran Kali Pertama</h2>
-        </div>
-        <div class="card" style="display: flex; flex-direction: column; gap: 10px;">
-          <div class="form-group">
-            <label class="form-label" data-i18n="fullName">Nama</label>
-            <input type="text" id="reg-name" class="form-input" placeholder="Nama Penuh" />
-          </div>
+        <!-- FORM REGISTER (PERTAMA KALI DAFTAR) -->
+        <div id="form-register-box" class="card hidden" style="display: flex; flex-direction: column; gap: 12px;">
           <div class="form-group">
             <label class="form-label" data-i18n="email">E-mel</label>
             <input type="email" id="reg-email" class="form-input" placeholder="email@domain.com" />
@@ -570,31 +559,27 @@
             <input type="password" id="reg-password" class="form-input" placeholder="••••••••" />
           </div>
           <div class="form-group">
-            <label class="form-label" data-i18n="confirmPassword">Pengesahan Kata Laluan</label>
+            <label class="form-label" data-i18n="confirmPassword">Sahkan Kata Laluan</label>
             <input type="password" id="reg-confirm-password" class="form-input" placeholder="••••••••" />
           </div>
-          <button class="btn-primary" onclick="handleRegisterSubmit()" style="margin-top: 6px;" data-i18n="registerSubmit">Daftar Akaun</button>
-          <div style="text-align: center; font-size: 11px; margin-top: 6px;">
+          <button class="btn-primary" onclick="handleRegister()" data-i18n="registerSubmit">Daftar Akaun</button>
+          <div style="text-align: center; font-size: 11px; margin-top: 8px;">
             <span data-i18n="alreadyHaveAccount">Sudah ada akaun?</span> 
-            <a href="javascript:void(0)" onclick="showAuthSubScreen('login')" style="color: var(--dark-pink); font-weight: 600;" data-i18n="login">Log Masuk</a>
+            <a href="javascript:void(0)" onclick="switchAuthMode('login')" style="color: var(--dark-pink); font-weight: 600;" data-i18n="loginHere">Log Masuk Sini</a>
           </div>
         </div>
-      </section>
 
-      <!-- 0.2 FORGOT PASSWORD SCREEN -->
-      <section id="screen-auth-forgot" class="hidden">
-        <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
-          <i class="fa-solid fa-key" style="font-size: 40px; color: var(--dark-pink); margin-bottom: 8px;"></i>
-          <h2 style="font-size: 18px;" data-i18n="resetPasswordTitle">Tetapkan Semula Kata Laluan</h2>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" data-i18n="resetPasswordDesc">Sila isi e-mel anda untuk menerima pautan penetapan semula kata laluan di e-mel.</p>
-        </div>
-        <div class="card" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- FORM FORGOT PASSWORD -->
+        <div id="form-forgot-box" class="card hidden" style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 12px; color: var(--text-muted); text-align: center;" data-i18n="forgotInstruction">Masukkan e-mel anda untuk menerima pautan tetapan semula kata laluan.</div>
           <div class="form-group">
             <label class="form-label" data-i18n="email">E-mel</label>
             <input type="email" id="forgot-email" class="form-input" placeholder="email@domain.com" />
           </div>
-          <button class="btn-primary" onclick="handleForgotPasswordSubmit()" data-i18n="sendResetLink">Hantar Pautan Reset</button>
-          <button class="btn-secondary" onclick="showAuthSubScreen('login')" data-i18n="backToLogin">Kembali ke Log Masuk</button>
+          <button class="btn-primary" onclick="handleForgotPassword()" data-i18n="sendResetLink">Hantar Pautan Reset</button>
+          <div style="text-align: center; font-size: 11px; margin-top: 8px;">
+            <a href="javascript:void(0)" onclick="switchAuthMode('login')" style="color: var(--dark-pink); font-weight: 600;" data-i18n="backToLogin">Kembali ke Log Masuk</a>
+          </div>
         </div>
       </section>
 
@@ -629,4 +614,1243 @@
         </div>
 
         <div class="card" style="margin-top: 12px;">
-          <div style="font-size: 12px; font-weight: 700; text-align: center; margin-bottom: 10px;" id="monthly-sales-title">JUAL
+          <div style="font-size: 12px; font-weight: 700; text-align: center; margin-bottom: 10px;" id="monthly-sales-title">JUALAN BULANAN 2026</div>
+          <div id="monthly-grid" class="grid-2" style="gap: 8px;"></div>
+        </div>
+      </section>
+
+      <!-- 2. ADD CATALOG -->
+      <section id="screen-add-catalog" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 13px; font-weight: 700;" data-i18n="addCatalogTitle">Tambah / Edit Produk Katalok</span>
+          <button class="header-action-btn" onclick="navigateAdmin('manage-catalog')">&lt; <span data-i18n="back">Kembali</span></button>
+        </div>
+        <form id="form-add-product" onsubmit="handleSaveProduct(event)" class="card" style="display: flex; flex-direction: column; gap: 10px;">
+          <input type="hidden" id="prod-id" value="" />
+          <div class="form-group">
+            <label class="form-label" data-i18n="productName">Nama Produk</label>
+            <input type="text" id="prod-name" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="description">Penerangan</label>
+            <textarea id="prod-desc" class="form-textarea"></textarea>
+          </div>
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="form-label" data-i18n="category">Kategori</label>
+              <button type="button" onclick="openCategoryModal()" style="background:none; border:none; color: var(--dark-pink); font-size: 11px; font-weight: 600; cursor: pointer;">+ <span data-i18n="manageCategory">Urus Kategori</span></button>
+            </div>
+            <select id="prod-category" class="form-select" required></select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label" data-i18n="price">Harga (RM)</label>
+              <input type="number" step="0.01" id="prod-price" class="form-input" required oninput="calculateTotalPrice()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="discount">Diskaun (RM)</label>
+              <input type="number" step="0.01" id="prod-discount" class="form-input" placeholder="0.00" oninput="calculateTotalPrice()" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="totalPrice">Jumlah Harga (RM)</label>
+            <input type="text" id="prod-total-price" class="form-input" readonly style="background: #f3f4f6;" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="productImages">Gambar Produk (Maks 10, PNG/JPG <= 5MB)</label>
+            <input type="file" id="prod-images-input" accept="image/png, image/jpeg, image/jpg" multiple style="display: none;" onchange="handleImageSelection(event)" />
+            <button type="button" class="btn-secondary" onclick="document.getElementById('prod-images-input').click()">+ <span data-i18n="uploadImages">Pilih Gambar</span></button>
+            <div id="images-preview" class="media-preview-grid"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="productVideo">Video Produk (Maks 1, <= 2GB)</label>
+            <input type="file" id="prod-video-input" accept="video/*" style="display: none;" onchange="handleVideoSelection(event)" />
+            <button type="button" class="btn-secondary" onclick="document.getElementById('prod-video-input').click()">+ <span data-i18n="uploadVideo">Pilih Video</span></button>
+            <div id="video-preview" style="margin-top: 6px;"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="buyNowUrl">Pautan Beli Sekarang (Buy Now URL)</label>
+            <input type="url" id="prod-buy-url" class="form-input" placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="waSellerUrl">Pautan WhatsApp Penjual</label>
+            <input type="url" id="prod-wa-url" class="form-input" placeholder="https://wa.me/..." />
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top: 10px;" data-i18n="save">Simpan</button>
+        </form>
+      </section>
+
+      <!-- 3. MANAGE CATALOG -->
+      <section id="screen-manage-catalog" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 13px; font-weight: 700;" data-i18n="productManagement">Pengurusan Produk</span>
+          <button class="header-action-btn" onclick="navigateAdmin('my-sales')">&lt; <span data-i18n="back">Kembali</span></button>
+        </div>
+        <div class="card" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <div class="form-group">
+            <label class="form-label" data-i18n="filterCategory">Tapis Mengikut Kategori</label>
+            <select id="manage-filter-cat" class="form-select" onchange="renderManageCatalog()">
+              <option value="ALL">-- Semua Kategori --</option>
+            </select>
+          </div>
+        </div>
+        <div id="manage-catalog-grid" class="product-grid"></div>
+      </section>
+
+      <!-- 4. VIEW MY CATALOG & CUSTOMER CATALOG -->
+      <section id="screen-catalog-view" class="hidden">
+        <div id="customer-header-card" class="customer-welcome-card" style="margin-bottom: 12px;">
+          <div class="customer-welcome-title" id="cust-shop-title">Scha Digital Learning Center</div>
+          <div style="font-size: 12px; color: var(--text-muted);" id="cust-shop-welcome">Selamat Datang ke Kedai Saya</div>
+        </div>
+        <div class="card" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <div class="form-group">
+            <label class="form-label" data-i18n="filterCategory">Tapis Mengikut Kategori</label>
+            <select id="cust-filter-cat" class="form-select" onchange="renderCustomerCatalog()">
+              <option value="ALL">-- Semua Kategori --</option>
+            </select>
+          </div>
+        </div>
+        <div id="customer-catalog-grid" class="product-grid"></div>
+      </section>
+
+      <!-- 5. SALES RECORD -->
+      <section id="screen-sales-record" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 13px; font-weight: 700;" data-i18n="salesHistory">Rekod Jualan</span>
+          <button class="header-action-btn" onclick="navigateAdmin('my-sales')">&lt; <span data-i18n="back">Kembali</span></button>
+        </div>
+
+        <div class="table-container card" style="margin-bottom: 12px;">
+          <table class="sales-table">
+            <thead>
+              <tr>
+                <th style="width: 22%;" data-i18n="date">Tarikh</th>
+                <th style="width: 38%;" data-i18n="product">Produk</th>
+                <th style="width: 22%;" data-i18n="amount">Jumlah</th>
+                <th style="width: 18%;" data-i18n="source">Sumber</th>
+              </tr>
+            </thead>
+            <tbody id="sales-record-tbody"></tbody>
+          </table>
+        </div>
+
+        <form id="form-manual-sale" onsubmit="handleManualSaleSubmit(event)" class="card" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 12px; font-weight: 700;" data-i18n="addSalesManually">+ Tambah Jualan Secara Manual</div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="selectProduct">Pilih Produk</label>
+            <select id="manual-prod-select" class="form-select" required onchange="onManualProductSelect()"></select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label" data-i18n="salesAmount">Jumlah Jualan (RM)</label>
+              <input type="number" step="0.01" id="manual-amount" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="date">Tarikh</label>
+              <input type="text" id="manual-date" class="form-input" readonly style="background: #f3f4f6;" />
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top: 6px;" data-i18n="save">Simpan</button>
+        </form>
+      </section>
+
+      <!-- 6. SETTINGS -->
+      <section id="screen-settings" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 13px; font-weight: 700;" data-i18n="settings">Tetapan</span>
+          <button class="header-action-btn" onclick="navigateAdmin('my-sales')">&lt; <span data-i18n="back">Kembali</span></button>
+        </div>
+
+        <form id="form-settings" onsubmit="handleSaveSettings(event)" class="card" style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" data-i18n="shopNameDisplay">Nama Kedai di Katalok</label>
+            <input type="text" id="setting-shop-name" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="welcomeGreetings">Ucapan Aluan di Katalok</label>
+            <input type="text" id="setting-welcome" class="form-input" />
+          </div>
+
+          <div style="background: var(--card-pink); padding: 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <label class="form-label" data-i18n="yourCatalogLink">Pautan Katalok Anda</label>
+            <input type="text" id="setting-catalog-url" class="form-input" readonly style="background: white;" />
+            <div class="grid-2">
+              <button type="button" class="btn-secondary" onclick="copyCatalogLink()" data-i18n="copyLink">Salin Pautan</button>
+              <button type="button" class="btn-secondary" onclick="navigateAdmin('view-catalog')" data-i18n="viewCatalog">Lihat Katalok</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 10px;" data-i18n="saveSettings">Simpan Tetapan</button>
+          
+          <button type="button" onclick="handleLogout()" style="background: none; border: 1px solid #e5e7eb; color: #ef4444; padding: 10px; border-radius: 25px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+            <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout">Log Keluar</span>
+          </button>
+        </form>
+      </section>
+
+    </div>
+
+    <!-- Persistent Bottom Navigation for Admin -->
+    <nav class="admin-nav hidden" id="admin-bottom-nav">
+      <div class="nav-item" onclick="navigateAdmin('my-sales')" id="nav-my-sales">
+        <i class="fa-solid fa-chart-line"></i>
+        <span data-i18n="navSales">Jualan</span>
+      </div>
+      <div class="nav-item" onclick="navigateAdmin('add-catalog')" id="nav-add-catalog">
+        <i class="fa-solid fa-folder-plus"></i>
+        <span data-i18n="navAdd">Tambah</span>
+      </div>
+      <div class="nav-item" onclick="navigateAdmin('manage-catalog')" id="nav-manage-catalog">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span data-i18n="navManage">Urus</span>
+      </div>
+      <div class="nav-item" onclick="navigateAdmin('view-catalog')" id="nav-view-catalog">
+        <i class="fa-solid fa-store"></i>
+        <span data-i18n="navCatalog">Katalok</span>
+      </div>
+      <div class="nav-item" onclick="navigateAdmin('sales-record')" id="nav-sales-record">
+        <i class="fa-solid fa-receipt"></i>
+        <span data-i18n="navRecord">Rekod</span>
+      </div>
+      <div class="nav-item" onclick="navigateAdmin('settings')" id="nav-settings">
+        <i class="fa-solid fa-gear"></i>
+        <span data-i18n="navSettings">Tetapan</span>
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- FIREBASE SDKs & LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword, 
+      sendPasswordResetEmail, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      getDatabase, 
+      ref, 
+      set, 
+      get, 
+      push, 
+      child, 
+      onValue, 
+      update, 
+      remove, 
+      runTransaction 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCmG5Cu3Fpx-N95tgRkk8PouCRSlHmP4Vo",
+      authDomain: "apps-5010.firebaseapp.com",
+      databaseURL: "https://apps-5010-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "apps-5010",
+      storageBucket: "apps-5010.firebasestorage.app",
+      messagingSenderId: "611182886661",
+      appId: "1:611182886661:web:033f2569aeecd55d31c16c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Global App State
+    let currentUser = null;
+    let currentLang = localStorage.getItem('scha_lang') || 'BM';
+    let currentAdminScreen = localStorage.getItem('scha_admin_screen') || 'my-sales';
+    let inactivityTimer = null;
+    let activeCatalogId = null;
+
+    // Cache Data
+    let categoriesData = {};
+    let productsData = {};
+    let salesData = {};
+    let settingsData = {
+      shopName: "Scha Digital Learning Center",
+      welcomeGreeting: "Selamat Datang ke Kedai Saya"
+    };
+
+    // Media Storage State
+    let selectedImagesBase64 = [];
+    let selectedVideoBase64 = null;
+
+    // Translations Dictionary (Tegas 100% BM & EN - Bahasa Indonesia Dilarang)
+    const i18n = {
+      BM: {
+        adminPortal: "Portal Pentadbir",
+        registerPortal: "Pendaftaran Pentadbir Baru",
+        resetPortal: "Tetapan Semula Kata Laluan",
+        email: "E-mel",
+        password: "Kata Laluan",
+        confirmPassword: "Sahkan Kata Laluan",
+        forgotPassword: "Lupa Kata Laluan?",
+        login: "Log Masuk",
+        noAccount: "Tiada akaun?",
+        registerHere: "Daftar Sini",
+        registerSubmit: "Daftar Akaun",
+        alreadyHaveAccount: "Sudah mempunyai akaun?",
+        loginHere: "Log Masuk Sini",
+        forgotInstruction: "Masukkan e-mel anda untuk menerima pautan tetapan semula kata laluan.",
+        sendResetLink: "Hantar Pautan Reset",
+        backToLogin: "Kembali ke Log Masuk",
+        salesSummaryFilter: "Ringkasan Prestasi Jualan",
+        today: "Hari Ini",
+        thisMonth: "Bulan Ini",
+        totalOrderThisMonth: "Jumlah Pesanan Bulan Ini",
+        salesToday: "Jumlah Jualan Hari Ini",
+        totalSalesThisMonth: "Jumlah Jualan Bulan Ini",
+        totalRevenue: "Keseluruhan Hasil",
+        addCatalogTitle: "Tambah / Edit Produk Katalok",
+        back: "Kembali",
+        productName: "Nama Produk",
+        description: "Penerangan",
+        category: "Kategori",
+        manageCategory: "Urus Kategori",
+        price: "Harga (RM)",
+        discount: "Diskaun (RM) pilihan",
+        totalPrice: "Jumlah Harga (RM)",
+        productImages: "Gambar Produk (Maks 10, PNG/JPG <= 5MB)",
+        uploadImages: "Pilih Gambar",
+        productVideo: "Video Produk (Maks 1, <= 2GB)",
+        uploadVideo: "Pilih Video",
+        buyNowUrl: "Pautan Beli Sekarang (Buy Now URL)",
+        waSellerUrl: "Pautan WhatsApp Penjual",
+        save: "Simpan",
+        productManagement: "Pengurusan Produk",
+        filterCategory: "Tapis Mengikut Kategori",
+        salesHistory: "Rekod Jualan",
+        date: "Tarikh",
+        product: "Produk",
+        amount: "Jumlah (RM)",
+        source: "Sumber",
+        addSalesManually: "+ Rekod Jualan Manual",
+        selectProduct: "Pilih Produk",
+        salesAmount: "Jumlah Jualan (RM)",
+        settings: "Tetapan",
+        shopNameDisplay: "Nama Kedai di Katalok",
+        welcomeGreetings: "Ucapan Aluan di Katalok",
+        yourCatalogLink: "Pautan Katalok Anda",
+        copyLink: "Salin Pautan",
+        viewCatalog: "Lihat Katalok Saya",
+        saveSettings: "Simpan Tetapan",
+        logout: "Log Keluar",
+        navSales: "Jualan",
+        navAdd: "Tambah",
+        navManage: "Urus",
+        navCatalog: "Katalok",
+        navRecord: "Rekod",
+        navSettings: "Tetapan",
+        savedSuccess: "Maklumat Berjaya Disimpan",
+        add: "Tambah",
+        close: "Tutup",
+        buyNow: "Beli Sekarang",
+        whatsappSeller: "WhatsApp Penjual"
+      },
+      EN: {
+        adminPortal: "Admin Portal",
+        registerPortal: "New Admin Registration",
+        resetPortal: "Reset Password",
+        email: "Email",
+        password: "Password",
+        confirmPassword: "Confirm Password",
+        forgotPassword: "Forgot Password?",
+        login: "Log In",
+        noAccount: "Don't have an account?",
+        registerHere: "Register Here",
+        registerSubmit: "Register Account",
+        alreadyHaveAccount: "Already have an account?",
+        loginHere: "Log In Here",
+        forgotInstruction: "Enter your email address to receive a password reset link.",
+        sendResetLink: "Send Reset Link",
+        backToLogin: "Back to Log In",
+        salesSummaryFilter: "Sales Performance Summary",
+        today: "Today",
+        thisMonth: "This Month",
+        totalOrderThisMonth: "Total Orders This Month",
+        salesToday: "Sales Today",
+        totalSalesThisMonth: "Total Sales This Month",
+        totalRevenue: "Total Revenue",
+        addCatalogTitle: "Add / Edit Product Catalog",
+        back: "Back",
+        productName: "Product Name",
+        description: "Description",
+        category: "Category",
+        manageCategory: "Manage Category",
+        price: "Price (RM)",
+        discount: "Discount (RM) optional",
+        totalPrice: "Total Price (RM)",
+        productImages: "Product Images (Max 10, PNG/JPG <= 5MB)",
+        uploadImages: "Select Images",
+        productVideo: "Product Video (Max 1, <= 2GB)",
+        uploadVideo: "Select Video",
+        buyNowUrl: "Buy Now URL",
+        waSellerUrl: "WhatsApp Seller URL",
+        save: "Save",
+        productManagement: "Product Management",
+        filterCategory: "Filter by Category",
+        salesHistory: "Sales Record",
+        date: "Date",
+        product: "Product",
+        amount: "Amount (RM)",
+        source: "Source",
+        addSalesManually: "+ Add Sales Manually",
+        selectProduct: "Select Product",
+        salesAmount: "Sales Amount (RM)",
+        settings: "Settings",
+        shopNameDisplay: "Shop Name Display on Catalog",
+        welcomeGreetings: "Welcome Greeting on Catalog",
+        yourCatalogLink: "Your Catalog Link",
+        copyLink: "Copy Link",
+        viewCatalog: "View My Catalog",
+        saveSettings: "Save Settings",
+        logout: "Log Out",
+        navSales: "Sales",
+        navAdd: "Add",
+        navManage: "Manage",
+        navCatalog: "Catalog",
+        navRecord: "Record",
+        navSettings: "Settings",
+        savedSuccess: "Information Saved Successfully",
+        add: "Add",
+        close: "Close",
+        buyNow: "Buy Now",
+        whatsappSeller: "WhatsApp Seller"
+      }
+    };
+
+    // Helper Toast
+    window.showToast = function(msg) {
+      const toast = document.getElementById('toast-modal');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    };
+
+    // Switching Auth Forms (Login / Register / Forgot Password)
+    window.switchAuthMode = function(mode) {
+      const loginBox = document.getElementById('form-login-box');
+      const registerBox = document.getElementById('form-register-box');
+      const forgotBox = document.getElementById('form-forgot-box');
+      const titleEl = document.getElementById('auth-screen-title');
+
+      loginBox.classList.add('hidden');
+      registerBox.classList.add('hidden');
+      forgotBox.classList.add('hidden');
+
+      if (mode === 'register') {
+        registerBox.classList.remove('hidden');
+        titleEl.innerText = i18n[currentLang].registerPortal;
+      } else if (mode === 'forgot') {
+        forgotBox.classList.remove('hidden');
+        titleEl.innerText = i18n[currentLang].resetPortal;
+      } else {
+        loginBox.classList.remove('hidden');
+        titleEl.innerText = i18n[currentLang].adminPortal;
+      }
+    };
+
+    // Auto Inactivity Logout (2 Hours)
+    function resetInactivityTimer() {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      if (currentUser) {
+        inactivityTimer = setTimeout(() => {
+          signOut(auth);
+          showToast("Sesi tamat kerana tiada aktiviti.");
+        }, 2 * 60 * 60 * 1000);
+      }
+    }
+    window.addEventListener('mousemove', resetInactivityTimer);
+    window.addEventListener('keydown', resetInactivityTimer);
+    window.addEventListener('touchstart', resetInactivityTimer);
+
+    // Date Helper (Asia/Kuala_Lumpur)
+    function getFormattedDate() {
+      const today = new Date();
+      const options = { timeZone: 'Asia/Kuala_Lumpur', day: '2-digit', month: '2-digit', year: 'numeric' };
+      return new Intl.DateTimeFormat('en-GB', options).format(today);
+    }
+
+    // Language Toggle
+    window.setLanguage = function(lang) {
+      currentLang = lang;
+      localStorage.setItem('scha_lang', lang);
+      document.getElementById('lang-en-btn').classList.toggle('active', lang === 'EN');
+      document.getElementById('lang-bm-btn').classList.toggle('active', lang === 'BM');
+
+      // Update text in UI
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[lang][key]) {
+          el.innerText = i18n[lang][key];
+        }
+      });
+
+      renderAllScreens();
+    };
+
+    // Routing Logic
+    function handleRoute() {
+      const hash = window.location.hash;
+
+      if (hash.startsWith('#/catalog/')) {
+        activeCatalogId = hash.replace('#/catalog/', '').split('/')[0];
+        showCustomerCatalogView();
+      } else {
+        if (currentUser) {
+          showAdminView(currentAdminScreen);
+        } else {
+          showAuthView();
+        }
+      }
+    }
+
+    window.addEventListener('hashchange', handleRoute);
+
+    function showAuthView() {
+      document.getElementById('admin-bottom-nav').classList.add('hidden');
+      document.querySelectorAll('.screen-content > section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-auth').classList.remove('hidden');
+      switchAuthMode('login');
+    }
+
+    window.navigateAdmin = function(screenId) {
+      currentAdminScreen = screenId;
+      localStorage.setItem('scha_admin_screen', screenId);
+      window.location.hash = `#/admin/${screenId}`;
+      showAdminView(screenId);
+    };
+
+    function showAdminView(screenId) {
+      if (!currentUser) {
+        showAuthView();
+        return;
+      }
+
+      document.getElementById('admin-bottom-nav').classList.remove('hidden');
+      document.querySelectorAll('.screen-content > section').forEach(s => s.classList.add('hidden'));
+
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      const activeNav = document.getElementById(`nav-${screenId}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      if (screenId === 'view-catalog') {
+        showCustomerCatalogView(true);
+        return;
+      }
+
+      const targetScreen = document.getElementById(`screen-${screenId}`);
+      if (targetScreen) targetScreen.classList.remove('hidden');
+
+      renderAllScreens();
+    }
+
+    function showCustomerCatalogView(isAdminPreview = false) {
+      document.querySelectorAll('.screen-content > section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-catalog-view').classList.remove('hidden');
+
+      if (isAdminPreview) {
+        document.getElementById('admin-bottom-nav').classList.remove('hidden');
+      } else {
+        document.getElementById('admin-bottom-nav').classList.add('hidden');
+      }
+
+      const targetUid = activeCatalogId || (currentUser ? currentUser.uid : null);
+      if (targetUid) {
+        loadCatalogDataForUid(targetUid);
+      }
+    }
+
+    // Firebase Auth Handlers
+    window.handleLogin = async function() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      if (!email || !pass) return alert("Sila isi e-mel dan kata laluan.");
+
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        alert("Gagal Log Masuk: " + err.message);
+      }
+    };
+
+    window.handleRegister = async function() {
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-password').value;
+      const confirmPass = document.getElementById('reg-confirm-password').value;
+
+      if (!email || !pass || !confirmPass) {
+        return alert("Sila isi semua ruangan e-mel dan kata laluan.");
+      }
+
+      if (pass !== confirmPass) {
+        return alert("Kata laluan dan sahkan kata laluan tidak sepadan.");
+      }
+
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        showToast("Akaun berjaya didaftarkan!");
+      } catch (err) {
+        alert("Gagal Mendaftar: " + err.message);
+      }
+    };
+
+    window.handleForgotPassword = async function() {
+      const email = document.getElementById('forgot-email').value.trim();
+      if (!email) return alert("Sila masukkan e-mel anda.");
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showToast("Pautan tetapan semula kata laluan telah dihantar ke e-mel.");
+        switchAuthMode('login');
+      } catch (err) {
+        alert("Ralat: " + err.message);
+      }
+    };
+
+    window.handleLogout = async function() {
+      await signOut(auth);
+      window.location.hash = "";
+    };
+
+    // Firebase Auth Listener
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      resetInactivityTimer();
+
+      if (user) {
+        setupDataListeners(user.uid);
+        if (!window.location.hash.startsWith('#/catalog/')) {
+          showAdminView(currentAdminScreen);
+        }
+      } else {
+        if (!window.location.hash.startsWith('#/catalog/')) {
+          showAuthView();
+        }
+      }
+    });
+
+    // Firebase Data Sync
+    function setupDataListeners(uid) {
+      const userRef = ref(db, `users/${uid}`);
+
+      onValue(child(userRef, 'categories'), (snapshot) => {
+        categoriesData = snapshot.val() || {};
+        renderCategoriesSelect();
+      });
+
+      onValue(child(userRef, 'products'), (snapshot) => {
+        productsData = snapshot.val() || {};
+        renderManageCatalog();
+        renderCustomerCatalog();
+        renderManualProductSelect();
+      });
+
+      onValue(child(userRef, 'sales'), (snapshot) => {
+        salesData = snapshot.val() || {};
+        renderSalesRecord();
+        renderDashboard();
+      });
+
+      onValue(child(userRef, 'settings'), (snapshot) => {
+        settingsData = snapshot.val() || {
+          shopName: "Scha Digital Learning Center",
+          welcomeGreeting: "Selamat Datang ke Kedai Saya"
+        };
+        document.getElementById('setting-shop-name').value = settingsData.shopName || "";
+        document.getElementById('setting-welcome').value = settingsData.welcomeGreeting || "";
+        document.getElementById('shop-name-header').innerText = settingsData.shopName || "Scha Digital Center";
+        document.getElementById('cust-shop-title').innerText = settingsData.shopName || "Scha Digital Learning Center";
+        document.getElementById('cust-shop-welcome').innerText = settingsData.welcomeGreeting || "Selamat Datang ke Kedai Saya";
+      });
+
+      const catalogUrl = `${window.location.origin}${window.location.pathname}#/catalog/${uid}`;
+      document.getElementById('setting-catalog-url').value = catalogUrl;
+    }
+
+    function loadCatalogDataForUid(uid) {
+      const userRef = ref(db, `users/${uid}`);
+
+      get(userRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const val = snapshot.val();
+          productsData = val.products || {};
+          categoriesData = val.categories || {};
+          const settings = val.settings || {};
+          document.getElementById('cust-shop-title').innerText = settings.shopName || "Scha Digital Learning Center";
+          document.getElementById('cust-shop-welcome').innerText = settings.welcomeGreeting || "Selamat Datang ke Kedai Saya";
+          renderCustomerCatalog();
+        }
+      });
+    }
+
+    // CATEGORY MANAGEMENT
+    window.openCategoryModal = function() {
+      document.getElementById('category-modal').classList.remove('hidden');
+      renderCategoryList();
+    };
+
+    window.closeCategoryModal = function() {
+      document.getElementById('category-modal').classList.add('hidden');
+    };
+
+    window.addCategory = async function() {
+      if (!currentUser) return;
+      const input = document.getElementById('new-cat-input');
+      const catName = input.value.trim();
+      if (!catName) return;
+
+      const newRef = push(ref(db, `users/${currentUser.uid}/categories`));
+      await set(newRef, { name: catName });
+      input.value = "";
+      renderCategoryList();
+    };
+
+    window.removeCategory = async function(catId) {
+      if (!currentUser) return;
+      await remove(ref(db, `users/${currentUser.uid}/categories/${catId}`));
+      renderCategoryList();
+    };
+
+    function renderCategoryList() {
+      const container = document.getElementById('category-list');
+      container.innerHTML = "";
+      Object.keys(categoriesData).forEach(id => {
+        const item = categoriesData[id];
+        const div = document.createElement('div');
+        div.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: #f9fafb; padding: 6px 12px; border-radius: 8px; font-size: 12px;";
+        div.innerHTML = `
+          <span>${item.name}</span>
+          <i class="fa-solid fa-trash" style="color: #ef4444; cursor: pointer;" onclick="removeCategory('${id}')"></i>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderCategoriesSelect() {
+      const addSelect = document.getElementById('prod-category');
+      const manageFilter = document.getElementById('manage-filter-cat');
+      const custFilter = document.getElementById('cust-filter-cat');
+
+      let optionsHtml = '<option value="">-- Pilih Kategori --</option>';
+      let filterHtml = '<option value="ALL">-- Semua Kategori --</option>';
+
+      Object.keys(categoriesData).forEach(id => {
+        const cat = categoriesData[id];
+        optionsHtml += `<option value="${cat.name}">${cat.name}</option>`;
+        filterHtml += `<option value="${cat.name}">${cat.name}</option>`;
+      });
+
+      if (addSelect) addSelect.innerHTML = optionsHtml;
+      if (manageFilter) manageFilter.innerHTML = filterHtml;
+      if (custFilter) custFilter.innerHTML = filterHtml;
+    }
+
+    // FORM CALCULATION & MEDIA HANDLING
+    window.calculateTotalPrice = function() {
+      const price = parseFloat(document.getElementById('prod-price').value) || 0;
+      const discount = parseFloat(document.getElementById('prod-discount').value) || 0;
+      const total = Math.max(0, price - discount);
+      document.getElementById('prod-total-price').value = total.toFixed(2);
+    };
+
+    window.handleImageSelection = function(event) {
+      const files = Array.from(event.target.files);
+      if (selectedImagesBase64.length + files.length > 10) {
+        alert("Maksimum 10 gambar sahaja dibenarkan.");
+        return;
+      }
+
+      files.forEach(file => {
+        if (file.size > 5 * 1024 * 1024) {
+          alert(`Fail ${file.name} melebihi had 5MB.`);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          selectedImagesBase64.push(e.target.result);
+          renderImagesPreview();
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+
+    function renderImagesPreview() {
+      const container = document.getElementById('images-preview');
+      container.innerHTML = "";
+      selectedImagesBase64.forEach((src, idx) => {
+        const div = document.createElement('div');
+        div.className = "media-preview-item";
+        div.innerHTML = `
+          <img src="${src}" />
+          <div class="remove-btn" onclick="removeImage(${idx})">✕</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    window.removeImage = function(idx) {
+      selectedImagesBase64.splice(idx, 1);
+      renderImagesPreview();
+    };
+
+    window.handleVideoSelection = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024 * 1024) {
+        alert("Saiz video melebihi had 2GB.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedVideoBase64 = e.target.result;
+        renderVideoPreview();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    function renderVideoPreview() {
+      const container = document.getElementById('video-preview');
+      if (!selectedVideoBase64) {
+        container.innerHTML = "";
+        return;
+      }
+      container.innerHTML = `
+        <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: black; border-radius: 8px; overflow: hidden;">
+          <video src="${selectedVideoBase64}" controls style="width: 100%; height: 100%;"></video>
+          <div class="remove-btn" style="position: absolute; top: 4px; right: 4px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="removeVideo()">✕</div>
+        </div>
+      `;
+    }
+
+    window.removeVideo = function() {
+      selectedVideoBase64 = null;
+      document.getElementById('prod-video-input').value = "";
+      renderVideoPreview();
+    };
+
+    // SAVE PRODUCT
+    window.handleSaveProduct = async function(event) {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      const id = document.getElementById('prod-id').value;
+      const name = document.getElementById('prod-name').value;
+      const desc = document.getElementById('prod-desc').value;
+      const category = document.getElementById('prod-category').value;
+      const price = parseFloat(document.getElementById('prod-price').value) || 0;
+      const discount = parseFloat(document.getElementById('prod-discount').value) || 0;
+      const totalPrice = parseFloat(document.getElementById('prod-total-price').value) || 0;
+      const buyUrl = document.getElementById('prod-buy-url').value;
+      const waUrl = document.getElementById('prod-wa-url').value;
+
+      const productPayload = {
+        name,
+        desc,
+        category,
+        price,
+        discount,
+        totalPrice,
+        images: selectedImagesBase64,
+        video: selectedVideoBase64 || null,
+        buyUrl,
+        waUrl,
+        updatedAt: Date.now()
+      };
+
+      if (id) {
+        await update(ref(db, `users/${currentUser.uid}/products/${id}`), productPayload);
+      } else {
+        const newRef = push(ref(db, `users/${currentUser.uid}/products`));
+        await set(newRef, productPayload);
+      }
+
+      showToast(i18n[currentLang].savedSuccess);
+      
+      document.getElementById('form-add-product').reset();
+      document.getElementById('prod-id').value = "";
+      selectedImagesBase64 = [];
+      selectedVideoBase64 = null;
+      renderImagesPreview();
+      renderVideoPreview();
+
+      navigateAdmin('manage-catalog');
+    };
+
+    // EDIT / DELETE PRODUCT
+    window.editProduct = function(prodId) {
+      const prod = productsData[prodId];
+      if (!prod) return;
+
+      document.getElementById('prod-id').value = prodId;
+      document.getElementById('prod-name').value = prod.name || "";
+      document.getElementById('prod-desc').value = prod.desc || "";
+      document.getElementById('prod-category').value = prod.category || "";
+      document.getElementById('prod-price').value = prod.price || "";
+      document.getElementById('prod-discount').value = prod.discount || "";
+      document.getElementById('prod-total-price').value = prod.totalPrice || "";
+      document.getElementById('prod-buy-url').value = prod.buyUrl || "";
+      document.getElementById('prod-wa-url').value = prod.waUrl || "";
+
+      selectedImagesBase64 = prod.images || [];
+      selectedVideoBase64 = prod.video || null;
+      renderImagesPreview();
+      renderVideoPreview();
+
+      navigateAdmin('add-catalog');
+    };
+
+    window.deleteProduct = async function(prodId) {
+      if (!currentUser) return;
+      if (confirm("Adakah anda pasti mahu memadam produk ini? Rekod jualan terdahulu tidak akan terjejas.")) {
+        await remove(ref(db, `users/${currentUser.uid}/products/${prodId}`));
+        showToast("Produk dipadam.");
+      }
+    };
+
+    // RENDER MANAGE CATALOG
+    function renderManageCatalog() {
+      const grid = document.getElementById('manage-catalog-grid');
+      const filterCat = document.getElementById('manage-filter-cat').value;
+      grid.innerHTML = "";
+
+      Object.keys(productsData).forEach(id => {
+        const prod = productsData[id];
+        if (filterCat !== "ALL" && prod.category !== filterCat) return;
+
+        const imgUrl = (prod.images && prod.images.length > 0) ? prod.images[0] : 'https://via.placeholder.com/150';
+
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-img-box" onclick="openImageViewer('${prod.images ? prod.images.join(',') : ''}')">
+            <img src="${imgUrl}" alt="${prod.name}" />
+          </div>
+          <div class="product-category-tag">${prod.category || 'UMUM'}</div>
+          <div class="product-title">${prod.name}</div>
+          <div class="product-price">RM ${(prod.totalPrice || prod.price).toFixed(2)}</div>
+          <button class="btn-buy" onclick="editProduct('${id}')"><i class="fa-solid fa-pen"></i> Edit</button>
+          <button class="btn-wa" style="background: #ef4444;" onclick="deleteProduct('${id}')"><i class="fa-solid fa-trash"></i> Padam</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // RENDER CUSTOMER CATALOG
+    function renderCustomerCatalog() {
+      const grid = document.getElementById('customer-catalog-grid');
+      const filterCat = document.getElementById('cust-filter-cat').value;
+      grid.innerHTML = "";
+
+      Object.keys(productsData).forEach(id => {
+        const prod = productsData[id];
+        if (filterCat !== "ALL" && prod.category !== filterCat) return;
+
+        const imgUrl = (prod.images && prod.images.length > 0) ? prod.images[0] : 'https://via.placeholder.com/150';
+
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-img-box" onclick="openImageViewer('${prod.images ? prod.images.join(',') : ''}')">
+            <img src="${imgUrl}" alt="${prod.name}" />
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="product-category-tag">${prod.category || 'UMUM'}</span>
+            <i class="fa-solid fa-share-nodes" style="cursor: pointer; font-size: 14px; color: var(--text-muted);" onclick="shareProduct('${id}', '${prod.name}')"></i>
+          </div>
+          <div class="product-title">${prod.name}</div>
+          <div class="product-price">RM ${(prod.totalPrice || prod.price).toFixed(2)}</div>
+          <button class="btn-buy" onclick="handleBuyNow('${id}')">${i18n[currentLang].buyNow}</button>
+          <button class="btn-wa" onclick="handleWhatsAppSeller('${id}')">${i18n[currentLang].whatsappSeller}</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // BUY NOW & WHATSAPP
+    window.handleBuyNow = function(prodId) {
+      const prod = productsData[prodId];
+      if (!prod) return;
+
+      if (prod.buyUrl) {
+        window.open(prod.buyUrl, '_blank');
+      } else {
+        alert("Pautan pembayaran belum disediakan oleh penjual.");
+      }
+    };
+
+    window.handleWhatsAppSeller = function(prodId) {
+      const prod = productsData[prodId];
+      if (!prod) return;
+
+      if (prod.waUrl) {
+        window.open(prod.waUrl, '_blank');
+      } else {
+        alert("Pautan WhatsApp belum disediakan oleh penjual.");
+      }
+    };
+
+    window.shareProduct = function(prodId, prodName) {
+      const targetUid = activeCatalogId || (currentUser ? currentUser.uid : '');
+      const shareUrl = `${window.location.origin}${window.location.pathname}#/catalog/${targetUid}/product/${prodId}`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: prodName,
+          url: shareUrl
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(shareUrl);
+        showToast("Pautan produk disalin ke papan klip!");
+      }
+    };
+
+    // IMAGE VIEWER MODAL
+    let currentViewerImages = [];
+    let currentViewerIndex = 0;
+
+    window.openImageViewer = function(imagesCsv) {
+      if (!imagesCsv) return;
+      currentViewerImages = imagesCsv.split(',');
+      currentViewerIndex = 0;
+      updateImageViewer();
+      document.getElementById('image-viewer').classList.remove('hidden');
+    };
+
+    window.closeImageViewer = function() {
+      document.getElementById('image-viewer').classList.add('hidden');
+    };
+
+    function updateImageViewer() {
+      document.getElementById('viewer-img').src = currentViewerImages[currentViewerIndex];
+      document.getElementById('viewer-counter').innerText = `${currentViewerIndex + 1} / ${currentViewerImages.length}`;
+    }
+
+    // UNIQUE ORDER ID SEQUENCE GENERATOR
+    async function generateUniqueOrderId(uid) {
+      const seqRef = ref(db, `users/${uid}/orderSequence`);
+      let newSeq = 1;
+
+      await runTransaction(seqRef, (currentVal) => {
+        if (currentVal === null) return 1;
+        return currentVal + 1;
+      }).then((result) => {
+        if (result.committed) {
+          newSeq = result.snapshot.val();
+        }
+      });
+
+      return `SCH${String(newSeq).padStart(5, '0')}`;
+    }
+
+    // SALES RECORD & MANUAL SALES
+    function renderManualProductSelect() {
+      const select = document.getElementById('manual-prod-select');
+      if (!select) return;
+
+      let html = '<option value="">-- Pilih Produk --</option>';
+      Object.keys(productsData).forEach(id => {
+        const prod = productsData[id];
+        html += `<option value="${id}">${prod.name}</option>`;
+      });
+
+      select.innerHTML = html;
+      document.getElementById('manual-date').value = getFormattedDate();
+    }
+
+    window.onManualProductSelect = function() {
+      const prodId = document.getElementById('manual-prod-select').value;
+      if (prodId && productsData[prodId]) {
+        document.getElementById('manual-amount').value = (productsData[prodId].totalPrice || productsData[prodId].price).toFixed(2);
+      }
+    };
+
+    window.handleManualSaleSubmit = async function(event) {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      const prodId = document.getElementById('manual-prod-select').value;
+      const amount = parseFloat(document.getElementById('manual-amount').value) || 0;
+      const dateStr = getFormattedDate();
+
+      if (!prodId) return;
+
+      const prodName = productsData[prodId] ? productsData[prodId].name : "Produk Digital";
+      const orderId = await generateUniqueOrderId(currentUser.uid);
+
+      const saleRecord = {
+        orderId,
+        productName: prodName,
+        amount,
+        source: "Manual",
+        date: dateStr,
+        timestamp: Date.now()
+      };
+
+      await push(ref(db, `users/${currentUser.uid}/sales`), saleRecord);
+      showToast(i18n[currentLang].savedSuccess);
+
+      document.getElementById('form-manual-sale').reset();
+      document.getElementById('manual-date').value = getFormattedDate();
+    };
+
+    function renderSalesRecord() {
+      const tbody = document.getElementById('sales-record-tbody');
+      tbody.innerHTML = "";
+
+      const sortedKeys = Object.keys(salesData).sort((a, b) => (salesData[b].timestamp || 0) - (salesData[a].timestamp || 0));
+
+      sortedKeys.forEach(id => {
+        const sale = salesData[id];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${sale.date || ''}</td>
+          <td>
+            <strong>${sale.productName || ''}</strong>
+            <span class="order-id-sub">${sale.orderId || ''}</span>
+          </td>
+          <td>RM ${parseFloat(sale.amount || 0).toFixed(2)}</td>
+          <td><span style="padding: 2px 6px; border-radius: 8px; background: #e0f2fe; color: #0369a1; font-weight: 600;">${sale.source || 'Catalog'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // DASHBOARD CALCULATIONS
+    window.filterDashboardSales = function(type) {
+      renderDashboard(type);
+    };
+
+    function renderDashboard() {
+      const todayStr = getFormattedDate();
+      let todaySales = 0;
+      let monthSales = 0;
+      let monthOrders = 0;
+      let totalRevenue = 0;
+
+      const currentMonth = todayStr.split('/')[1];
+      const currentYear = todayStr.split('/')[2];
+
+      const monthlyBreakdown = {
+        '01': 0, '02': 0, '03': 0, '04': 0, '05': 0, '06': 0,
+        '07': 0, '08': 0, '09': 0, '10': 0, '11': 0, '12': 0
+      };
+
+      Object.keys(salesData).forEach(id => {
+        const sale = salesData[id];
+        const amt = parseFloat(sale.amount) || 0;
+        totalRevenue += amt;
+
+        if (sale.date === todayStr) {
+          todaySales += amt;
+        }
+
+        if (sale.date) {
+          const parts = sale.date.split('/');
+          if (parts.length === 3) {
+            const m = parts[1];
+            const y = parts[2];
+
+            if (y === currentYear) {
+              if (monthlyBreakdown[m] !== undefined) {
+                monthlyBreakdown[m] += amt;
+              }
+              if (m === currentMonth) {
+                monthSales += amt;
+                monthOrders += 1;
+              }
+            }
+          }
+        }
+      });
+
+      document.getElementById('dash-total-orders').innerText = monthOrders;
+      document.getElementById('dash-sales-today').innerText = `RM ${todaySales.toFixed(2)}`;
+      document.getElementById('dash-sales-month').innerText = `RM ${monthSales.toFixed(2)}`;
+      document.getElementById('dash-sales-total').innerText = `RM ${totalRevenue.toFixed(2)}`;
+
+      const monthNames = {
+        '01': 'Januari', '02': 'Februari', '03': 'Mac', '04': 'April',
+        '05': 'Mei', '06': 'Jun', '07': 'Julai', '08': 'Ogos',
+        '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Disember'
+      };
+
+      const monthlyGrid = document.getElementById('monthly-grid');
+      monthlyGrid.innerHTML = "";
+
+      Object.keys(monthlyBreakdown).forEach(m => {
+        const div = document.createElement('div');
+        div.style.cssText = "background: var(--card-pink); padding: 10px; border-radius: 12px; text-align: center;";
+        div.innerHTML = `
+          <div style="font-size: 10px; color: var(--text-muted);">${monthNames[m]} ${currentYear}</div>
+          <div style="font-size: 13px; font-weight: 700; color: var(--price-orange); margin-top: 2px;">RM ${monthlyBreakdown[m].toFixed(2)}</div>
+        `;
+        monthlyGrid.appendChild(div);
+      });
+    }
+
+    // SETTINGS HANDLERS
+    window.handleSaveSettings = async function(event) {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      const shopName = document.getElementById('setting-shop-name').value;
+      const welcomeGreeting = document.getElementById('setting-welcome').value;
+
+      await set(ref(db, `users/${currentUser.uid}/settings`), {
+        shopName,
+        welcomeGreeting
+      });
+
+      showToast(i18n[currentLang].savedSuccess);
+    };
+
+    window.copyCatalogLink = function() {
+      const input = document.getElementById('setting-catalog-url');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      showToast("Pautan Katalok disalin!");
+    };
+
+    function renderAllScreens() {
+      document.getElementById('current-date-display').innerText = getFormattedDate();
+    }
+
+    // INITIALIZATION
+    document.addEventListener('DOMContentLoaded', () => {
+      setLanguage(currentLang);
+      handleRoute();
+    });
+  </script>
+
+  <!-- PWA SERVICE WORKER REGISTRATION -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `
+          const CACHE_NAME = 'scha-center-v1';
+          self.addEventListener('install', e => {
+            e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./'])));
+          });
+          self.addEventListener('fetch', e => {
+            e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).catch(() => {});
+      });
+    }
+  </script>
+
+</body>
+</html>
