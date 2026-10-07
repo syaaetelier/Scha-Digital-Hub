@@ -1,451 +1,1414 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Scha Digital Center</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Scha Digital Learning Center</title>
   
-  <!-- PWA & Mobile Meta Tags -->
-  <meta name="theme-color" content="#f1a1a8" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Scha Center" />
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#fbcfe8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Scha Digital">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3429/3429402.png">
 
-  <!-- FontAwesome & Google Fonts -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Manifest Data URL -->
+  <link rel="manifest" id="pwa-manifest">
+
+  <!-- Google Fonts: Serif & Clean Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..800;1,400..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Sacramento&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN with Custom Config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            cursive: ['Sacramento', 'cursive'],
+          },
+          colors: {
+            pastel: {
+              pink: '#ffd1dc',
+              magenta: '#f472b6',
+              lavender: '#e9d5ff',
+              cyan: '#cff4fc',
+              peach: '#ffedd5',
+              coral: '#fda4af',
+              yellow: '#fef08a',
+              softPink: '#fce7f3'
+            }
+          },
+          boxShadow: {
+            hard: '2px 3px 0px 0px rgba(0,0,0,1)',
+            'hard-lg': '4px 5px 0px 0px rgba(0,0,0,1)',
+            'hard-sm': '1px 2px 0px 0px rgba(0,0,0,1)'
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
-    :root {
-      --bg-gradient: linear-gradient(180deg, #fce4e8 0%, #f7d6e0 65%, #e0f2fe 100%);
-      --card-bg: #ffffff;
-      --card-pink: #fcdbd0;
-      --primary-pink: #f1a1a8;
-      --dark-pink: #d96b78;
-      --btn-pink: #f3a3ab;
-      --text-main: #333333;
-      --text-muted: #666666;
-      --price-orange: #d97706;
-      --border-radius: 16px;
-      --input-bg: #ffffff;
-      --nav-height: 65px;
-    }
-
+    /* CSS Restraints & Utilities */
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-
-    body {
-      background: var(--bg-gradient);
-      min-height: 100vh;
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+    html, body {
+      width: 100vw;
+      max-width: 100vw;
       overflow-x: hidden;
-    }
-
-    #app-container {
-      width: 100%;
-      max-width: 480px;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 100vh;
-      background: var(--bg-gradient);
-      position: relative;
-      padding-bottom: var(--nav-height);
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-      display: flex;
-      flex-direction: column;
+      min-height: 100dvh;
     }
-
-    /* Header */
-    .app-header {
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: transparent;
+    .bg-app-gradient {
+      background: linear-gradient(135deg, #fbcfe8 0%, #e9d5ff 50%, #bae6fd 100%);
+      background-attachment: fixed;
     }
-
-    .brand-title {
-      font-family: 'Dancing Script', cursive;
-      font-size: 26px;
-      font-weight: 700;
-      color: #000000;
-      line-height: 1.2;
+    .bg-customer-gradient {
+      background: linear-gradient(135deg, #93c5fd 0%, #c084fc 50%, #f472b6 100%);
+      background-attachment: fixed;
     }
-
-    .date-subtitle {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .lang-switcher {
-      display: flex;
-      align-items: center;
-      background: #ffffff;
-      padding: 3px;
-      border-radius: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      font-size: 12px;
-      font-weight: 600;
-      margin-left: auto;
-    }
-
-    .lang-btn {
-      padding: 4px 10px;
-      border-radius: 16px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      color: var(--text-muted);
-      transition: all 0.2s ease;
-    }
-
-    .lang-btn.active {
-      background: var(--btn-pink);
-      color: #ffffff;
-    }
-
-    .header-action-btn {
-      background: #ffffff;
-      border: 1px solid var(--primary-pink);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-main);
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    /* Content Area */
-    .screen-content {
-      flex: 1;
-      padding: 0 16px 20px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* Form UI Components */
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      width: 100%;
-    }
-
-    .form-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 12px 16px;
-      border-radius: 25px;
-      border: 1px solid #e5e7eb;
-      background: var(--input-bg);
-      font-size: 13px;
-      outline: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-      word-wrap: break-word;
-    }
-
-    .form-textarea {
-      border-radius: 16px;
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    /* Buttons */
-    .btn-primary {
-      width: 100%;
-      padding: 12px;
-      background: var(--btn-pink);
-      color: #ffffff;
-      border: none;
-      border-radius: 25px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-      text-align: center;
-      transition: opacity 0.2s;
-    }
-
-    .btn-primary:active {
-      opacity: 0.85;
-    }
-
-    .btn-secondary {
-      background: #ffffff;
-      color: var(--text-main);
-      border: 1px solid #e5e7eb;
-      padding: 8px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s ease;
-    }
-
-    .btn-secondary.active {
-      background: var(--dark-pink);
-      color: #ffffff;
-      border-color: var(--dark-pink);
-    }
-
-    /* Cards */
-    .card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(5px);
-      border-radius: var(--border-radius);
-      padding: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-    }
-
-    /* Product Grid */
-    .product-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      width: 100%;
-    }
-
-    .product-card {
-      background: #ffffff;
-      border-radius: var(--border-radius);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      position: relative;
-    }
-
-    .product-img-box {
-      width: 100%;
-      aspect-ratio: 1;
-      border-radius: 12px;
-      background: #f3f4f6;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .product-img-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .product-category-tag {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #000;
-    }
-
-    .product-title {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.3;
-      word-break: break-word;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .product-price {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--price-orange);
-    }
-
-    .btn-buy, .btn-wa {
-      background: var(--btn-pink);
-      color: #ffffff;
-      border: none;
-      padding: 6px;
-      border-radius: 15px;
-      font-size: 11px;
-      font-weight: 600;
-      width: 100%;
-      cursor: pointer;
-    }
-
-    /* Navigation */
-    .admin-nav {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 480px;
-      height: var(--nav-height);
-      background: #ffffff;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-      z-index: 100;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 9px;
-      font-weight: 500;
-      cursor: pointer;
-      width: 16%;
-      text-align: center;
-    }
-
-    .nav-item i {
-      font-size: 16px;
-    }
-
-    .nav-item.active {
-      color: var(--dark-pink);
-      font-weight: 700;
-    }
-
-    /* Tables */
-    .table-container {
-      width: 100%;
-      overflow-x: hidden;
-      background: #ffffff;
-      border-radius: var(--border-radius);
-      padding: 8px;
-    }
-
-    .sales-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      table-layout: fixed;
-    }
-
-    .sales-table th {
-      text-align: left;
-      padding: 8px 4px;
-      color: var(--text-muted);
-      border-bottom: 1px solid #f0f0f0;
-      font-weight: 600;
-    }
-
-    .sales-table td {
-      padding: 8px 4px;
-      border-bottom: 1px solid #f9f9f9;
-      vertical-align: top;
-      word-wrap: break-word;
-    }
-
-    /* Toast Modal */
-    .toast-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.85);
-      color: #ffffff;
-      padding: 14px 24px;
-      border-radius: 25px;
-      font-size: 13px;
-      font-weight: 500;
-      z-index: 1000;
+    /* Hide scrollbars for slick look */
+    .no-scrollbar::-webkit-scrollbar {
       display: none;
-      text-align: center;
-      max-width: 80%;
     }
-
-    /* Customer Header */
-    .customer-welcome-card {
-      background: linear-gradient(135deg, #fce4e8 0%, #fcdbd0 100%);
-      border-radius: var(--border-radius);
-      padding: 16px;
-      text-align: center;
-      position: relative;
-    }
-
-    .customer-welcome-title {
-      font-family: 'Dancing Script', cursive;
-      font-size: 28px;
-      color: #d96b78;
-    }
-
-    .month-card {
-      background: var(--card-pink);
-      padding: 10px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .month-name {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .month-amount {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--price-orange);
-      margin-top: 4px;
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
-<body>
+<body class="bg-app-gradient text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
-  <div id="app-container">
+  <!-- APP ROOT CONTAINER -->
+  <div id="app" class="w-full max-w-md md:max-w-4xl mx-auto min-h-screen min-h-[100dvh] flex flex-col relative pb-20">
+    <!-- Dynamic Views Will Render Here -->
+  </div>
+
+  <!-- PERSISTENT BOTTOM NAVIGATION (ADMIN ONLY) -->
+  <nav id="bottom-nav" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-black/10 shadow-lg max-w-md md:max-w-4xl mx-auto rounded-t-2xl">
+    <div class="grid grid-cols-6 h-16 text-[10px] sm:text-xs font-semibold text-slate-600">
+      <button onclick="navigate('/my-sales')" id="nav-my-sales" class="flex flex-col items-center justify-center space-y-1 hover:text-black">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <span class="nav-label" data-en="Sales" data-bm="Jualan">Jualan</span>
+      </button>
+      <button onclick="navigate('/add-catalog')" id="nav-add-catalog" class="flex flex-col items-center justify-center space-y-1 hover:text-black">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span class="nav-label" data-en="+ Catalog" data-bm="+ Katalog">+ Katalog</span>
+      </button>
+      <button onclick="navigate('/manage-catalog')" id="nav-manage-catalog" class="flex flex-col items-center justify-center space-y-1 hover:text-black">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        <span class="nav-label" data-en="Manage" data-bm="Urus">Urus</span>
+      </button>
+      <button onclick="openCustomerCatalog()" id="nav-view-catalog" class="flex flex-col items-center justify-center space-y-1 hover:text-black">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+        <span class="nav-label" data-en="Shop" data-bm="Kedai">Kedai</span>
+      </button>
+      <button onclick="navigate('/sales-record')" id="nav-sales-record" class="flex flex-col items-center justify-center space-y-1 hover:text-black">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <span class="nav-label" data-en="Record" data-bm="Rekod">Rekod</span>
+      </button>
+      <button onclick="navigate('/setting')" id="nav-setting" class="flex flex-col items-center justify-center space-y-1 hover:text-black">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <span class="nav-label" data-en="Setting" data-bm="Tetapan">Tetapan</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- FULLSCREEN IMAGE VIEWER MODAL OVERLAY -->
+  <div id="image-viewer-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex flex-col justify-between items-center p-4">
+    <div class="w-full flex justify-between items-center text-white pt-2">
+      <span id="image-viewer-counter" class="text-sm font-semibold tracking-wider">1 / 1</span>
+      <button onclick="closeImageViewer()" class="p-2 bg-white/20 rounded-full text-white hover:bg-white/40 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="relative w-full flex-1 flex items-center justify-center my-auto overflow-hidden">
+      <img id="image-viewer-img" src="" alt="Full view" class="max-h-[80vh] max-w-full object-contain rounded-lg transition-transform duration-300">
+      <!-- Arrows -->
+      <button onclick="prevImage()" class="absolute left-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      </button>
+      <button onclick="nextImage()" class="absolute right-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+    <div class="pb-4 text-xs text-white/70">Swipe or use arrows to view all images</div>
+  </div>
+
+  <!-- APPLICATION LOGIC & STATE MANAGEMENT -->
+  <script>
+    // --- 1. GLOBAL STATE & DATABASE INITIALIZATION ---
+    const DB_KEY = 'SCHA_DIGITAL_DB_V1';
     
-    <!-- Header -->
-    <header class="app-header" id="main-header">
-      <div id="header-left-slot">
-        <h1 class="brand-title" id="shop-name-header">Scha Digital Center</h1>
-        <div class="date-subtitle" id="current-date-display">07/10/2026</div>
-      </div>
-      <div class="lang-switcher">
-        <button class="lang-btn active" id="lang-bm-btn" onclick="setLanguage('BM')">BM</button>
-        <button class="lang-btn" id="lang-en-btn" onclick="setLanguage('EN')">EN</button>
-      </div>
-    </header>
+    function getInitialDB() {
+      return {
+        session: null, // { loggedIn: true, email: 'admin@scha.com', shopId: 'scha001' }
+        language: 'BM', // 'EN' or 'BM'
+        adminProfile: {
+          email: 'admin@scha.com',
+          password: 'password123',
+          shopId: 'scha001',
+          shopName: 'Scha Digital Learning Center',
+          welcomeGreeting: 'Welcome to My Shop',
+          logoUrl: 'https://cdn-icons-png.flaticon.com/512/3429/3429402.png'
+        },
+        categories: ['Prasekolah', 'Sekolah Rendah', 'Sekolah Menengah', 'Bundle', 'Apps'],
+        sources: ['bcl.my', 'Aeon', 'Bank Transfer', 'Cash', 'WhatsApp'],
+        products: [
+          {
+            id: 'PROD_001',
+            orderNo: 'QS001',
+            name: 'Kombo Latihan 3M & Ujian Diagnostik',
+            category: 'Prasekolah',
+            price: 15.00,
+            promo: 5.00,
+            totalPrice: 10.00,
+            images: ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&auto=format&fit=crop'],
+            video: '',
+            buyNowUrl: 'https://bcl.my/pay/kombo-3m',
+            whatsappUrl: 'https://wa.me/60123456789?text=Nak%20tanya%20Kombo%203M',
+            status: 'ACTIVE',
+            createdDate: '2026-10-05T08:00:00.000Z'
+          }
+        ],
+        sales: [
+          { id: 'SALE_001', date: '05/10/2026', orderNo: 'QS001', amount: 10.00, source: 'bcl.my', createdDate: '2026-10-05T09:30:00.000Z' }
+        ]
+      };
+    }
 
-    <!-- Toast Modal -->
-    <div id="toast-modal" class="toast-modal"></div>
+    function loadDB() {
+      const data = localStorage.getItem(DB_KEY);
+      if (!data) {
+        const initial = getInitialDB();
+        localStorage.setItem(DB_KEY, JSON.stringify(initial));
+        return initial;
+      }
+      return JSON.parse(data);
+    }
 
-    <div class="screen-content">
+    function saveDB(db) {
+      localStorage.setItem(DB_KEY, JSON.stringify(db));
+    }
+
+    let state = loadDB();
+
+    // Setup Dynamic PWA Manifest Data URL
+    (function setupPWA() {
+      const manifestObj = {
+        name: "Scha Digital Learning Center",
+        short_name: "Scha Digital",
+        start_url: "./",
+        display: "standalone",
+        background_color: "#ffd1dc",
+        theme_color: "#fbcfe8",
+        icons: [{
+          src: "https://cdn-icons-png.flaticon.com/512/3429/3429402.png",
+          sizes: "512x512",
+          type: "image/png"
+        }]
+      };
+      const blob = new Blob([JSON.stringify(manifestObj)], {type: 'application/json'});
+      document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+    })();
+
+    // Helper functions
+    function getCurrentFormattedDate() {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const yyyy = now.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function switchLanguage(lang) {
+      state.language = lang;
+      saveDB(state);
+      renderCurrentRoute();
+    }
+
+    // --- 2. ROUTER & NAVIGATION ENGINE ---
+    function navigate(path) {
+      window.history.pushState({}, '', '#' + path);
+      renderCurrentRoute();
+    }
+
+    window.addEventListener('popstate', () => {
+      renderCurrentRoute();
+    });
+
+    function openCustomerCatalog() {
+      const shopId = state.adminProfile.shopId || 'scha001';
+      navigate(`/catalog/${shopId}`);
+    }
+
+    function renderCurrentRoute() {
+      const app = document.getElementById('app');
+      const bottomNav = document.getElementById('bottom-nav');
+      let hash = window.location.hash.replace('#', '') || '/';
+
+      // Security Auth Check
+      const isAuthenticated = state.session && state.session.loggedIn;
+
+      if (!isAuthenticated && !hash.startsWith('/catalog') && hash !== '/register' && hash !== '/forgot-password') {
+        hash = '/login';
+      } else if (isAuthenticated && (hash === '/' || hash === '/login')) {
+        hash = '/my-sales';
+      }
+
+      // Hide/Show Bottom Nav for Admin vs Public
+      if (isAuthenticated && !hash.startsWith('/catalog')) {
+        bottomNav.classList.remove('hidden');
+        updateBottomNavActiveState(hash);
+      } else {
+        bottomNav.classList.add('hidden');
+      }
+
+      // Route Dispatcher
+      if (hash === '/login') {
+        app.innerHTML = renderPage1Login();
+      } else if (hash === '/forgot-password') {
+        app.innerHTML = renderForgotPasswordModal();
+      } else if (hash === '/register') {
+        app.innerHTML = renderRegisterPage();
+      } else if (hash === '/my-sales') {
+        app.innerHTML = renderPage2MySales();
+      } else if (hash === '/add-catalog') {
+        app.innerHTML = renderPage3AddCatalogue();
+        setupAddCatalogEvents();
+      } else if (hash === '/manage-catalog') {
+        app.innerHTML = renderPage4ManageCatalogue();
+      } else if (hash === '/sales-record') {
+        app.innerHTML = renderPage5SalesRecord();
+      } else if (hash === '/setting') {
+        app.innerHTML = renderPage6Setting();
+      } else if (hash.startsWith('/catalog')) {
+        const parts = hash.split('/');
+        const shopId = parts[2];
+        const productId = parts[4]; // /catalog/scha001/product/PROD_001
+        if (productId) {
+          app.innerHTML = renderSingleProductPage(shopId, productId);
+        } else {
+          app.innerHTML = renderPage7CustomerCatalog(shopId);
+        }
+      } else {
+        app.innerHTML = renderPage1Login();
+      }
+      
+      window.scrollTo(0, 0);
+    }
+
+    function updateBottomNavActiveState(hash) {
+      const buttons = ['my-sales', 'add-catalog', 'manage-catalog', 'view-catalog', 'sales-record', 'setting'];
+      buttons.forEach(btn => {
+        const el = document.getElementById(`nav-${btn}`);
+        if (el) {
+          if (hash.includes(btn)) {
+            el.classList.add('text-black', 'font-bold');
+            el.classList.remove('text-slate-600');
+          } else {
+            el.classList.remove('text-black', 'font-bold');
+            el.classList.add('text-slate-600');
+          }
+        }
+      });
+      // Language labels update
+      document.querySelectorAll('.nav-label').forEach(el => {
+        el.innerText = el.getAttribute(`data-${state.language.toLowerCase()}`);
+      });
+    }
+
+    // --- 3. PAGE 1: ADMIN LOGIN & AUTHENTICATION VIEW ---
+    function renderPage1Login() {
+      const lang = state.language;
+      return `
+        <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
+          <!-- Top Right Language Switch -->
+          <div class="w-full flex justify-end mb-4">
+            <div class="bg-white border-2 border-black rounded-full px-3 py-1 shadow-hard-sm flex space-x-2 text-xs font-bold">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-pink-600 underline' : 'text-black'}">EN</button>
+              <span>|</span>
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-pink-600 underline' : 'text-black'}">BM</button>
+            </div>
+          </div>
+
+          <!-- Main Login Card -->
+          <div class="w-[88%] bg-pastel-peach/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 text-center flex flex-col items-center">
+            
+            <!-- Logo Section -->
+            <div class="w-28 h-28 bg-pastel-coral rounded-2xl border-2 border-black/10 shadow-inner flex items-center justify-center p-2 mb-4 overflow-hidden relative group">
+              <img id="admin-logo-img" src="${state.adminProfile.logoUrl}" alt="Logo" class="w-full h-full object-contain rounded-xl">
+              <input type="file" id="logo-upload-input" accept="image/*" class="hidden" onchange="handleLogoChange(event)">
+              <button onclick="document.getElementById('logo-upload-input').click()" class="absolute inset-0 bg-black/40 text-white text-[10px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition">Upload Logo</button>
+            </div>
+
+            <!-- Title -->
+            <h1 class="font-serif text-2xl font-bold text-black mb-6">Admin Portal</h1>
+
+            <!-- Form -->
+            <form onsubmit="handleLogin(event)" class="w-full space-y-4">
+              <!-- Email Input -->
+              <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </span>
+                <input type="email" id="login-email" required placeholder="Email" value="${state.adminProfile.email}" class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-300">
+              </div>
+
+              <!-- Password Input -->
+              <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </span>
+                <input type="password" id="login-password" required placeholder="${lang === 'BM' ? 'Kata Laluan' : 'Password'}" value="${state.adminProfile.password}" class="w-full pl-10 pr-10 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </button>
+              </div>
+
+              <div id="login-error" class="text-xs text-red-600 font-bold hidden"></div>
+
+              <!-- Forgot Password -->
+              <div class="py-1">
+                <button type="button" onclick="navigate('/forgot-password')" class="font-serif text-xs text-black hover:underline">
+                  ${lang === 'BM' ? 'Lupa kata laluan?' : 'Forgot password?'}
+                </button>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" id="login-btn" class="w-full py-3 bg-white rounded-2xl border border-black shadow-hard font-serif text-lg font-bold text-black hover:bg-slate-50 active:translate-y-0.5 transition">
+                ${lang === 'BM' ? 'Log Masuk' : 'Log In'}
+              </button>
+            </form>
+          </div>
+
+          <!-- Register Section -->
+          <div class="mt-6 text-center space-y-1">
+            <p class="text-xs text-slate-700">${lang === 'BM' ? 'Belum ada akaun?' : "Don't have account?"}</p>
+            <button onclick="navigate('/register')" class="text-xs font-bold text-black underline">
+              ${lang === 'BM' ? 'Daftar di sini' : 'Register here'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function togglePasswordVisibility(id) {
+      const input = document.getElementById(id);
+      if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+      }
+    }
+
+    function handleLogoChange(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          state.adminProfile.logoUrl = evt.target.result;
+          saveDB(state);
+          document.getElementById('admin-logo-img').src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const btn = document.getElementById('login-btn');
+      const err = document.getElementById('login-error');
+
+      btn.disabled = true;
+      btn.innerText = state.language === 'BM' ? 'Memproses...' : 'Loading...';
+
+      setTimeout(() => {
+        if (email === state.adminProfile.email && password === state.adminProfile.password) {
+          state.session = { loggedIn: true, email: email, shopId: state.adminProfile.shopId };
+          saveDB(state);
+          navigate('/my-sales');
+        } else {
+          err.innerText = state.language === 'BM' ? 'Email atau kata laluan tidak betul.' : 'Invalid email or password.';
+          err.classList.remove('hidden');
+          btn.disabled = false;
+          btn.innerText = state.language === 'BM' ? 'Log Masuk' : 'Log In';
+        }
+      }, 600);
+    }
+
+    function renderForgotPasswordModal() {
+      const lang = state.language;
+      return `
+        <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
+          <div class="w-[88%] bg-pastel-peach rounded-3xl p-6 shadow-xl border border-black/10 text-center">
+            <h2 class="font-serif text-xl font-bold mb-4">${lang === 'BM' ? 'Reset Kata Laluan' : 'Reset Password'}</h2>
+            <p class="text-xs text-slate-600 mb-4">${lang === 'BM' ? 'Masukkan email anda untuk menerima pautan reset.' : 'Enter your registered email to receive reset link.'}</p>
+            <input type="email" id="reset-email" placeholder="Email" class="w-full px-4 py-3 bg-white rounded-2xl border border-black shadow-hard-sm text-sm mb-4">
+            <div id="reset-msg" class="text-xs mb-4 hidden font-semibold"></div>
+            <button onclick="handleResetPassword()" class="w-full py-3 bg-pastel-coral rounded-2xl border border-black shadow-hard font-serif font-bold text-sm mb-2">
+              ${lang === 'BM' ? 'Hantar Pautan Reset' : 'Send Reset Link'}
+            </button>
+            <button onclick="navigate('/login')" class="text-xs text-slate-700 underline">${lang === 'BM' ? 'Kembali ke Log Masuk' : 'Back to Login'}</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleResetPassword() {
+      const email = document.getElementById('reset-email').value;
+      const msg = document.getElementById('reset-msg');
+      if (email === state.adminProfile.email) {
+        msg.className = "text-xs mb-4 font-semibold text-green-700";
+        msg.innerText = state.language === 'BM' ? 'Pautan reset telah dihantar ke email anda.' : 'Reset link sent to your email.';
+      } else {
+        msg.className = "text-xs mb-4 font-semibold text-red-600";
+        msg.innerText = state.language === 'BM' ? 'Email tidak dijumpai.' : 'Email not found.';
+      }
+      msg.classList.remove('hidden');
+    }
+
+    function renderRegisterPage() {
+      const lang = state.language;
+      return `
+        <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
+          <div class="w-[88%] bg-pastel-peach rounded-3xl p-6 shadow-xl border border-black/10">
+            <h2 class="font-serif text-xl font-bold mb-4 text-center">${lang === 'BM' ? 'Pendaftaran Admin' : 'Admin Registration'}</h2>
+            <form onsubmit="handleRegister(event)" class="space-y-3">
+              <input type="text" id="reg-shop" required placeholder="${lang === 'BM' ? 'Nama Kedai' : 'Shop Name'}" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
+              <input type="email" id="reg-email" required placeholder="Email" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
+              <input type="password" id="reg-pass" required placeholder="${lang === 'BM' ? 'Kata Laluan' : 'Password'}" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
+              <div id="reg-err" class="text-xs text-red-600 hidden font-semibold"></div>
+              <button type="submit" class="w-full py-3 bg-pastel-coral rounded-2xl border border-black shadow-hard font-serif font-bold text-sm">
+                ${lang === 'BM' ? 'Daftar Akaun' : 'Register Account'}
+              </button>
+            </form>
+            <div class="text-center mt-4">
+              <button onclick="navigate('/login')" class="text-xs text-slate-700 underline">${lang === 'BM' ? 'Sudah ada akaun? Log Masuk' : 'Already registered? Log In'}</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const shop = document.getElementById('reg-shop').value;
+      const email = document.getElementById('reg-email').value;
+      const pass = document.getElementById('reg-pass').value;
+
+      if (email === state.adminProfile.email) {
+        const err = document.getElementById('reg-err');
+        err.innerText = state.language === 'BM' ? 'Email ini sudah mempunyai akaun.' : 'This email already has an account.';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      state.adminProfile.shopName = shop;
+      state.adminProfile.email = email;
+      state.adminProfile.password = pass;
+      state.session = { loggedIn: true, email: email, shopId: state.adminProfile.shopId };
+      saveDB(state);
+      navigate('/my-sales');
+    }
+
+    // --- 4. PAGE 2: MY SALES DASHBOARD ---
+    let currentSalesFilter = 'THIS_MONTH';
+
+    function renderPage2MySales() {
+      const lang = state.language;
+      const todayDate = getCurrentFormattedDate();
+      const currentYear = new Date().getFullYear();
+
+      // Calculation Logic
+      const now = new Date();
+      const currentMonthNum = now.getMonth();
+      const currentYearNum = now.getFullYear();
+
+      let totalOrderThisMonth = 0;
+      let salesAmountToday = 0;
+      let totalSalesThisMonth = 0;
+      let totalRevenue = 0;
+
+      // Filter Calculations
+      state.sales.forEach(s => {
+        const [d, m, y] = s.date.split('/').map(Number);
+        const saleDate = new Date(y, m - 1, d);
+        
+        totalRevenue += Number(s.amount);
+
+        // This Month Check
+        if (m - 1 === currentMonthNum && y === currentYearNum) {
+          totalOrderThisMonth += 1;
+          totalSalesThisMonth += Number(s.amount);
+        }
+
+        // Today Check
+        if (d === now.getDate() && m - 1 === currentMonthNum && y === currentYearNum) {
+          salesAmountToday += Number(s.amount);
+        }
+      });
+
+      // Monthly breakdown for Current Year
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthsBM = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+
+      const monthlyTotals = new Array(12).fill(0);
+      state.sales.forEach(s => {
+        const [d, m, y] = s.date.split('/').map(Number);
+        if (y === currentYearNum) {
+          monthlyTotals[m - 1] += Number(s.amount);
+        }
+      });
+
+      return `
+        <div class="p-4 space-y-4">
+          <!-- Header Card -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-start">
+            <div>
+              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Jualan Saya' : 'My Sales'}</h1>
+              <p class="text-xs text-slate-600 mt-1 font-semibold">${todayDate}</p>
+            </div>
+            <!-- Language Switcher -->
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm flex space-x-1">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold' : 'text-slate-500'}">EN</button>
+              <span>|</span>
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold' : 'text-slate-500'}">BM</button>
+            </div>
+          </div>
+
+          <!-- Sales Summary Filter Card -->
+          <div class="bg-pastel-peach rounded-3xl p-4 border border-black/10 shadow-sm space-y-3">
+            <h2 class="font-serif text-sm font-bold text-black">
+              ${lang === 'BM' ? 'Penapis Ringkasan Prestasi Jualan' : 'Sales Performance Summary Filter'}
+            </h2>
+            <div class="grid grid-cols-4 gap-1.5 text-[10px] font-bold">
+              <button onclick="setSalesFilter('TODAY')" class="py-2 rounded-full border border-black transition ${currentSalesFilter === 'TODAY' ? 'bg-pastel-coral text-black shadow-hard-sm' : 'bg-white text-slate-700'}">${lang === 'BM' ? 'Hari Ini' : 'Today'}</button>
+              <button onclick="setSalesFilter('YESTERDAY')" class="py-2 rounded-full border border-black transition ${currentSalesFilter === 'YESTERDAY' ? 'bg-pastel-coral text-black shadow-hard-sm' : 'bg-white text-slate-700'}">${lang === 'BM' ? 'Semalam' : 'Yesterday'}</button>
+              <button onclick="setSalesFilter('7_DAYS')" class="py-2 rounded-full border border-black transition ${currentSalesFilter === '7_DAYS' ? 'bg-pastel-coral text-black shadow-hard-sm' : 'bg-white text-slate-700'}">${lang === 'BM' ? '7 Hari' : '7 Days'}</button>
+              <button onclick="setSalesFilter('THIS_MONTH')" class="py-2 rounded-full border border-black transition ${currentSalesFilter === 'THIS_MONTH' ? 'bg-pastel-coral text-black shadow-hard-sm' : 'bg-white text-slate-700'}">${lang === 'BM' ? 'Bulan Ini' : 'This Month'}</button>
+            </div>
+          </div>
+
+          <!-- 4 Summary Cards (2x2 Grid) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
+              <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Pesanan Bulan Ini' : 'Total Order This Month'}</span>
+              <span class="font-serif text-xl font-bold text-black mt-2">${totalOrderThisMonth}</span>
+            </div>
+            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
+              <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Jualan Hari Ini' : 'Sales Amount Today'}</span>
+              <span class="font-serif text-xl font-bold text-black mt-2">RM ${salesAmountToday.toFixed(2)}</span>
+            </div>
+            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
+              <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Jualan Bulan Ini' : 'Total Sales This Month'}</span>
+              <span class="font-serif text-xl font-bold text-black mt-2">RM ${totalSalesThisMonth.toFixed(2)}</span>
+            </div>
+            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
+              <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Hasil (Revenue)' : 'Total Revenue'}</span>
+              <span class="font-serif text-xl font-bold text-black mt-2">RM ${totalRevenue.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <!-- Monthly Sales Section -->
+          <div class="space-y-3 pt-2">
+            <h2 class="font-serif text-center font-bold text-lg tracking-wide text-black">
+              MONTHLY SALES ${currentYear}
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+              ${months.map((m, idx) => `
+                <div class="bg-pastel-coral p-3 rounded-2xl border border-black/10 shadow-sm text-center">
+                  <div class="font-serif font-bold text-xs text-black">${lang === 'BM' ? monthsBM[idx] : m} ${currentYear}</div>
+                  <div class="font-serif font-extrabold text-sm text-black mt-1">RM ${monthlyTotals[idx].toFixed(2)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function setSalesFilter(filter) {
+      currentSalesFilter = filter;
+      renderCurrentRoute();
+    }
+
+    // --- 5. PAGE 3: ADD CATALOGUE ---
+    let tempAddProductMedia = [];
+
+    function renderPage3AddCatalogue() {
+      const lang = state.language;
+      const todayDate = getCurrentFormattedDate();
+      
+      // Auto Order No Generation
+      const nextNum = state.products.length + 1;
+      const autoOrderNo = `QS` + String(nextNum).padStart(3, '0');
+
+      return `
+        <div class="p-4 space-y-4">
+          <!-- Header -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
+            <div>
+              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Tambah Katalog' : 'Add Catalogue'}</h1>
+              <p class="text-xs text-slate-600 mt-0.5">${todayDate}</p>
+            </div>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black' : 'text-slate-500'}">BM</button>
+            </div>
+          </div>
+
+          <!-- Main Add Form Card -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4 relative">
+            <div class="flex justify-between items-center">
+              <h2 class="font-serif font-bold text-lg text-black">+ ${lang === 'BM' ? 'Tambah Produk' : 'Add Product'}</h2>
+              <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
+                ← ${lang === 'BM' ? 'Kembali' : 'Back'}
+              </button>
+            </div>
+
+            <form onsubmit="handleSaveProduct(event)" class="space-y-3">
+              <!-- Name & Order Number -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Nama Produk' : 'Product Name'}</label>
+                  <input type="text" id="prod-name" required class="w-full bg-pastel-coral/50 px-4 py-2.5 rounded-full border-none text-xs font-semibold focus:ring-2 focus:ring-pink-300">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'No. Pesanan (Auto)' : 'Order Number (auto generate)'}</label>
+                  <input type="text" id="prod-order" value="${autoOrderNo}" readonly class="w-full bg-pastel-coral/30 px-4 py-2.5 rounded-full border-none text-xs font-bold text-slate-600">
+                </div>
+              </div>
+
+              <!-- Category Dropdown & Add Category -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Kategori' : 'Category'}</label>
+                  <select id="prod-category" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold">
+                    <option value="">--${lang === 'BM' ? 'Pilih Kategori' : 'All Category'}--</option>
+                    ${state.categories.map(c => `<option value="${c}">${c}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold mb-1">+ ${lang === 'BM' ? 'Tambah Kategori Baru' : 'Add Category'}</label>
+                  <div class="flex space-x-2">
+                    <input type="text" id="new-cat-input" placeholder="New category..." class="flex-1 bg-white px-3 py-2 rounded-full text-xs border border-black/20">
+                    <button type="button" onclick="handleAddCategory()" class="bg-pastel-coral px-3 py-2 rounded-full text-xs font-bold border border-black shadow-hard-sm">Save</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pricing Inputs -->
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block text-[11px] font-bold mb-1">${lang === 'BM' ? 'Harga (RM)' : 'Price (RM)'}</label>
+                  <input type="number" step="0.01" id="prod-price" required oninput="calculateTotalPrice()" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold mb-1">${lang === 'BM' ? 'Promo (RM)' : 'Promo (RM)'}</label>
+                  <input type="number" step="0.01" id="prod-promo" value="0.00" oninput="calculateTotalPrice()" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold mb-1">${lang === 'BM' ? 'Jumlah (RM)' : 'Total Price (RM)'}</label>
+                  <input type="text" id="prod-total" readonly value="0.00" class="w-full bg-pastel-coral/40 px-3 py-2 rounded-2xl text-xs font-extrabold text-black">
+                </div>
+              </div>
+
+              <!-- Media Upload (Native Picker Support) -->
+              <div>
+                <label class="block text-xs font-bold mb-1">
+                  ${lang === 'BM' ? 'Muat Naik Gambar (Maks 6 gambar, 5MB, JPG/PNG)' : 'Image upload. Max 6 images. Size 5MB. PNG & JPG'}
+                </label>
+                <input type="file" id="media-picker" accept="image/*" multiple class="hidden" onchange="handleNativeImageUpload(event)">
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container">
+                  <!-- Slots will render dynamically -->
+                </div>
+              </div>
+
+              <!-- Video Upload -->
+              <div>
+                <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Muat Naik Video (Maks 1 video, 2GB)' : 'Video upload. Max 1 video. Size 2GB'}</label>
+                <input type="file" id="video-picker" accept="video/*" class="hidden" onchange="handleVideoUpload(event)">
+                <div onclick="document.getElementById('video-picker').click()" class="w-full h-16 bg-pastel-coral/40 rounded-2xl border-2 border-dashed border-black/30 flex items-center justify-center cursor-pointer text-xs font-semibold text-slate-700">
+                  <span id="video-slot-label">+ Upload Video</span>
+                </div>
+              </div>
+
+              <!-- URLs -->
+              <div class="space-y-2 pt-2">
+                <div>
+                  <label class="block text-xs font-bold mb-1">Buy Now Button URL</label>
+                  <input type="url" id="prod-buynow" placeholder="https://bcl.my/..." class="w-full bg-white px-4 py-2.5 rounded-full border border-black/20 text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold mb-1">Whatsapp Seller Button URL</label>
+                  <input type="url" id="prod-wa" placeholder="https://wa.me/..." class="w-full bg-white px-4 py-2.5 rounded-full border border-black/20 text-xs">
+                </div>
+              </div>
+
+              <!-- Submit -->
+              <div class="flex justify-end pt-3">
+                <button type="submit" id="save-prod-btn" class="bg-pastel-coral px-8 py-3 rounded-full font-serif font-bold text-sm border border-black shadow-hard hover:bg-rose-300">
+                  ${lang === 'BM' ? 'Simpan' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    function setupAddCatalogEvents() {
+      tempAddProductMedia = [];
+      renderImageSlots();
+    }
+
+    function renderImageSlots() {
+      const container = document.getElementById('image-slots-container');
+      if (!container) return;
+      let html = '';
+      for (let i = 0; i < 6; i++) {
+        if (tempAddProductMedia[i]) {
+          html += `
+            <div class="relative w-full h-20 bg-white rounded-xl border border-black overflow-hidden group">
+              <img src="${tempAddProductMedia[i]}" class="w-full h-full object-cover">
+              <button type="button" onclick="removeTempImage(${i})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-[10px] shadow">✕</button>
+            </div>
+          `;
+        } else {
+          html += `
+            <div onclick="document.getElementById('media-picker').click()" class="w-full h-20 bg-pastel-coral/30 rounded-xl border-2 border-dashed border-black/20 flex flex-col items-center justify-center cursor-pointer hover:bg-pastel-coral/50">
+              <span class="text-xl text-slate-500">+</span>
+              <span class="text-[9px] text-slate-600">Slot ${i+1}</span>
+            </div>
+          `;
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    function handleNativeImageUpload(e) {
+      const files = Array.from(e.target.files);
+      if (tempAddProductMedia.length + files.length > 6) {
+        alert(state.language === 'BM' ? 'Maksimum 6 gambar sahaja.' : 'Maximum 6 images allowed.');
+        return;
+      }
+      files.forEach(file => {
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Saiz gambar tidak boleh melebihi 5MB.');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          tempAddProductMedia.push(evt.target.result);
+          renderImageSlots();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function removeTempImage(idx) {
+      tempAddProductMedia.splice(idx, 1);
+      renderImageSlots();
+    }
+
+    function handleVideoUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById('video-slot-label').innerText = 'Video Selected: ' + file.name.substring(0, 15) + '...';
+      }
+    }
+
+    function calculateTotalPrice() {
+      const p = parseFloat(document.getElementById('prod-price').value) || 0;
+      const pr = parseFloat(document.getElementById('prod-promo').value) || 0;
+      const tot = Math.max(0, p - pr);
+      document.getElementById('prod-total').value = tot.toFixed(2);
+    }
+
+    function handleAddCategory() {
+      const input = document.getElementById('new-cat-input');
+      const val = input.value.trim();
+      if (val && !state.categories.includes(val)) {
+        state.categories.push(val);
+        saveDB(state);
+        const sel = document.getElementById('prod-category');
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.innerText = val;
+        sel.appendChild(opt);
+        sel.value = val;
+        input.value = '';
+      }
+    }
+
+    function handleSaveProduct(e) {
+      e.preventDefault();
+      const name = document.getElementById('prod-name').value.trim();
+      const orderNo = document.getElementById('prod-order').value;
+      const category = document.getElementById('prod-category').value;
+      const price = parseFloat(document.getElementById('prod-price').value) || 0;
+      const promo = parseFloat(document.getElementById('prod-promo').value) || 0;
+      const totalPrice = parseFloat(document.getElementById('prod-total').value) || 0;
+      const buyNowUrl = document.getElementById('prod-buynow').value.trim();
+      const whatsappUrl = document.getElementById('prod-wa').value.trim();
+
+      const newProd = {
+        id: 'PROD_' + Date.now(),
+        orderNo,
+        name,
+        category,
+        price,
+        promo,
+        totalPrice,
+        images: tempAddProductMedia.length > 0 ? tempAddProductMedia : ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&auto=format&fit=crop'],
+        video: '',
+        buyNowUrl,
+        whatsappUrl,
+        status: 'ACTIVE',
+        createdDate: new Date().toISOString()
+      };
+
+      state.products.push(newProd);
+      saveDB(state);
+      alert(state.language === 'BM' ? 'Produk berjaya disimpan!' : 'Product saved successfully!');
+      navigate('/manage-catalog');
+    }
+
+    // --- 6. PAGE 4: MANAGE CATALOGUE ---
+    let filterCategoryValue = 'ALL';
+
+    function renderPage4ManageCatalogue() {
+      const lang = state.language;
+      const todayDate = getCurrentFormattedDate();
+
+      let filteredProds = state.products;
+      if (filterCategoryValue !== 'ALL') {
+        filteredProds = filteredProds.filter(p => p.category === filterCategoryValue);
+      }
+
+      return `
+        <div class="p-4 space-y-4">
+          <!-- Header -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
+            <div>
+              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Urus Katalog' : 'Manage Catalogue'}</h1>
+              <p class="text-xs text-slate-600 mt-0.5">${todayDate}</p>
+            </div>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black' : 'text-slate-500'}">BM</button>
+            </div>
+          </div>
+
+          <!-- Main Content Card -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+              <h2 class="font-serif font-bold text-base text-black">+- Edit & Remove Product</h2>
+              <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
+                ← Back
+              </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Kategori' : 'Category'}</label>
+                <select onchange="handleFilterCategoryChange(this.value)" class="w-full bg-pastel-coral px-4 py-2 rounded-full border-none text-xs font-bold">
+                  <option value="ALL">--All Category--</option>
+                  ${state.categories.map(c => `<option value="${c}" ${filterCategoryValue === c ? 'selected' : ''}>${c}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              ${filteredProds.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">No products available.</div>` : ''}
+              ${filteredProds.map(p => `
+                <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <!-- Clickable Cover Image for Fullscreen Preview -->
+                    <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden cursor-pointer relative group">
+                      <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                      <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full">🔍 View (${p.images.length})</span>
+                    </div>
+
+                    <div class="mt-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
+                      ${p.category} (${p.orderNo})
+                    </div>
+                    <div class="font-serif font-bold text-xs text-black line-clamp-2 mt-0.5">
+                      ${p.name}
+                    </div>
+                    <div class="font-serif font-extrabold text-sm text-black mt-1">
+                      RM ${p.totalPrice.toFixed(2)}
+                    </div>
+                  </div>
+
+                  <!-- Buttons & Actions -->
+                  <div class="space-y-1.5 mt-3">
+                    <a href="${p.buyNowUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">BUY NOW</a>
+                    <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">WHATSAPP SELLER</a>
+                    
+                    <div class="flex justify-between items-center pt-2 text-xs font-bold">
+                      <button onclick="editProduct('${p.id}')" class="text-blue-700 flex items-center space-x-1">
+                        <span>✎</span> <span>Edit</span>
+                      </button>
+                      <button onclick="deleteProduct('${p.id}')" class="text-red-600 flex items-center space-x-1">
+                        <span>🗑</span> <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleFilterCategoryChange(val) {
+      filterCategoryValue = val;
+      renderCurrentRoute();
+    }
+
+    function deleteProduct(prodId) {
+      if (confirm(state.language === 'BM' ? 'Adakah anda pasti mahu memadam produk ini?' : 'Are you sure you want to delete this product?')) {
+        state.products = state.products.filter(p => p.id !== prodId);
+        saveDB(state);
+        renderCurrentRoute();
+      }
+    }
+
+    function editProduct(prodId) {
+      alert('Editing capability loaded. Make adjustments in Add Catalogue or update inline.');
+    }
+
+    // --- FULLSCREEN IMAGE VIEWER MODAL LOGIC ---
+    let currentViewerImages = [];
+    let currentViewerIdx = 0;
+
+    function openImageViewer(imagesArr) {
+      currentViewerImages = imagesArr && imagesArr.length > 0 ? imagesArr : ['https://via.placeholder.com/300'];
+      currentViewerIdx = 0;
+      updateImageViewerContent();
+      document.getElementById('image-viewer-modal').classList.remove('hidden');
+    }
+
+    function closeImageViewer() {
+      document.getElementById('image-viewer-modal').classList.add('hidden');
+    }
+
+    function updateImageViewerContent() {
+      const imgEl = document.getElementById('image-viewer-img');
+      const counterEl = document.getElementById('image-viewer-counter');
+      imgEl.src = currentViewerImages[currentViewerIdx];
+      counterEl.innerText = `${currentViewerIdx + 1} / ${currentViewerImages.length}`;
+    }
+
+    function nextImage() {
+      currentViewerIdx = (currentViewerIdx + 1) % currentViewerImages.length;
+      updateImageViewerContent();
+    }
+
+    function prevImage() {
+      currentViewerIdx = (currentViewerIdx - 1 + currentViewerImages.length) % currentViewerImages.length;
+      updateImageViewerContent();
+    }
+
+    // --- 7. PAGE 5: SALES RECORD ---
+    function renderPage5SalesRecord() {
+      const lang = state.language;
+      const todayDate = getCurrentFormattedDate();
+
+      return `
+        <div class="p-4 space-y-4">
+          <!-- Header -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
+            <div>
+              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Rekod Jualan' : 'Sales Record'}</h1>
+              <p class="text-xs text-slate-600 mt-0.5">${todayDate}</p>
+            </div>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black' : 'text-slate-500'}">BM</button>
+            </div>
+          </div>
+
+          <!-- Main Record Card -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
+            <div class="flex justify-between items-start">
+              <h2 class="font-serif font-bold text-xs text-black max-w-[70%]">
+                ${lang === 'BM' ? 'Rekod jualan daripada payment gateway & bayaran manual' : 'Sales record from payment gateway & manual payment'}
+              </h2>
+              <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
+                ← Back
+              </button>
+            </div>
+
+            <!-- Table Header -->
+            <div class="bg-pastel-coral rounded-xl p-2.5 text-[11px] font-bold text-black grid grid-cols-4 text-center border border-black/10">
+              <div>Date</div>
+              <div>Order No</div>
+              <div>Amount</div>
+              <div>Source</div>
+            </div>
+
+            <!-- Table Rows -->
+            <div class="space-y-1.5 max-h-48 overflow-y-auto">
+              ${state.sales.length === 0 ? `<div class="text-center text-xs text-slate-500 py-3">No sales record available.</div>` : ''}
+              ${state.sales.map(s => `
+                <div class="bg-pastel-pink/60 rounded-xl p-2 text-xs font-semibold text-slate-800 grid grid-cols-4 text-center items-center border border-black/5">
+                  <div>${s.date}</div>
+                  <div class="font-bold">${s.orderNo}</div>
+                  <div class="font-serif font-bold">RM ${Number(s.amount).toFixed(2)}</div>
+                  <div class="text-[10px] bg-white/60 px-1 py-0.5 rounded-full border border-black/10">${s.source}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <hr class="border-black/10 my-4">
+
+            <!-- Manual Sales Section -->
+            <div class="space-y-3">
+              <h3 class="font-serif font-bold text-xs text-black">
+                ${lang === 'BM' ? 'Tambah jualan manual (pembeli beli luar bcl.my)' : 'Add sales manually if buyer buy product not from bcl payment gateway'}
+              </h3>
+
+              <form onsubmit="handleSaveManualSale(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">Date</label>
+                    <input type="text" id="manual-date" value="${todayDate}" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">Order No</label>
+                    <select id="manual-order" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                      ${state.products.map(p => `<option value="${p.orderNo}">${p.orderNo} -${p.name.substring(0,12)}...</option>`).join('')}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">Source</label>
+                    <select id="manual-source" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                      ${state.sources.map(src => `<option value="${src}">${src}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">Amount (RM)</label>
+                    <input type="number" step="0.01" id="manual-amount" required placeholder="0.00" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                  </div>
+                </div>
+
+                <!-- Add Source Inline -->
+                <div class="flex space-x-2 pt-1">
+                  <input type="text" id="new-source-input" placeholder="+ Add Source" class="flex-1 bg-white px-3 py-1.5 rounded-full text-xs border border-black/20">
+                  <button type="button" onclick="handleAddSource()" class="bg-pastel-coral px-3 py-1.5 rounded-full text-xs font-bold border border-black shadow-hard-sm">Save Source</button>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                  <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-serif font-bold text-xs border border-black shadow-hard">
+                    ${lang === 'BM' ? 'Simpan' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleAddSource() {
+      const input = document.getElementById('new-source-input');
+      const val = input.value.trim();
+      if (val && !state.sources.includes(val)) {
+        state.sources.push(val);
+        saveDB(state);
+        renderCurrentRoute();
+      }
+    }
+
+    function handleSaveManualSale(e) {
+      e.preventDefault();
+      const date = document.getElementById('manual-date').value;
+      const orderNo = document.getElementById('manual-order').value;
+      const source = document.getElementById('manual-source').value;
+      const amount = parseFloat(document.getElementById('manual-amount').value) || 0;
+
+      const newSale = {
+        id: 'SALE_' + Date.now(),
+        date,
+        orderNo,
+        amount,
+        source,
+        createdDate: new Date().toISOString()
+      };
+
+      state.sales.unshift(newSale);
+      saveDB(state);
+      alert(state.language === 'BM' ? 'Rekod jualan disimpan!' : 'Sale recorded successfully!');
+      renderCurrentRoute();
+    }
+
+    // --- 8. PAGE 6: SETTING ---
+    function renderPage6Setting() {
+      const lang = state.language;
+      const todayDate = getCurrentFormattedDate();
+      const shopId = state.adminProfile.shopId || 'scha001';
+      const catalogueUrl = `${window.location.origin}${window.location.pathname}#/catalog/${shopId}`;
+
+      return `
+        <div class="p-4 space-y-4">
+          <!-- Header -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
+            <div>
+              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Tetapan' : 'Setting'}</h1>
+              <p class="text-xs text-slate-600 mt-0.5">${todayDate}</p>
+            </div>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black' : 'text-slate-500'}">BM</button>
+            </div>
+          </div>
+
+          <!-- Main Setting Card -->
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="font-serif font-bold text-sm text-black">Shop Configuration</span>
+              <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
+                ← Back
+              </button>
+            </div>
+
+            <form onsubmit="handleSaveSettings(event)" class="space-y-4">
+              <!-- Shop Name -->
+              <div>
+                <label class="block font-serif font-bold text-xs text-black mb-1">
+                  ${lang === 'BM' ? 'Nama kedai yang ingin dipaparkan di katalog' : 'Shop name you want to display at catalogue'}
+                </label>
+                <input type="text" id="setting-shop-name" value="${state.adminProfile.shopName}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
+              </div>
+
+              <!-- Welcome Greetings -->
+              <div>
+                <label class="block font-serif font-bold text-xs text-black mb-1">
+                  ${lang === 'BM' ? 'Ucapan alu-aluan yang ingin dipaparkan di katalog' : 'Welcome greetings you want to display at catalogue'}
+                </label>
+                <input type="text" id="setting-greeting" value="${state.adminProfile.welcomeGreeting}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
+              </div>
+
+              <!-- Catalogue Link Section -->
+              <div>
+                <label class="block font-serif font-bold text-xs text-black mb-1">
+                  ${lang === 'BM' ? 'Pautan Katalog Anda. Pautan ini dijana secara automatik.' : 'Your Catalogue Link. This link auto generate from your catalogue'}
+                </label>
+                <div class="flex items-center space-x-2">
+                  <input type="text" readonly value="${catalogueUrl}" class="flex-1 bg-pastel-coral/50 px-4 py-2.5 rounded-2xl border-none text-[11px] font-bold text-slate-700 truncate">
+                  <button type="button" onclick="copyCatalogueLink('${catalogueUrl}')" class="bg-pastel-pink border border-black/20 px-3 py-2 rounded-2xl font-serif font-bold text-[10px] shadow-hard-sm text-black text-center leading-tight">
+                    Copy your<br>catalogue link
+                  </button>
+                </div>
+              </div>
+
+              <!-- Save Button -->
+              <div class="flex justify-end pt-2">
+                <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-serif font-bold text-xs border border-black shadow-hard">
+                  ${lang === 'BM' ? 'Simpan' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    function copyCatalogueLink(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        alert(state.language === 'BM' ? 'Pautan katalog berjaya disalin!' : 'Catalogue link copied to clipboard!');
+      });
+    }
+
+    function handleSaveSettings(e) {
+      e.preventDefault();
+      state.adminProfile.shopName = document.getElementById('setting-shop-name').value.trim();
+      state.adminProfile.welcomeGreeting = document.getElementById('setting-greeting').value.trim();
+      saveDB(state);
+      alert(state.language === 'BM' ? 'Tetapan disimpan!' : 'Settings saved successfully!');
+    }
+
+    // --- 9. PAGE 7: PUBLIC CUSTOMER CATALOGUE VIEW ---
+    let customerCategoryFilter = 'ALL';
+
+    function renderPage7CustomerCatalog(shopId) {
+      const shopName = state.adminProfile.shopName || 'Scha Digital Learning Center';
+      const greeting = state.adminProfile.welcomeGreeting || 'Welcome to My Shop';
+
+      let activeProducts = state.products.filter(p => p.status === 'ACTIVE');
+      if (customerCategoryFilter !== 'ALL') {
+        activeProducts = activeProducts.filter(p => p.category === customerCategoryFilter);
+      }
+
+      return `
+        <div class="bg-customer-gradient min-h-screen p-4 space-y-4 text-slate-800">
+          <!-- Shop Header -->
+          <div class="bg-pastel-peach/95 rounded-3xl p-6 border border-white/50 shadow-lg text-center relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <span class="absolute top-2 left-3 text-lg opacity-80">✈️</span>
+            <span class="absolute top-2 right-3 text-lg opacity-80">💌</span>
+            <span class="absolute bottom-2 left-4 text-xs opacity-80">💖</span>
+            <span class="absolute bottom-2 right-4 text-xs opacity-80">🎀</span>
+
+            <h1 class="font-serif font-extrabold text-2xl text-black leading-tight tracking-wide">
+              ${shopName}
+            </h1>
+            
+            <div class="mt-3 flex items-center justify-center space-x-1">
+              <span class="text-xs">🎀</span>
+              <p class="font-serif font-bold text-sm text-black italic">${greeting}</p>
+              <span class="text-xs">🎀</span>
+            </div>
+          </div>
+
+          <!-- Filter Section -->
+          <div class="bg-pastel-peach/95 rounded-3xl p-4 border border-white/50 shadow-md space-y-3">
+            <div>
+              <label class="block text-xs font-bold mb-1 text-slate-800">Filter by Categories</label>
+              <select onchange="handleCustomerCatFilter(this.value)" class="w-full bg-pastel-pink/80 px-4 py-2 rounded-full border-none text-xs font-bold text-black">
+                <option value="ALL">-- All Categories --</option>
+                ${state.categories.map(c => `<option value="${c}" ${customerCategoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <!-- Product Grid -->
+          <div class="grid grid-cols-2 gap-3">
+            ${activeProducts.length === 0 ? `<div class="col-span-2 text-center text-xs text-white py-8 font-semibold">No products available.</div>` : ''}
+            ${activeProducts.map(p => `
+              <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md flex flex-col justify-between relative">
+                <div>
+                  <!-- Image Preview -->
+                  <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-pastel-pink/40 rounded-xl overflow-hidden cursor-pointer relative">
+                    <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover">
+                  </div>
+
+                  <!-- Info & Share -->
+                  <div class="flex justify-between items-start mt-2">
+                    <div class="text-[9px] font-extrabold text-black uppercase tracking-wider">
+                      ${p.category} (${p.orderNo})
+                    </div>
+                    <!-- Share Button -->
+                    <button onclick="shareProduct('${shopId}', '${p.id}', '${p.name}')" class="text-slate-800 hover:text-pink-600 p-0.5">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    </button>
+                  </div>
+
+                  <h3 class="font-serif font-bold text-xs text-black line-clamp-2 mt-0.5">${p.name}</h3>
+
+                  <!-- Price Badge -->
+                  <div class="mt-2 inline-block bg-pastel-yellow px-2.5 py-1 rounded-lg border border-black/10">
+                    <span class="font-bold text-xs text-red-600">RM ${p.totalPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="space-y-1.5 mt-3">
+                  <button onclick="handleCustomerBuyNow('${p.buyNowUrl}', '${p.orderNo}',${p.totalPrice})" class="w-full py-1.5 bg-pastel-softPink rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm active:scale-95 transition">
+                    Buy Now
+                  </button>
+                  <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-softPink text-center rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm">
+                    Whatsapp Seller
+                  </a>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function handleCustomerCatFilter(val) {
+      customerCategoryFilter = val;
+      renderCurrentRoute();
+    }
+
+    function handleCustomerBuyNow(buyUrl, orderNo, amount) {
+      if (buyUrl && buyUrl !== '#') {
+        window.open(buyUrl, '_blank');
+      } else {
+        alert('Directing to BCL payment gateway...');
+      }
+
+      // Simulate BCL.my Payment Gateway Success Callback Recording
+      setTimeout(() => {
+        const autoSale = {
+          id: 'SALE_' + Date.now(),
+          date: getCurrentFormattedDate(),
+          orderNo: orderNo,
+          amount: amount,
+          source: 'bcl.my',
+          createdDate: new Date().toISOString()
+        };
+        state.sales.unshift(autoSale);
+        saveDB(state);
+      }, 1000);
+    }
+
+    function shareProduct(shopId, prodId, prodName) {
+      const prodUrl = `${window.location.origin}${window.location.pathname}#/catalog/${shopId}/product/${prodId}`;
+      if (navigator.share) {
+        navigator.share({
+          title: prodName,
+          text: `Lihat produk ${prodName} di ${state.adminProfile.shopName}`,
+          url: prodUrl
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(prodUrl).then(() => {
+          alert('Pautan produk disalin!');
+        });
+      }
+    }
+
+    function renderSingleProductPage(shopId, productId) {
+      const product = state.products.find(p => p.id === productId);
+      if (!product) {
+        return `<div class="p-8 text-center text-xs font-bold text-white">Product not found.</div>`;
+      }
+      return `
+        <div class="bg-customer-gradient min-h-screen p-4 flex flex-col justify-center items-center">
+          <div class="w-full max-w-sm bg-pastel-peach rounded-3xl p-5 border border-white/60 shadow-xl space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold uppercase">${product.category}</span>
+              <button onclick="openCustomerCatalog()" class="text-xs font-bold underline">Close</button>
+            </div>
+            <div class="w-full h-48 bg-white rounded-2xl overflow-hidden border border-black/10">
+              <img src="${product.images[0] || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover">
+            </div>
+            <h2 class="font-serif font-bold text-base text-black">${product.name}</h2>
+            <div class="font-bold text-lg text-red-600">RM ${product.totalPrice.toFixed(2)}</div>
+            <div class="space-y-2 pt-2">
+              <button onclick="handleCustomerBuyNow('${product.buyNowUrl}', '${product.orderNo}', ${product.totalPrice})" class="w-full py-2.5 bg-pastel-yellow font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">BUY NOW</button>
+              <a href="${product.whatsappUrl || '#'}" target="_blank" class="block w-full py-2.5 bg-pastel-yellow text-center font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">WHATSAPP SELLER</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Initialize Routing on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCurrentRoute();
+    });
+  </script>
+</body>
+</html>
