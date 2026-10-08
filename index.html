@@ -15,7 +15,7 @@
   <!-- Manifest Data URL -->
   <link rel="manifest" id="pwa-manifest">
 
-  <!-- Google Fonts: Plus Jakarta Sans (Terang, Jelas & Mudah Dibaca) -->
+  <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
         extend: {
           fontFamily: {
             sans: ['Plus Jakarta Sans', 'sans-serif'],
-            serif: ['Plus Jakarta Sans', 'sans-serif'], // Diselaraskan untuk kejelasan maksimum
+            serif: ['Plus Jakarta Sans', 'sans-serif'],
           },
           colors: {
             pastel: {
@@ -144,7 +144,8 @@
 
   <!-- APPLICATION LOGIC & STATE MANAGEMENT -->
   <script>
-    const DB_KEY = 'SCHA_DIGITAL_DB_V4';
+    // Kunci simpanan kekal supaya akaun tidak hilang bila kod dikemaskini
+    const DB_KEY = 'SCHA_DIGITAL_HUB_DB';
     const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam (dalam milisaat)
     let inactivityTimer = null;
     
@@ -170,6 +171,13 @@
     function loadDB() {
       const data = localStorage.getItem(DB_KEY);
       if (!data) {
+        // Cuba semak juga kunci pangkalan data terdahulu jika wujud
+        const oldData = localStorage.getItem('SCHA_DIGITAL_DB_V4') || localStorage.getItem('SCHA_DIGITAL_DB_V3');
+        if (oldData) {
+          const parsedOld = JSON.parse(oldData);
+          localStorage.setItem(DB_KEY, JSON.stringify(parsedOld));
+          return parsedOld;
+        }
         const initial = getInitialDB();
         localStorage.setItem(DB_KEY, JSON.stringify(initial));
         return initial;
@@ -411,7 +419,7 @@
           btn.disabled = false;
           btn.innerText = state.language === 'BM' ? 'Log Masuk' : 'Log In';
         }
-      }, 600);
+      }, 500);
     }
 
     function renderForgotPasswordModal() {
@@ -476,7 +484,7 @@
 
       if (email === state.adminProfile.email) {
         const err = document.getElementById('reg-err');
-        err.innerText = state.language === 'BM' ? 'Email ini sudah mempunyai akaun.' : 'This email already has an account.';
+        err.innerText = state.language === 'BM' ? 'Email ini sudah mempunyai akaun. Sila terus Log Masuk.' : 'This email already has an account. Please Log In directly.';
         err.classList.remove('hidden');
         return;
       }
@@ -675,10 +683,10 @@
 
               <div>
                 <label class="block text-xs font-bold mb-1">
-                  ${lang === 'BM' ? 'Muat Naik Gambar (Maks 6 gambar, 5MB, JPG/PNG)' : 'Image upload. Max 6 images. Size 5MB. PNG & JPG'}
+                  ${lang === 'BM' ? 'Muat Naik Gambar (Bebas Dari Mana-mana Galeri/Folder, Maks 6 Gambar)' : 'Image Upload (All Gallery/Folders Access, Max 6 Images)'}
                 </label>
-                <!-- MEMBENARKAN GALERI PHONENYA TERMASUK SEMUA ALBUM -->
-                <input type="file" id="media-picker" accept="image/png, image/jpeg, image/jpg" multiple class="hidden" onchange="handleNativeImageUpload(event)">
+                <!-- DENGAN accept="image/*" TANPA HADAAN SEKATAN UNTUK AKSES SEMUA GALERI/ALBUM -->
+                <input type="file" id="media-picker" accept="image/*" multiple class="hidden" onchange="handleNativeImageUpload(event)">
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container"></div>
               </div>
 
@@ -748,10 +756,6 @@
         return;
       }
       files.forEach(file => {
-        if (file.size > 5 * 1024 * 1024) {
-          alert('Saiz gambar tidak boleh melebihi 5MB.');
-          return;
-        }
         const reader = new FileReader();
         reader.onload = function(evt) {
           tempAddProductMedia.push(evt.target.result);
@@ -1181,17 +1185,17 @@
             </div>
 
             <form onsubmit="handleSaveSettings(event)" class="space-y-4">
-              <!-- UI UPLOAD 1 GAMBAR LOGO / PROFILE ADMIN (JPG/PNG SEHINGGA 2GB) -->
+              <!-- UI UPLOAD GAMBAR LOGO DENGAN AKSES PENUH GALERI PHONE -->
               <div class="bg-white/80 p-4 rounded-2xl border border-black/10 space-y-3">
                 <label class="block font-bold text-xs text-black">
-                  ${lang === 'BM' ? 'Muat Naik Logo / Gambar Admin Portal (Maks 1 Gambar, JPG/PNG, Saiz 2GB)' : 'Upload Admin Portal Logo (Max 1 Image, JPG/PNG, Size 2GB)'}
+                  ${lang === 'BM' ? 'Muat Naik Logo Admin Portal (Bebas Dari Mana-mana Folder/Galeri Phone)' : 'Upload Admin Portal Logo (Access All Gallery/Folder)'}
                 </label>
                 <div class="flex items-center space-x-4">
                   <div class="w-16 h-16 bg-pastel-coral/30 rounded-xl border border-black overflow-hidden flex items-center justify-center">
                     <img id="setting-logo-preview" src="${state.adminProfile.logoUrl}" class="w-full h-full object-contain">
                   </div>
                   <!-- MENGAKSES SEMUA ALBUM & GALERI PHONE TANPA SEKATAN -->
-                  <input type="file" id="setting-logo-input" accept="image/png, image/jpeg, image/jpg" class="hidden" onchange="handleSettingLogoUpload(event)">
+                  <input type="file" id="setting-logo-input" accept="image/*" class="hidden" onchange="handleSettingLogoUpload(event)">
                   <button type="button" onclick="document.getElementById('setting-logo-input').click()" class="bg-pastel-coral px-4 py-2 rounded-full border border-black text-xs font-bold shadow-hard-sm hover:bg-rose-300">
                     ${lang === 'BM' ? 'Pilih Gambar dari Galeri' : 'Choose Image from Gallery'}
                   </button>
@@ -1243,11 +1247,6 @@
     function handleSettingLogoUpload(e) {
       const file = e.target.files[0];
       if (file) {
-        // Had saiz fail 2GB
-        if (file.size > 2 * 1024 * 1024 * 1024) {
-          alert(state.language === 'BM' ? 'Saiz gambar melebihi had 2GB.' : 'Image size exceeds 2GB limit.');
-          return;
-        }
         const reader = new FileReader();
         reader.onload = function(evt) {
           state.adminProfile.logoUrl = evt.target.result;
