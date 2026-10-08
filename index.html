@@ -15,10 +15,10 @@
   <!-- Manifest Data URL -->
   <link rel="manifest" id="pwa-manifest">
 
-  <!-- Google Fonts: Serif & Clean Sans -->
+  <!-- Google Fonts: Plus Jakarta Sans (Terang, Jelas & Mudah Dibaca) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..800;1,400..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Sacramento&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -27,9 +27,8 @@
       theme: {
         extend: {
           fontFamily: {
-            serif: ['Playfair Display', 'serif'],
             sans: ['Plus Jakarta Sans', 'sans-serif'],
-            cursive: ['Sacramento', 'cursive'],
+            serif: ['Plus Jakarta Sans', 'sans-serif'], // Diselaraskan untuk kejelasan maksimum
           },
           colors: {
             pastel: {
@@ -64,9 +63,10 @@
       overflow-x: hidden;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
       min-height: 100dvh;
+      color: #1e293b;
     }
     .bg-app-gradient {
       background: linear-gradient(135deg, #fbcfe8 0%, #e9d5ff 50%, #bae6fd 100%);
@@ -85,7 +85,7 @@
     }
   </style>
 </head>
-<body class="bg-app-gradient text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-app-gradient text-slate-900 antialiased min-h-screen flex flex-col justify-between font-sans">
 
   <!-- APP ROOT CONTAINER -->
   <div id="app" class="w-full max-w-md md:max-w-4xl mx-auto min-h-screen min-h-[100dvh] flex flex-col relative pb-20">
@@ -94,7 +94,7 @@
 
   <!-- PERSISTENT BOTTOM NAVIGATION (ADMIN ONLY) -->
   <nav id="bottom-nav" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-black/10 shadow-lg max-w-md md:max-w-4xl mx-auto rounded-t-2xl">
-    <div class="grid grid-cols-6 h-16 text-[10px] sm:text-xs font-semibold text-slate-600">
+    <div class="grid grid-cols-6 h-16 text-xs font-semibold text-slate-700">
       <button onclick="navigate('/my-sales')" id="nav-my-sales" class="flex flex-col items-center justify-center space-y-1 hover:text-black">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
         <span class="nav-label" data-en="Sales" data-bm="Jualan">Jualan</span>
@@ -144,7 +144,9 @@
 
   <!-- APPLICATION LOGIC & STATE MANAGEMENT -->
   <script>
-    const DB_KEY = 'SCHA_DIGITAL_DB_V3';
+    const DB_KEY = 'SCHA_DIGITAL_DB_V4';
+    const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam (dalam milisaat)
+    let inactivityTimer = null;
     
     function getInitialDB() {
       return {
@@ -180,6 +182,24 @@
     }
 
     let state = loadDB();
+
+    // --- AUTO LOG OUT UNTUK INAKTIVITI (2 JAM) ---
+    function resetInactivityTimer() {
+      clearTimeout(inactivityTimer);
+      if (state.session && state.session.loggedIn) {
+        inactivityTimer = setTimeout(() => {
+          state.session = null;
+          saveDB(state);
+          alert(state.language === 'BM' ? 'Sesi anda telah tamat selepas 2 jam tidak aktif. Sila log masuk semula.' : 'Your session expired due to 2 hours of inactivity. Please log in again.');
+          navigate('/login');
+        }, INACTIVITY_TIMEOUT);
+      }
+    }
+
+    // Event listener pengesan aktiviti pengguna
+    ['mousemove', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
+      window.addEventListener(evt, resetInactivityTimer, true);
+    });
 
     // PWA Manifest Setup
     (function setupPWA() {
@@ -229,6 +249,7 @@
     }
 
     function renderCurrentRoute() {
+      resetInactivityTimer();
       const app = document.getElementById('app');
       const bottomNav = document.getElementById('bottom-nav');
       let hash = window.location.hash.replace('#', '') || '/';
@@ -286,10 +307,10 @@
         const el = document.getElementById(`nav-${btn}`);
         if (el) {
           if (hash.includes(btn)) {
-            el.classList.add('text-black', 'font-bold');
+            el.classList.add('text-black', 'font-extrabold');
             el.classList.remove('text-slate-600');
           } else {
-            el.classList.remove('text-black', 'font-bold');
+            el.classList.remove('text-black', 'font-extrabold');
             el.classList.add('text-slate-600');
           }
         }
@@ -313,27 +334,26 @@
           </div>
 
           <div class="w-[88%] bg-pastel-peach/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 text-center flex flex-col items-center">
-            <div class="w-28 h-28 bg-pastel-coral rounded-2xl border-2 border-black/10 shadow-inner flex items-center justify-center p-2 mb-4 overflow-hidden relative group">
+            <!-- LOGO TERPAPAR DARIPADA DATABASE UTAMA -->
+            <div class="w-28 h-28 bg-white rounded-2xl border-2 border-black/10 shadow-md flex items-center justify-center p-2 mb-4 overflow-hidden">
               <img id="admin-logo-img" src="${state.adminProfile.logoUrl}" alt="Logo" class="w-full h-full object-contain rounded-xl">
-              <input type="file" id="logo-upload-input" accept="image/*" class="hidden" onchange="handleLogoChange(event)">
-              <button onclick="document.getElementById('logo-upload-input').click()" class="absolute inset-0 bg-black/40 text-white text-[10px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition">Muat Naik Logo</button>
             </div>
 
-            <h1 class="font-serif text-2xl font-bold text-black mb-6">Admin Portal</h1>
+            <h1 class="text-2xl font-extrabold text-slate-900 mb-6">Admin Portal</h1>
 
             <form onsubmit="handleLogin(event)" class="w-full space-y-4">
               <div class="relative w-full">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 </span>
-                <input type="email" id="login-email" required placeholder="Email" value="${state.adminProfile.email}" class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <input type="email" id="login-email" required placeholder="Email" value="${state.adminProfile.email}" class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pink-300">
               </div>
 
               <div class="relative w-full">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </span>
-                <input type="password" id="login-password" required placeholder="${lang === 'BM' ? 'Kata Laluan' : 'Password'}" value="${state.adminProfile.password}" class="w-full pl-10 pr-10 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <input type="password" id="login-password" required placeholder="${lang === 'BM' ? 'Kata Laluan' : 'Password'}" value="${state.adminProfile.password}" class="w-full pl-10 pr-10 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pink-300">
                 <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                 </button>
@@ -342,20 +362,20 @@
               <div id="login-error" class="text-xs text-red-600 font-bold hidden"></div>
 
               <div class="py-1">
-                <button type="button" onclick="navigate('/forgot-password')" class="font-serif text-xs text-black hover:underline">
+                <button type="button" onclick="navigate('/forgot-password')" class="text-xs font-semibold text-slate-800 hover:underline">
                   ${lang === 'BM' ? 'Lupa kata laluan?' : 'Forgot password?'}
                 </button>
               </div>
 
-              <button type="submit" id="login-btn" class="w-full py-3 bg-white rounded-2xl border border-black shadow-hard font-serif text-lg font-bold text-black hover:bg-slate-50 active:translate-y-0.5 transition">
+              <button type="submit" id="login-btn" class="w-full py-3 bg-white rounded-2xl border border-black shadow-hard text-base font-extrabold text-black hover:bg-slate-50 active:translate-y-0.5 transition">
                 ${lang === 'BM' ? 'Log Masuk' : 'Log In'}
               </button>
             </form>
           </div>
 
           <div class="mt-6 text-center space-y-1">
-            <p class="text-xs text-slate-700">${lang === 'BM' ? 'Belum ada akaun?' : "Don't have account?"}</p>
-            <button onclick="navigate('/register')" class="text-xs font-bold text-black underline">
+            <p class="text-xs text-slate-700 font-medium">${lang === 'BM' ? 'Belum ada akaun?' : "Don't have account?"}</p>
+            <button onclick="navigate('/register')" class="text-xs font-extrabold text-black underline">
               ${lang === 'BM' ? 'Daftar di sini' : 'Register here'}
             </button>
           </div>
@@ -367,19 +387,6 @@
       const input = document.getElementById(id);
       if (input) {
         input.type = input.type === 'password' ? 'text' : 'password';
-      }
-    }
-
-    function handleLogoChange(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          state.adminProfile.logoUrl = evt.target.result;
-          saveDB(state);
-          document.getElementById('admin-logo-img').src = evt.target.result;
-        };
-        reader.readAsDataURL(file);
       }
     }
 
@@ -412,14 +419,14 @@
       return `
         <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
           <div class="w-[88%] bg-pastel-peach rounded-3xl p-6 shadow-xl border border-black/10 text-center">
-            <h2 class="font-serif text-xl font-bold mb-4">${lang === 'BM' ? 'Reset Kata Laluan' : 'Reset Password'}</h2>
-            <p class="text-xs text-slate-600 mb-4">${lang === 'BM' ? 'Masukkan email anda untuk menerima pautan reset.' : 'Enter your registered email to receive reset link.'}</p>
+            <h2 class="text-lg font-bold mb-4">${lang === 'BM' ? 'Reset Kata Laluan' : 'Reset Password'}</h2>
+            <p class="text-xs text-slate-700 font-medium mb-4">${lang === 'BM' ? 'Masukkan email anda untuk menerima pautan reset.' : 'Enter your registered email to receive reset link.'}</p>
             <input type="email" id="reset-email" placeholder="Email" class="w-full px-4 py-3 bg-white rounded-2xl border border-black shadow-hard-sm text-sm mb-4">
-            <div id="reset-msg" class="text-xs mb-4 hidden font-semibold"></div>
-            <button onclick="handleResetPassword()" class="w-full py-3 bg-pastel-coral rounded-2xl border border-black shadow-hard font-serif font-bold text-sm mb-2">
+            <div id="reset-msg" class="text-xs mb-4 hidden font-bold"></div>
+            <button onclick="handleResetPassword()" class="w-full py-3 bg-pastel-coral rounded-2xl border border-black shadow-hard font-bold text-sm mb-2">
               ${lang === 'BM' ? 'Hantar Pautan Reset' : 'Send Reset Link'}
             </button>
-            <button onclick="navigate('/login')" class="text-xs text-slate-700 underline">${lang === 'BM' ? 'Kembali ke Log Masuk' : 'Back to Login'}</button>
+            <button onclick="navigate('/login')" class="text-xs font-semibold text-slate-700 underline">${lang === 'BM' ? 'Kembali ke Log Masuk' : 'Back to Login'}</button>
           </div>
         </div>
       `;
@@ -429,10 +436,10 @@
       const email = document.getElementById('reset-email').value;
       const msg = document.getElementById('reset-msg');
       if (email === state.adminProfile.email) {
-        msg.className = "text-xs mb-4 font-semibold text-green-700";
+        msg.className = "text-xs mb-4 font-bold text-green-700";
         msg.innerText = state.language === 'BM' ? 'Pautan reset telah dihantar ke email anda.' : 'Reset link sent to your email.';
       } else {
-        msg.className = "text-xs mb-4 font-semibold text-red-600";
+        msg.className = "text-xs mb-4 font-bold text-red-600";
         msg.innerText = state.language === 'BM' ? 'Email tidak dijumpai.' : 'Email not found.';
       }
       msg.classList.remove('hidden');
@@ -443,18 +450,18 @@
       return `
         <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
           <div class="w-[88%] bg-pastel-peach rounded-3xl p-6 shadow-xl border border-black/10">
-            <h2 class="font-serif text-xl font-bold mb-4 text-center">${lang === 'BM' ? 'Pendaftaran Admin' : 'Admin Registration'}</h2>
+            <h2 class="text-lg font-bold mb-4 text-center">${lang === 'BM' ? 'Pendaftaran Admin' : 'Admin Registration'}</h2>
             <form onsubmit="handleRegister(event)" class="space-y-3">
               <input type="text" id="reg-shop" required placeholder="${lang === 'BM' ? 'Nama Kedai' : 'Shop Name'}" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
               <input type="email" id="reg-email" required placeholder="Email" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
               <input type="password" id="reg-pass" required placeholder="${lang === 'BM' ? 'Kata Laluan' : 'Password'}" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
-              <div id="reg-err" class="text-xs text-red-600 hidden font-semibold"></div>
-              <button type="submit" class="w-full py-3 bg-pastel-coral rounded-2xl border border-black shadow-hard font-serif font-bold text-sm">
+              <div id="reg-err" class="text-xs text-red-600 hidden font-bold"></div>
+              <button type="submit" class="w-full py-3 bg-pastel-coral rounded-2xl border border-black shadow-hard font-bold text-sm">
                 ${lang === 'BM' ? 'Daftar Akaun' : 'Register Account'}
               </button>
             </form>
             <div class="text-center mt-4">
-              <button onclick="navigate('/login')" class="text-xs text-slate-700 underline">${lang === 'BM' ? 'Sudah ada akaun? Log Masuk' : 'Already registered? Log In'}</button>
+              <button onclick="navigate('/login')" class="text-xs font-semibold text-slate-700 underline">${lang === 'BM' ? 'Sudah ada akaun? Log Masuk' : 'Already registered? Log In'}</button>
             </div>
           </div>
         </div>
@@ -528,8 +535,8 @@
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-start">
             <div>
-              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Jualan Saya' : 'My Sales'}</h1>
-              <p class="text-xs text-slate-600 mt-1 font-semibold">${todayDate}</p>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Jualan Saya' : 'My Sales'}</h1>
+              <p class="text-xs text-slate-700 mt-1 font-bold">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm flex space-x-1">
               <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold' : 'text-slate-500'}">EN</button>
@@ -539,7 +546,7 @@
           </div>
 
           <div class="bg-pastel-peach rounded-3xl p-4 border border-black/10 shadow-sm space-y-3">
-            <h2 class="font-serif text-sm font-bold text-black">
+            <h2 class="text-sm font-bold text-black">
               ${lang === 'BM' ? 'Penapis Ringkasan Prestasi Jualan' : 'Sales Performance Summary Filter'}
             </h2>
             <div class="grid grid-cols-4 gap-1.5 text-[10px] font-bold">
@@ -552,32 +559,32 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
-              <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Pesanan Bulan Ini' : 'Total Order This Month'}</span>
-              <span class="font-serif text-xl font-bold text-black mt-2">${totalOrderThisMonth}</span>
+              <span class="text-xs text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Pesanan Bulan Ini' : 'Total Order This Month'}</span>
+              <span class="text-xl font-extrabold text-black mt-2">${totalOrderThisMonth}</span>
             </div>
             <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
-              <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Jualan Hari Ini' : 'Sales Amount Today'}</span>
-              <span class="font-serif text-xl font-bold text-black mt-2">RM ${salesAmountToday.toFixed(2)}</span>
+              <span class="text-xs text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Jualan Hari Ini' : 'Sales Amount Today'}</span>
+              <span class="text-xl font-extrabold text-black mt-2">RM ${salesAmountToday.toFixed(2)}</span>
             </div>
             <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
-              <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Jualan Bulan Ini' : 'Total Sales This Month'}</span>
-              <span class="font-serif text-xl font-bold text-black mt-2">RM ${totalSalesThisMonth.toFixed(2)}</span>
+              <span class="text-xs text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Jualan Bulan Ini' : 'Total Sales This Month'}</span>
+              <span class="text-xl font-extrabold text-black mt-2">RM ${totalSalesThisMonth.toFixed(2)}</span>
             </div>
             <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
-              <span class="text-[11px] font-serif text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Hasil (Revenue)' : 'Total Revenue'}</span>
-              <span class="font-serif text-xl font-bold text-black mt-2">RM ${totalRevenue.toFixed(2)}</span>
+              <span class="text-xs text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Hasil (Revenue)' : 'Total Revenue'}</span>
+              <span class="text-xl font-extrabold text-black mt-2">RM ${totalRevenue.toFixed(2)}</span>
             </div>
           </div>
 
           <div class="space-y-3 pt-2">
-            <h2 class="font-serif text-center font-bold text-lg tracking-wide text-black">
+            <h2 class="text-center font-extrabold text-base tracking-wide text-black">
               MONTHLY SALES ${currentYear}
             </h2>
             <div class="grid grid-cols-2 gap-3">
               ${months.map((m, idx) => `
                 <div class="bg-pastel-coral p-3 rounded-2xl border border-black/10 shadow-sm text-center">
-                  <div class="font-serif font-bold text-xs text-black">${lang === 'BM' ? monthsBM[idx] : m} ${currentYear}</div>
-                  <div class="font-serif font-extrabold text-sm text-black mt-1">RM ${monthlyTotals[idx].toFixed(2)}</div>
+                  <div class="font-bold text-xs text-black">${lang === 'BM' ? monthsBM[idx] : m} ${currentYear}</div>
+                  <div class="font-extrabold text-sm text-black mt-1">RM ${monthlyTotals[idx].toFixed(2)}</div>
                 </div>
               `).join('')}
             </div>
@@ -605,8 +612,8 @@
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
             <div>
-              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Tambah Katalog' : 'Add Catalogue'}</h1>
-              <p class="text-xs text-slate-600 mt-0.5">${todayDate}</p>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Tambah Katalog' : 'Add Catalogue'}</h1>
+              <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
               <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
@@ -616,7 +623,7 @@
 
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4 relative">
             <div class="flex justify-between items-center">
-              <h2 class="font-serif font-bold text-lg text-black">+ ${lang === 'BM' ? 'Tambah Produk' : 'Add Product'}</h2>
+              <h2 class="font-bold text-base text-black">+ ${lang === 'BM' ? 'Tambah Produk' : 'Add Product'}</h2>
               <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
                 ← ${lang === 'BM' ? 'Kembali' : 'Back'}
               </button>
@@ -653,15 +660,15 @@
 
               <div class="grid grid-cols-3 gap-2">
                 <div>
-                  <label class="block text-[11px] font-bold mb-1">${lang === 'BM' ? 'Harga (RM)' : 'Price (RM)'}</label>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Harga (RM)' : 'Price (RM)'}</label>
                   <input type="number" step="0.01" id="prod-price" required oninput="calculateTotalPrice()" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                 </div>
                 <div>
-                  <label class="block text-[11px] font-bold mb-1">${lang === 'BM' ? 'Promo (RM)' : 'Promo (RM)'}</label>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Promo (RM)' : 'Promo (RM)'}</label>
                   <input type="number" step="0.01" id="prod-promo" value="0.00" oninput="calculateTotalPrice()" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                 </div>
                 <div>
-                  <label class="block text-[11px] font-bold mb-1">${lang === 'BM' ? 'Jumlah (RM)' : 'Total Price (RM)'}</label>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Jumlah (RM)' : 'Total Price (RM)'}</label>
                   <input type="text" id="prod-total" readonly value="0.00" class="w-full bg-pastel-coral/40 px-3 py-2 rounded-2xl text-xs font-extrabold text-black">
                 </div>
               </div>
@@ -670,7 +677,8 @@
                 <label class="block text-xs font-bold mb-1">
                   ${lang === 'BM' ? 'Muat Naik Gambar (Maks 6 gambar, 5MB, JPG/PNG)' : 'Image upload. Max 6 images. Size 5MB. PNG & JPG'}
                 </label>
-                <input type="file" id="media-picker" accept="image/*" multiple class="hidden" onchange="handleNativeImageUpload(event)">
+                <!-- MEMBENARKAN GALERI PHONENYA TERMASUK SEMUA ALBUM -->
+                <input type="file" id="media-picker" accept="image/png, image/jpeg, image/jpg" multiple class="hidden" onchange="handleNativeImageUpload(event)">
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container"></div>
               </div>
 
@@ -694,7 +702,7 @@
               </div>
 
               <div class="flex justify-end pt-3">
-                <button type="submit" id="save-prod-btn" class="bg-pastel-coral px-8 py-3 rounded-full font-serif font-bold text-sm border border-black shadow-hard hover:bg-rose-300">
+                <button type="submit" id="save-prod-btn" class="bg-pastel-coral px-8 py-3 rounded-full font-bold text-sm border border-black shadow-hard hover:bg-rose-300">
                   ${lang === 'BM' ? 'Simpan' : 'Save'}
                 </button>
               </div>
@@ -841,8 +849,8 @@
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
             <div>
-              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Urus Katalog' : 'Manage Catalogue'}</h1>
-              <p class="text-xs text-slate-600 mt-0.5">${todayDate}</p>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Urus Katalog' : 'Manage Catalogue'}</h1>
+              <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
               <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
@@ -852,7 +860,7 @@
 
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
             <div class="flex justify-between items-center">
-              <h2 class="font-serif font-bold text-base text-black">+- Edit & Remove Product</h2>
+              <h2 class="font-bold text-sm text-black">+- Edit & Remove Product</h2>
               <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
                 ← Back
               </button>
@@ -891,10 +899,10 @@
                     <div class="mt-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
                       ${p.category} (${p.orderNo})
                     </div>
-                    <div class="font-serif font-bold text-xs text-black line-clamp-2 mt-0.5">
+                    <div class="font-bold text-xs text-black line-clamp-2 mt-0.5">
                       ${p.name}
                     </div>
-                    <div class="font-serif font-extrabold text-sm text-black mt-1">
+                    <div class="font-extrabold text-sm text-black mt-1">
                       RM ${p.totalPrice.toFixed(2)}
                     </div>
                   </div>
@@ -991,8 +999,8 @@
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
             <div>
-              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Rekod Jualan' : 'Sales Record'}</h1>
-              <p class="text-xs text-slate-600 mt-0.5">${todayDate}</p>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Rekod Jualan' : 'Sales Record'}</h1>
+              <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
               <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
@@ -1002,7 +1010,7 @@
 
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
             <div class="flex justify-between items-start">
-              <h2 class="font-serif font-bold text-xs text-black max-w-[70%]">
+              <h2 class="font-bold text-xs text-black max-w-[70%]">
                 ${lang === 'BM' ? 'Rekod jualan daripada payment gateway & bayaran manual' : 'Sales record from payment gateway & manual payment'}
               </h2>
               <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
@@ -1026,7 +1034,7 @@
                 <div class="bg-pastel-pink/60 rounded-xl p-2 text-xs font-semibold text-slate-800 grid grid-cols-5 text-center items-center border border-black/5">
                   <div class="text-[10px]">${s.date}</div>
                   <div class="font-bold text-[10px]">${s.orderNo}</div>
-                  <div class="font-serif font-bold text-[11px]">RM ${Number(s.amount).toFixed(2)}</div>
+                  <div class="font-bold text-[11px]">RM ${Number(s.amount).toFixed(2)}</div>
                   <div class="text-[9px] bg-white/60 px-1 py-0.5 rounded-full border border-black/10 truncate">${s.source}</div>
                   <div class="flex justify-center items-center space-x-1.5">
                     <button onclick="editSaleRecord('${s.id}')" title="Edit" class="p-1 bg-white rounded-full border border-black/20 text-blue-700 hover:bg-blue-50">
@@ -1044,7 +1052,7 @@
 
             <!-- Manual Sales Section -->
             <div class="space-y-3">
-              <h3 class="font-serif font-bold text-xs text-black">
+              <h3 class="font-bold text-xs text-black">
                 ${lang === 'BM' ? 'Tambah jualan manual (pembeli beli luar bcl.my)' : 'Add sales manually if buyer buy product not from bcl payment gateway'}
               </h3>
 
@@ -1082,7 +1090,7 @@
                 </div>
 
                 <div class="flex justify-end pt-2">
-                  <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-serif font-bold text-xs border border-black shadow-hard">
+                  <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard">
                     ${lang === 'BM' ? 'Simpan' : 'Save'}
                   </button>
                 </div>
@@ -1149,15 +1157,14 @@
     function renderPage6Setting() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
-      // UI LINK EXACTLY MATCHED
       const entireCatalogueUrl = `https://syaaetelier.github.io/Scha-Digital-Hub/#/catalog`;
 
       return `
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
             <div>
-              <h1 class="font-serif text-2xl font-bold text-black">${lang === 'BM' ? 'Tetapan' : 'Setting'}</h1>
-              <p class="text-xs text-slate-600 mt-0.5">${todayDate}</p>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Tetapan' : 'Setting'}</h1>
+              <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
               <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
@@ -1167,22 +1174,39 @@
 
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
             <div class="flex justify-between items-center">
-              <span class="font-serif font-bold text-sm text-black">Shop Configuration</span>
+              <span class="font-bold text-sm text-black">Shop Configuration</span>
               <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
                 ← Back
               </button>
             </div>
 
             <form onsubmit="handleSaveSettings(event)" class="space-y-4">
+              <!-- UI UPLOAD 1 GAMBAR LOGO / PROFILE ADMIN (JPG/PNG SEHINGGA 2GB) -->
+              <div class="bg-white/80 p-4 rounded-2xl border border-black/10 space-y-3">
+                <label class="block font-bold text-xs text-black">
+                  ${lang === 'BM' ? 'Muat Naik Logo / Gambar Admin Portal (Maks 1 Gambar, JPG/PNG, Saiz 2GB)' : 'Upload Admin Portal Logo (Max 1 Image, JPG/PNG, Size 2GB)'}
+                </label>
+                <div class="flex items-center space-x-4">
+                  <div class="w-16 h-16 bg-pastel-coral/30 rounded-xl border border-black overflow-hidden flex items-center justify-center">
+                    <img id="setting-logo-preview" src="${state.adminProfile.logoUrl}" class="w-full h-full object-contain">
+                  </div>
+                  <!-- MENGAKSES SEMUA ALBUM & GALERI PHONE TANPA SEKATAN -->
+                  <input type="file" id="setting-logo-input" accept="image/png, image/jpeg, image/jpg" class="hidden" onchange="handleSettingLogoUpload(event)">
+                  <button type="button" onclick="document.getElementById('setting-logo-input').click()" class="bg-pastel-coral px-4 py-2 rounded-full border border-black text-xs font-bold shadow-hard-sm hover:bg-rose-300">
+                    ${lang === 'BM' ? 'Pilih Gambar dari Galeri' : 'Choose Image from Gallery'}
+                  </button>
+                </div>
+              </div>
+
               <div>
-                <label class="block font-serif font-bold text-xs text-black mb-1">
+                <label class="block font-bold text-xs text-black mb-1">
                   ${lang === 'BM' ? 'Nama kedai yang ingin dipaparkan di katalog' : 'Shop name you want to display at catalogue'}
                 </label>
                 <input type="text" id="setting-shop-name" value="${state.adminProfile.shopName}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
               </div>
 
               <div>
-                <label class="block font-serif font-bold text-xs text-black mb-1">
+                <label class="block font-bold text-xs text-black mb-1">
                   ${lang === 'BM' ? 'Ucapan alu-aluan yang ingin dipaparkan di katalog' : 'Welcome greetings you want to display at catalogue'}
                 </label>
                 <input type="text" id="setting-greeting" value="${state.adminProfile.welcomeGreeting}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
@@ -1190,12 +1214,12 @@
 
               <!-- Entire Catalogue Link Section -->
               <div>
-                <label class="block font-serif font-bold text-xs text-black mb-1">
+                <label class="block font-bold text-xs text-black mb-1">
                   ${lang === 'BM' ? 'Pautan Keseluruhan Katalog Anda (Auto Generate)' : 'Your Catalogue Link. This link auto generate from your catalogue'}
                 </label>
                 <div class="flex items-center space-x-2">
                   <input type="text" readonly value="${entireCatalogueUrl}" class="flex-1 bg-pastel-coral/50 px-4 py-2.5 rounded-2xl border-none text-[11px] font-bold text-slate-700 truncate">
-                  <button type="button" onclick="copyCatalogueLink('${entireCatalogueUrl}')" class="bg-pastel-pink border border-black/20 px-3 py-2 rounded-2xl font-serif font-bold text-[10px] shadow-hard-sm text-black text-center leading-tight">
+                  <button type="button" onclick="copyCatalogueLink('${entireCatalogueUrl}')" class="bg-pastel-pink border border-black/20 px-3 py-2 rounded-2xl font-bold text-[10px] shadow-hard-sm text-black text-center leading-tight">
                     Copy your<br>catalogue link
                   </button>
                 </div>
@@ -1203,10 +1227,10 @@
 
               <!-- SAVE & SIGN OUT BUTTONS -->
               <div class="flex justify-between items-center pt-2">
-                <button type="button" onclick="handleSignOut()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-full font-serif font-bold text-xs border border-black shadow-hard transition">
+                <button type="button" onclick="handleSignOut()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard transition">
                   ${lang === 'BM' ? 'Daftar Keluar' : 'Sign Out'}
                 </button>
-                <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-serif font-bold text-xs border border-black shadow-hard">
+                <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard">
                   ${lang === 'BM' ? 'Simpan' : 'Save'}
                 </button>
               </div>
@@ -1214,6 +1238,23 @@
           </div>
         </div>
       `;
+    }
+
+    function handleSettingLogoUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Had saiz fail 2GB
+        if (file.size > 2 * 1024 * 1024 * 1024) {
+          alert(state.language === 'BM' ? 'Saiz gambar melebihi had 2GB.' : 'Image size exceeds 2GB limit.');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          state.adminProfile.logoUrl = evt.target.result;
+          document.getElementById('setting-logo-preview').src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
     }
 
     function copyCatalogueLink(url) {
@@ -1267,13 +1308,13 @@
             <span class="absolute bottom-2 left-4 text-xs opacity-80">💖</span>
             <span class="absolute bottom-2 right-4 text-xs opacity-80">🎀</span>
 
-            <h1 class="font-serif font-extrabold text-2xl text-black leading-tight tracking-wide">
+            <h1 class="font-extrabold text-2xl text-black leading-tight tracking-wide">
               ${shopName}
             </h1>
             
             <div class="mt-3 flex items-center justify-center space-x-1">
               <span class="text-xs">🎀</span>
-              <p class="font-serif font-bold text-sm text-black italic">${greeting}</p>
+              <p class="font-bold text-sm text-black italic">${greeting}</p>
               <span class="text-xs">🎀</span>
             </div>
           </div>
@@ -1317,7 +1358,7 @@
                     </button>
                   </div>
 
-                  <h3 class="font-serif font-bold text-xs text-black line-clamp-2 mt-0.5">${p.name}</h3>
+                  <h3 class="font-bold text-xs text-black line-clamp-2 mt-0.5">${p.name}</h3>
 
                   <div class="mt-2 inline-block bg-pastel-yellow px-2.5 py-1 rounded-lg border border-black/10">
                     <span class="font-bold text-xs text-red-600">RM ${p.totalPrice.toFixed(2)}</span>
@@ -1400,7 +1441,7 @@
             <div class="w-full h-48 bg-white rounded-2xl overflow-hidden border border-black/10">
               <img src="${product.images[0] || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover">
             </div>
-            <h2 class="font-serif font-bold text-base text-black">${product.name}</h2>
+            <h2 class="font-bold text-base text-black">${product.name}</h2>
             <div class="font-bold text-lg text-red-600">RM ${product.totalPrice.toFixed(2)}</div>
             <div class="space-y-2 pt-2">
               <button onclick="handleCustomerBuyNow('${product.buyNowUrl}', '${product.orderNo}', ${product.totalPrice})" class="w-full py-2.5 bg-pastel-yellow font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">BUY NOW</button>
