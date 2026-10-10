@@ -88,7 +88,7 @@
 <body class="bg-app-gradient text-slate-900 antialiased min-h-screen flex flex-col justify-between font-sans">
 
   <!-- APP ROOT CONTAINER -->
-  <div id="app" class="w-full max-w-md md:max-w-4xl mx-auto min-h-screen min-h-[100dvh] flex flex-col relative pb-20">
+  <div id="app" class="w-full max-w-md md:max-w-4xl mx-auto min-h-screen min-h-[100dvh] flex flex-col relative pb-24">
     <!-- Dynamic Views Rendered Here -->
   </div>
 
@@ -132,21 +132,24 @@
     </div>
     <div class="relative w-full flex-1 flex items-center justify-center my-auto overflow-hidden">
       <img id="image-viewer-img" src="" alt="Full view" class="max-h-[80vh] max-w-full object-contain rounded-lg transition-transform duration-300">
-      <button onclick="prevImage()" class="absolute left-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <button onclick="prevImage()" class="absolute left-2 p-3 bg-white/80 hover:bg-white text-black font-extrabold rounded-full shadow-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
       </button>
-      <button onclick="nextImage()" class="absolute right-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      <button onclick="nextImage()" class="absolute right-2 p-3 bg-white/80 hover:bg-white text-black font-extrabold rounded-full shadow-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
       </button>
     </div>
-    <div class="viewer-hint pb-4 text-xs text-white/70">Tatal atau guna anak panah untuk lihat gambar</div>
+    <div class="viewer-hint pb-4 text-xs text-white/90 font-bold">Tatal atau guna anak panah untuk lihat gambar</div>
   </div>
 
   <!-- APPLICATION LOGIC & STATE MANAGEMENT -->
   <script>
     const DB_KEY = 'SCHA_DIGITAL_HUB_DB';
-    const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam (7,200,000 ms)
+    const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam
     let inactivityTimer = null;
+    
+    // Simpanan memori indeks gambar semasa untuk setiap kad produk
+    window.cardImageIndices = {};
     
     function getInitialDB() {
       return {
@@ -189,7 +192,6 @@
 
     let state = loadDB();
 
-    // --- KETEGASAN AUTO LOCK / LOG OUT SELEPAS 2 JAM INAKTIF ---
     function resetInactivityTimer() {
       clearTimeout(inactivityTimer);
       if (state.session && state.session.loggedIn) {
@@ -205,7 +207,6 @@
       }
     }
 
-    // Pemantau aktiviti pengguna merentasi pelbagai tindakan
     ['mousemove', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
       window.addEventListener(evt, resetInactivityTimer, true);
     });
@@ -243,7 +244,6 @@
       renderCurrentRoute();
     }
 
-    // --- ROUTER & NAVIGATION ENGINE ---
     function navigate(path) {
       window.history.pushState({}, '', '#' + path);
       renderCurrentRoute();
@@ -327,6 +327,34 @@
       document.querySelectorAll('.nav-label').forEach(el => {
         el.innerText = el.getAttribute(`data-${state.language.toLowerCase()}`);
       });
+    }
+
+    // --- FUNGSI SLIDE IMEG PADA KAD PRODUK (MANAGE & CATALOGUE) ---
+    function nextCardImage(event, prodId, maxLen) {
+      event.stopPropagation();
+      if (!window.cardImageIndices[prodId]) window.cardImageIndices[prodId] = 0;
+      window.cardImageIndices[prodId] = (window.cardImageIndices[prodId] + 1) % maxLen;
+      updateCardImageDisplay(prodId);
+    }
+
+    function prevCardImage(event, prodId, maxLen) {
+      event.stopPropagation();
+      if (!window.cardImageIndices[prodId]) window.cardImageIndices[prodId] = 0;
+      window.cardImageIndices[prodId] = (window.cardImageIndices[prodId] - 1 + maxLen) % maxLen;
+      updateCardImageDisplay(prodId);
+    }
+
+    function updateCardImageDisplay(prodId) {
+      const imgEl = document.getElementById(`card-img-${prodId}`);
+      const counterEl = document.getElementById(`card-counter-${prodId}`);
+      const prod = state.products.find(p => p.id === prodId);
+      if (prod && imgEl) {
+        const idx = window.cardImageIndices[prodId] || 0;
+        imgEl.src = prod.images[idx] || 'https://via.placeholder.com/150';
+        if (counterEl) {
+          counterEl.innerText = `${idx + 1} / ${prod.images.length}`;
+        }
+      }
     }
 
     // --- PAGE 1: ADMIN LOGIN ---
@@ -791,12 +819,17 @@
         state.categories.push(val);
         saveDB(state);
         const sel = document.getElementById('prod-category');
-        const opt = document.createElement('option');
-        opt.value = val;
-        opt.innerText = val;
-        sel.appendChild(opt);
-        sel.value = val;
+        if (sel) {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.innerText = val;
+          sel.appendChild(opt);
+          sel.value = val;
+        }
         input.value = '';
+        alert(state.language === 'BM' ? 'Kategori baru berjaya ditambah & disimpan!' : 'New category successfully added & saved!');
+      } else {
+        alert(state.language === 'BM' ? 'Sila masukkan nama kategori yang sah atau kategori sudah wujud.' : 'Please enter a valid or existing category name.');
       }
     }
 
@@ -829,7 +862,7 @@
 
       state.products.push(newProd);
       saveDB(state);
-      alert(state.language === 'BM' ? 'Produk berjaya disimpan!' : 'Product saved successfully!');
+      alert(state.language === 'BM' ? 'Produk berjaya disimpan dengan sempurna!' : 'Product saved successfully and perfectly!');
       navigate('/manage-catalog');
     }
 
@@ -892,40 +925,57 @@
             <!-- Product Grid -->
             <div class="grid grid-cols-2 gap-3 pt-2">
               ${filteredProds.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">${lang === 'BM' ? 'Tiada produk tersedia. Sila tambah produk di halaman + Katalog.' : 'No products available. Please add products in + Catalog page.'}</div>` : ''}
-              ${filteredProds.map(p => `
-                <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden cursor-pointer relative group">
-                      <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover group-hover:scale-105 transition">
-                      <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full">🔍 ${lang === 'BM' ? 'Lihat' : 'View'} (${p.images.length})</span>
+              ${filteredProds.map(p => {
+                const currentIdx = window.cardImageIndices[p.id] || 0;
+                const activeImg = p.images[currentIdx] || p.images[0] || 'https://via.placeholder.com/150';
+                return `
+                  <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <!-- IMAGE SLIDER CONTAINER WITH HIGH OPACITY ARROWS -->
+                      <div class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden relative group">
+                        <img id="card-img-${p.id}" src="${activeImg}" onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
+                        
+                        <!-- High Opacity Navigation Arrows -->
+                        ${p.images && p.images.length > 1 ? `
+                          <button type="button" onclick="prevCardImage(event, '${p.id}', ${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
+                            ❮
+                          </button>
+                          <button type="button" onclick="nextCardImage(event, '${p.id}', ${p.images.length})" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
+                            ❯
+                          </button>
+                          <span id="card-counter-${p.id}" class="absolute bottom-1 right-1 bg-black/80 text-white font-bold text-[9px] px-1.5 py-0.5 rounded-full">
+                            ${currentIdx + 1} / ${p.images.length}
+                          </span>
+                        ` : ''}
+                      </div>
+
+                      <div class="mt-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
+                        ${p.category} (${p.orderNo})
+                      </div>
+                      <div class="font-bold text-xs text-black line-clamp-2 mt-0.5">
+                        ${p.name}
+                      </div>
+                      <div class="font-extrabold text-sm text-black mt-1">
+                        RM ${p.totalPrice.toFixed(2)}
+                      </div>
                     </div>
 
-                    <div class="mt-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                      ${p.category} (${p.orderNo})
-                    </div>
-                    <div class="font-bold text-xs text-black line-clamp-2 mt-0.5">
-                      ${p.name}
-                    </div>
-                    <div class="font-extrabold text-sm text-black mt-1">
-                      RM ${p.totalPrice.toFixed(2)}
-                    </div>
-                  </div>
-
-                  <div class="space-y-1.5 mt-3">
-                    <a href="${p.buyNowUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">BUY NOW</a>
-                    <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">WHATSAPP SELLER</a>
-                    
-                    <div class="flex justify-between items-center pt-2 text-xs font-bold">
-                      <button onclick="editProduct('${p.id}')" class="text-blue-700 flex items-center space-x-1">
-                        <span>✎</span> <span>${lang === 'BM' ? 'Edit' : 'Edit'}</span>
-                      </button>
-                      <button onclick="deleteProduct('${p.id}')" class="text-red-600 flex items-center space-x-1">
-                        <span>🗑</span> <span>${lang === 'BM' ? 'Padam' : 'Delete'}</span>
-                      </button>
+                    <div class="space-y-1.5 mt-3">
+                      <a href="${p.buyNowUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">BUY NOW</a>
+                      <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">WHATSAPP SELLER</a>
+                      
+                      <div class="flex justify-between items-center pt-2 text-xs font-bold">
+                        <button onclick="editProduct('${p.id}')" class="text-blue-700 flex items-center space-x-1">
+                          <span>✎</span> <span>${lang === 'BM' ? 'Edit' : 'Edit'}</span>
+                        </button>
+                        <button onclick="deleteProduct('${p.id}')" class="text-red-600 flex items-center space-x-1">
+                          <span>🗑</span> <span>${lang === 'BM' ? 'Padam' : 'Delete'}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              `).join('')}
+                `;
+              }).join('')}
             </div>
           </div>
         </div>
@@ -957,6 +1007,7 @@
         if (newName) {
           prod.name = newName.trim();
           saveDB(state);
+          alert(state.language === 'BM' ? 'Perubahan berjaya disimpan!' : 'Changes saved successfully!');
           renderCurrentRoute();
         }
       }
@@ -984,7 +1035,7 @@
       counterEl.innerText = `${currentViewerIdx + 1} / ${currentViewerImages.length}`;
       const hintEl = document.querySelector('.viewer-hint');
       if (hintEl) {
-        hintEl.innerText = state.language === 'BM' ? 'Tatal atau guna anak panah untuk lihat gambar' : 'Swipe or use arrows to view images';
+        hintEl.innerText = state.language === 'BM' ? 'Tatal atau guna anak panah untuk lihat gambar dengan jelas' : 'Swipe or use arrows to view images clearly';
       }
     }
 
@@ -1099,7 +1150,7 @@
 
                 <div class="flex justify-end pt-2">
                   <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard">
-                    ${lang === 'BM' ? 'Simpan' : 'Save'}
+                    ${lang === 'BM' ? 'Simpan Jualan' : 'Save Sale'}
                   </button>
                 </div>
               </form>
@@ -1116,6 +1167,7 @@
         if (newAmt !== null) {
           sale.amount = parseFloat(newAmt) || 0;
           saveDB(state);
+          alert(state.language === 'BM' ? 'Rekod jualan berjaya dikemaskini!' : 'Sales record updated successfully!');
           renderCurrentRoute();
         }
       }
@@ -1135,7 +1187,11 @@
       if (val && !state.sources.includes(val)) {
         state.sources.push(val);
         saveDB(state);
+        input.value = '';
+        alert(state.language === 'BM' ? 'Sumber baru berjaya disimpan!' : 'New source saved successfully!');
         renderCurrentRoute();
+      } else {
+        alert(state.language === 'BM' ? 'Sila masukkan sumber yang sah.' : 'Please enter a valid source.');
       }
     }
 
@@ -1157,7 +1213,7 @@
 
       state.sales.unshift(newSale);
       saveDB(state);
-      alert(state.language === 'BM' ? 'Rekod jualan disimpan!' : 'Sale recorded successfully!');
+      alert(state.language === 'BM' ? 'Rekod jualan manual berjaya disimpan dengan sempurna!' : 'Manual sale successfully recorded and saved!');
       renderCurrentRoute();
     }
 
@@ -1238,7 +1294,7 @@
                   ${lang === 'BM' ? 'Daftar Keluar' : 'Sign Out'}
                 </button>
                 <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard">
-                  ${lang === 'BM' ? 'Simpan' : 'Save'}
+                  ${lang === 'BM' ? 'Simpan Tetapan' : 'Save Settings'}
                 </button>
               </div>
             </form>
@@ -1254,6 +1310,7 @@
         reader.onload = function(evt) {
           state.adminProfile.logoUrl = evt.target.result;
           document.getElementById('setting-logo-preview').src = evt.target.result;
+          saveDB(state);
         };
         reader.readAsDataURL(file);
       }
@@ -1270,7 +1327,7 @@
       state.adminProfile.shopName = document.getElementById('setting-shop-name').value.trim();
       state.adminProfile.welcomeGreeting = document.getElementById('setting-greeting').value.trim();
       saveDB(state);
-      alert(state.language === 'BM' ? 'Tetapan disimpan!' : 'Settings saved successfully!');
+      alert(state.language === 'BM' ? 'Tetapan kedai berjaya disimpan dengan sempurna!' : 'Shop settings saved successfully and perfectly!');
     }
 
     function handleSignOut() {
@@ -1347,39 +1404,57 @@
           <!-- Product Grid -->
           <div class="grid grid-cols-2 gap-3">
             ${activeProducts.length === 0 ? `<div class="col-span-2 text-center text-xs text-white py-8 font-semibold">${lang === 'BM' ? 'Tiada produk tersedia buat masa ini.' : 'No products available at the moment.'}</div>` : ''}
-            ${activeProducts.map(p => `
-              <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md flex flex-col justify-between relative">
-                <div>
-                  <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-pastel-pink/40 rounded-xl overflow-hidden cursor-pointer relative">
-                    <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover">
-                  </div>
-
-                  <div class="flex justify-between items-start mt-2">
-                    <div class="text-[9px] font-extrabold text-black uppercase tracking-wider">
-                      ${p.category} (${p.orderNo})
+            ${activeProducts.map(p => {
+              const currentIdx = window.cardImageIndices[p.id] || 0;
+              const activeImg = p.images[currentIdx] || p.images[0] || 'https://via.placeholder.com/150';
+              return `
+                <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md flex flex-col justify-between relative">
+                  <div>
+                    <!-- IMAGE SLIDER CONTAINER WITH HIGH OPACITY ARROWS -->
+                    <div class="w-full h-28 bg-pastel-pink/40 rounded-xl overflow-hidden relative group">
+                      <img id="card-img-${p.id}" src="${activeImg}" onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
+                      
+                      <!-- High Opacity Navigation Arrows -->
+                      ${p.images && p.images.length > 1 ? `
+                        <button type="button" onclick="prevCardImage(event, '${p.id}', ${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
+                          ❮
+                        </button>
+                        <button type="button" onclick="nextCardImage(event, '${p.id}', ${p.images.length})" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
+                          ❯
+                        </button>
+                        <span id="card-counter-${p.id}" class="absolute bottom-1 right-1 bg-black/80 text-white font-bold text-[9px] px-1.5 py-0.5 rounded-full">
+                          ${currentIdx + 1} / ${p.images.length}
+                        </span>
+                      ` : ''}
                     </div>
-                    <button onclick="shareProductLink('${p.id}', '${p.name}')" title="${lang === 'BM' ? 'Kongsi Produk Ini' : 'Share Product'}" class="text-slate-800 hover:text-pink-600 p-0.5">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+
+                    <div class="flex justify-between items-start mt-2">
+                      <div class="text-[9px] font-extrabold text-black uppercase tracking-wider">
+                        ${p.category} (${p.orderNo})
+                      </div>
+                      <button onclick="shareProductLink('${p.id}', '${p.name}')" title="${lang === 'BM' ? 'Kongsi Produk Ini' : 'Share Product'}" class="text-slate-800 hover:text-pink-600 p-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                      </button>
+                    </div>
+
+                    <h3 class="font-bold text-xs text-black line-clamp-2 mt-0.5">${p.name}</h3>
+
+                    <div class="mt-2 inline-block bg-pastel-yellow px-2.5 py-1 rounded-lg border border-black/10">
+                      <span class="font-bold text-xs text-red-600">RM ${p.totalPrice.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-1.5 mt-3">
+                    <button onclick="handleCustomerBuyNow('${p.buyNowUrl}', '${p.orderNo}',${p.totalPrice})" class="w-full py-1.5 bg-pastel-softPink rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm active:scale-95 transition">
+                      ${lang === 'BM' ? 'Beli Sekarang' : 'Buy Now'}
                     </button>
-                  </div>
-
-                  <h3 class="font-bold text-xs text-black line-clamp-2 mt-0.5">${p.name}</h3>
-
-                  <div class="mt-2 inline-block bg-pastel-yellow px-2.5 py-1 rounded-lg border border-black/10">
-                    <span class="font-bold text-xs text-red-600">RM ${p.totalPrice.toFixed(2)}</span>
+                    <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-softPink text-center rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm">
+                      ${lang === 'BM' ? 'Hubungi WhatsApp' : 'Whatsapp Seller'}
+                    </a>
                   </div>
                 </div>
-
-                <div class="space-y-1.5 mt-3">
-                  <button onclick="handleCustomerBuyNow('${p.buyNowUrl}', '${p.orderNo}',${p.totalPrice})" class="w-full py-1.5 bg-pastel-softPink rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm active:scale-95 transition">
-                    ${lang === 'BM' ? 'Beli Sekarang' : 'Buy Now'}
-                  </button>
-                  <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-softPink text-center rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm">
-                    ${lang === 'BM' ? 'Hubungi WhatsApp' : 'Whatsapp Seller'}
-                  </a>
-                </div>
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         </div>
       `;
@@ -1417,7 +1492,7 @@
     }
 
     function shareProductLink(prodId, prodName) {
-      const prodUrl = `https://syaaetelier.github.io/Scha-Digital-Hub/#/catalog/product/${prodId}`;
+      const prodUrl = window.location.origin + window.location.pathname + `#/catalog/product/${prodId}`;
       if (navigator.share) {
         navigator.share({
           title: prodName,
