@@ -899,8 +899,12 @@
 
       state.products.push(newProd);
       saveDB(state);
+      
+      // Kosongkan semula tatasusunan imej sementara supaya penambahan produk seterusnya (kedua, ketiga, dst) berfungsi lancar
+      tempAddProductMedia = [];
+
       alert(state.language === 'BM' ? 'Produk berjaya disimpan dengan sempurna!' : 'Product saved successfully and perfectly!');
-      navigate('/manage-catalog');
+      navigate('/add-catalog');
     }
 
     // --- PAGE 4: MANAGE CATALOGUE ---
