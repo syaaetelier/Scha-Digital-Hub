@@ -702,7 +702,7 @@
               </button>
             </div>
 
-            <form onsubmit="handleSaveProduct(event)" class="space-y-3">
+            <form id="add-product-form" onsubmit="handleSaveProduct(event)" class="space-y-3">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Nama Produk' : 'Product Name'}</label>
@@ -827,6 +827,7 @@
         };
         reader.readAsDataURL(file);
       });
+      e.target.value = '';
     }
 
     function removeTempImage(idx) {
@@ -889,7 +890,7 @@
         price,
         promo,
         totalPrice,
-        images: tempAddProductMedia.length > 0 ? tempAddProductMedia : ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&auto=format&fit=crop'],
+        images: tempAddProductMedia.length > 0 ? [...tempAddProductMedia] : ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&auto=format&fit=crop'],
         video: '',
         buyNowUrl,
         whatsappUrl,
@@ -900,8 +901,10 @@
       state.products.push(newProd);
       saveDB(state);
       
-      // Kosongkan semula tatasusunan imej sementara supaya penambahan produk seterusnya (kedua, ketiga, dst) berfungsi lancar
+      // Kosongkan semula memori imej sementara & set semula borang
       tempAddProductMedia = [];
+      const formEl = document.getElementById('add-product-form');
+      if (formEl) formEl.reset();
 
       alert(state.language === 'BM' ? 'Produk berjaya disimpan dengan sempurna!' : 'Product saved successfully and perfectly!');
       navigate('/add-catalog');
