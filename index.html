@@ -149,7 +149,7 @@
     let inactivityTimer = null;
     
     window.cardImageIndices = {};
-    window.publicShowArrows = {};
+    window.publicShowArrows = {}; 
 
     let touchStartX = 0;
     let touchEndX = 0;
@@ -742,7 +742,7 @@
 
               <div>
                 <label class="block text-xs font-bold mb-1">
-                  ${lang === 'BM' ? 'Muat Naik Gambar (Auto Mampat & Pantas, Maks 6 Gambar)' : 'Image Upload (Auto Compressed & Fast, Max 6 Images)'}
+                  ${lang === 'BM' ? 'Muat Naik Gambar (Auto Mampat < 2MB, Maks 6 Gambar)' : 'Image Upload (Auto Compressed < 2MB, Max 6 Images)'}
                 </label>
                 <input type="file" id="media-picker" accept="image/*" multiple class="hidden" onchange="handleNativeImageUpload(event)">
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container"></div>
@@ -807,6 +807,7 @@
       container.innerHTML = html;
     }
 
+    // Fungsi Auto Mampat Imej di bawah 2MB Menggunakan Canvas
     function handleNativeImageUpload(e) {
       const files = Array.from(e.target.files);
       if (tempAddProductMedia.length + files.length > 6) {
@@ -821,20 +822,19 @@
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800;
-            const MAX_HEIGHT = 800;
+            const MAX_DIMENSION = 900; // Saiz optimum agar fail di bawah 2MB (biasanya sekitar 150KB - 400KB)
             let width = img.width;
             let height = img.height;
 
             if (width > height) {
-              if (width > MAX_WIDTH) {
-                height *= MAX_WIDTH / width;
-                width = MAX_WIDTH;
+              if (width > MAX_DIMENSION) {
+                height *= MAX_DIMENSION / width;
+                width = MAX_DIMENSION;
               }
             } else {
-              if (height > MAX_HEIGHT) {
-                width *= MAX_HEIGHT / height;
-                height = MAX_HEIGHT;
+              if (height > MAX_DIMENSION) {
+                width *= MAX_DIMENSION / height;
+                height = MAX_DIMENSION;
               }
             }
 
@@ -843,7 +843,8 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            // Mampat ke JPEG kualiti 0.75 (menjamin saiz di bawah 2MB & storan pelayar tidak penuh)
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
             tempAddProductMedia.push(compressedDataUrl);
             renderImageSlots();
           };
@@ -908,7 +909,7 @@
       const waEl = document.getElementById('prod-wa');
 
       if (!nameEl || !orderEl || !catEl || !priceEl) {
-        alert(state.language === 'BM' ? 'Ralat borang tidak dijumpai. Sila muat semula halaman.' : 'Form error. Please refresh page.');
+        alert(state.language === 'BM' ? 'Ralat borang. Sila muat semula halaman.' : 'Form error. Please refresh.');
         return;
       }
 
@@ -922,7 +923,7 @@
       const whatsappUrl = waEl ? waEl.value.trim() : '';
 
       const newProd = {
-        id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+        id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
         orderNo,
         name,
         category,
@@ -942,9 +943,11 @@
         saveDB(state);
       } catch (err) {
         state.products.pop();
+        alert(state.language === 'BM' ? 'Gagal menyimpan produk ke storan.' : 'Failed to save product to storage.');
         return;
       }
       
+      // Kosongkan semula tatasusunan imej sementara untuk produk seterusnya
       tempAddProductMedia = [];
       const formEl = document.getElementById('add-product-form');
       if (formEl) formEl.reset();
@@ -953,6 +956,7 @@
       navigate('/add-catalog');
     }
 
+    // --- PAGE 4: MANAGE CATALOGUE ---
     let filterCategoryValue = 'ALL';
     let filterProductNameValue = 'ALL';
 
@@ -989,6 +993,7 @@
               </button>
             </div>
 
+            <!-- 2 DROPDOWN FILTERS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Penapis Kategori' : 'Filter by Category'}</label>
@@ -1007,6 +1012,7 @@
               </div>
             </div>
 
+            <!-- Product Grid -->
             <div class="grid grid-cols-2 gap-3 pt-2">
               ${filteredProds.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">${lang === 'BM' ? 'Tiada produk tersedia. Sila tambah produk di halaman + Katalog.' : 'No products available. Please add products in + Catalog page.'}</div>` : ''}
               ${filteredProds.map(p => {
@@ -1015,11 +1021,13 @@
                 return `
                   <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
                     <div>
+                      <!-- IMAGE SLIDER CONTAINER (MANAGE CATALOGUE) -->
                       <div class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden relative group"
                            ontouchstart="handleTouchStart(event)" 
                            ontouchend="handleTouchEnd(event, '${p.id}',${p.images.length})">
                         <img id="card-img-${p.id}" src="${activeImg}" onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
                         
+                        <!-- High Opacity Navigation Arrows -->
                         ${p.images && p.images.length > 1 ? `
                           <button type="button" onclick="prevCardImage(event, '${p.id}', ${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
                             ❮
@@ -1097,6 +1105,7 @@
       }
     }
 
+    // --- FULLSCREEN IMAGE VIEWER MODAL LOGIC ---
     let currentViewerImages = [];
     let currentViewerIdx = 0;
 
@@ -1132,6 +1141,7 @@
       updateImageViewerContent();
     }
 
+    // --- PAGE 5: SALES RECORD ---
     function renderPage5SalesRecord() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
@@ -1296,6 +1306,7 @@
       renderCurrentRoute();
     }
 
+    // --- PAGE 6: SETTING ---
     function renderPage6Setting() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
@@ -1413,6 +1424,7 @@
       }
     }
 
+    // --- PAGE 7: PUBLIC CUSTOMER CATALOGUE VIEW ---
     let publicCategoryFilter = 'ALL';
     let publicProductNameFilter = 'ALL';
 
@@ -1431,6 +1443,7 @@
 
       return `
         <div class="bg-customer-gradient min-h-screen p-4 space-y-4 text-slate-800">
+          
           <div class="bg-pastel-peach/95 rounded-3xl p-6 border border-white/50 shadow-lg text-center relative overflow-hidden">
             <span class="absolute top-2 left-3 text-lg opacity-80">✈️</span>
             <span class="absolute top-2 right-3 text-lg opacity-80">💌</span>
@@ -1453,6 +1466,7 @@
             </div>
           </div>
 
+          <!-- 2 DROPDOWN FILTERS -->
           <div class="bg-pastel-peach/95 rounded-3xl p-4 border border-white/50 shadow-md space-y-3">
             <div>
               <label class="block text-xs font-bold mb-1 text-slate-800">${lang === 'BM' ? 'Penapis Kategori' : 'Filter by Categories'}</label>
@@ -1471,6 +1485,7 @@
             </div>
           </div>
 
+          <!-- Product Grid -->
           <div class="grid grid-cols-2 gap-3">
             ${activeProducts.length === 0 ? `<div class="col-span-2 text-center text-xs text-white py-8 font-semibold">${lang === 'BM' ? 'Tiada produk tersedia buat masa ini.' : 'No products available at the moment.'}</div>` : ''}
             ${activeProducts.map(p => {
