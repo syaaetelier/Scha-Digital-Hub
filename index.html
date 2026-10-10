@@ -139,14 +139,13 @@
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
       </button>
     </div>
-    <div class="pb-4 text-xs text-white/70">Tatal atau guna anak panah untuk lihat gambar</div>
+    <div class="viewer-hint pb-4 text-xs text-white/70">Tatal atau guna anak panah untuk lihat gambar</div>
   </div>
 
   <!-- APPLICATION LOGIC & STATE MANAGEMENT -->
   <script>
-    // Kunci simpanan kekal supaya akaun tidak hilang bila kod dikemaskini
     const DB_KEY = 'SCHA_DIGITAL_HUB_DB';
-    const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam (dalam milisaat)
+    const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam (7,200,000 ms)
     let inactivityTimer = null;
     
     function getInitialDB() {
@@ -171,7 +170,6 @@
     function loadDB() {
       const data = localStorage.getItem(DB_KEY);
       if (!data) {
-        // Cuba semak juga kunci pangkalan data terdahulu jika wujud
         const oldData = localStorage.getItem('SCHA_DIGITAL_DB_V4') || localStorage.getItem('SCHA_DIGITAL_DB_V3');
         if (oldData) {
           const parsedOld = JSON.parse(oldData);
@@ -191,20 +189,23 @@
 
     let state = loadDB();
 
-    // --- AUTO LOG OUT UNTUK INAKTIVITI (2 JAM) ---
+    // --- KETEGASAN AUTO LOCK / LOG OUT SELEPAS 2 JAM INAKTIF ---
     function resetInactivityTimer() {
       clearTimeout(inactivityTimer);
       if (state.session && state.session.loggedIn) {
         inactivityTimer = setTimeout(() => {
           state.session = null;
           saveDB(state);
-          alert(state.language === 'BM' ? 'Sesi anda telah tamat selepas 2 jam tidak aktif. Sila log masuk semula.' : 'Your session expired due to 2 hours of inactivity. Please log in again.');
+          const alertMsg = state.language === 'BM' 
+            ? 'Sesi anda telah dikunci secara automatik selepas 2 jam tidak aktif. Sila log masuk semula.' 
+            : 'Your session has been automatically locked after 2 hours of inactivity. Please log in again.';
+          alert(alertMsg);
           navigate('/login');
         }, INACTIVITY_TIMEOUT);
       }
     }
 
-    // Event listener pengesan aktiviti pengguna
+    // Pemantau aktiviti pengguna merentasi pelbagai tindakan
     ['mousemove', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
       window.addEventListener(evt, resetInactivityTimer, true);
     });
@@ -335,19 +336,18 @@
         <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
           <div class="w-full flex justify-end mb-4">
             <div class="bg-white border-2 border-black rounded-full px-3 py-1 shadow-hard-sm flex space-x-2 text-xs font-bold">
-              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-pink-600 underline' : 'text-black'}">EN</button>
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-pink-600 underline font-extrabold' : 'text-black'}">EN</button>
               <span>|</span>
-              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-pink-600 underline' : 'text-black'}">BM</button>
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-pink-600 underline font-extrabold' : 'text-black'}">BM</button>
             </div>
           </div>
 
           <div class="w-[88%] bg-pastel-peach/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 text-center flex flex-col items-center">
-            <!-- LOGO TERPAPAR DARIPADA DATABASE UTAMA -->
             <div class="w-28 h-28 bg-white rounded-2xl border-2 border-black/10 shadow-md flex items-center justify-center p-2 mb-4 overflow-hidden">
               <img id="admin-logo-img" src="${state.adminProfile.logoUrl}" alt="Logo" class="w-full h-full object-contain rounded-xl">
             </div>
 
-            <h1 class="text-2xl font-extrabold text-slate-900 mb-6">Admin Portal</h1>
+            <h1 class="text-2xl font-extrabold text-slate-900 mb-6">${lang === 'BM' ? 'Portal Admin' : 'Admin Portal'}</h1>
 
             <form onsubmit="handleLogin(event)" class="w-full space-y-4">
               <div class="relative w-full">
@@ -547,9 +547,9 @@
               <p class="text-xs text-slate-700 mt-1 font-bold">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm flex space-x-1">
-              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold' : 'text-slate-500'}">EN</button>
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button>
               <span>|</span>
-              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold' : 'text-slate-500'}">BM</button>
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
             </div>
           </div>
 
@@ -586,7 +586,7 @@
 
           <div class="space-y-3 pt-2">
             <h2 class="text-center font-extrabold text-base tracking-wide text-black">
-              MONTHLY SALES ${currentYear}
+              ${lang === 'BM' ? 'JUALAN BULANAN' : 'MONTHLY SALES'} ${currentYear}
             </h2>
             <div class="grid grid-cols-2 gap-3">
               ${months.map((m, idx) => `
@@ -624,8 +624,8 @@
               <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
-              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
-              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black' : 'text-slate-500'}">BM</button>
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
             </div>
           </div>
 
@@ -660,8 +660,8 @@
                 <div>
                   <label class="block text-xs font-bold mb-1">+ ${lang === 'BM' ? 'Tambah Kategori Baru' : 'Add Category'}</label>
                   <div class="flex space-x-2">
-                    <input type="text" id="new-cat-input" placeholder="New category..." class="flex-1 bg-white px-3 py-2 rounded-full text-xs border border-black/20">
-                    <button type="button" onclick="handleAddCategory()" class="bg-pastel-coral px-3 py-2 rounded-full text-xs font-bold border border-black shadow-hard-sm">Save</button>
+                    <input type="text" id="new-cat-input" placeholder="${lang === 'BM' ? 'Kategori baru...' : 'New category...'}" class="flex-1 bg-white px-3 py-2 rounded-full text-xs border border-black/20">
+                    <button type="button" onclick="handleAddCategory()" class="bg-pastel-coral px-3 py-2 rounded-full text-xs font-bold border border-black shadow-hard-sm">${lang === 'BM' ? 'Simpan' : 'Save'}</button>
                   </div>
                 </div>
               </div>
@@ -685,7 +685,6 @@
                 <label class="block text-xs font-bold mb-1">
                   ${lang === 'BM' ? 'Muat Naik Gambar (Bebas Dari Mana-mana Galeri/Folder, Maks 6 Gambar)' : 'Image Upload (All Gallery/Folders Access, Max 6 Images)'}
                 </label>
-                <!-- DENGAN accept="image/*" TANPA HADAAN SEKATAN UNTUK AKSES SEMUA GALERI/ALBUM -->
                 <input type="file" id="media-picker" accept="image/*" multiple class="hidden" onchange="handleNativeImageUpload(event)">
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container"></div>
               </div>
@@ -694,17 +693,17 @@
                 <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Muat Naik Video (Maks 1 video, 2GB)' : 'Video upload. Max 1 video. Size 2GB'}</label>
                 <input type="file" id="video-picker" accept="video/*" class="hidden" onchange="handleVideoUpload(event)">
                 <div onclick="document.getElementById('video-picker').click()" class="w-full h-16 bg-pastel-coral/40 rounded-2xl border-2 border-dashed border-black/30 flex items-center justify-center cursor-pointer text-xs font-semibold text-slate-700">
-                  <span id="video-slot-label">+ Upload Video</span>
+                  <span id="video-slot-label">${lang === 'BM' ? '+ Muat Naik Video' : '+ Upload Video'}</span>
                 </div>
               </div>
 
               <div class="space-y-2 pt-2">
                 <div>
-                  <label class="block text-xs font-bold mb-1">Buy Now Button URL</label>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Pautan Butang Beli Sekarang (Buy Now)' : 'Buy Now Button URL'}</label>
                   <input type="url" id="prod-buynow" placeholder="https://bcl.my/..." class="w-full bg-white px-4 py-2.5 rounded-full border border-black/20 text-xs">
                 </div>
                 <div>
-                  <label class="block text-xs font-bold mb-1">Whatsapp Seller Button URL</label>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Pautan Butang WhatsApp Penjual' : 'Whatsapp Seller Button URL'}</label>
                   <input type="url" id="prod-wa" placeholder="https://wa.me/..." class="w-full bg-white px-4 py-2.5 rounded-full border border-black/20 text-xs">
                 </div>
               </div>
@@ -773,7 +772,8 @@
     function handleVideoUpload(e) {
       const file = e.target.files[0];
       if (file) {
-        document.getElementById('video-slot-label').innerText = 'Video Selected: ' + file.name.substring(0, 15) + '...';
+        const labelText = state.language === 'BM' ? 'Video Dipilih: ' : 'Video Selected: ';
+        document.getElementById('video-slot-label').innerText = labelText + file.name.substring(0, 15) + '...';
       }
     }
 
@@ -857,16 +857,16 @@
               <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
-              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
-              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black' : 'text-slate-500'}">BM</button>
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
             </div>
           </div>
 
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
             <div class="flex justify-between items-center">
-              <h2 class="font-bold text-sm text-black">+- Edit & Remove Product</h2>
+              <h2 class="font-bold text-sm text-black">${lang === 'BM' ? 'Urus & Buang Produk' : 'Edit & Remove Product'}</h2>
               <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
-                ← Back
+                ← ${lang === 'BM' ? 'Kembali' : 'Back'}
               </button>
             </div>
 
@@ -897,7 +897,7 @@
                   <div>
                     <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden cursor-pointer relative group">
                       <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover group-hover:scale-105 transition">
-                      <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full">🔍 View (${p.images.length})</span>
+                      <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full">🔍 ${lang === 'BM' ? 'Lihat' : 'View'} (${p.images.length})</span>
                     </div>
 
                     <div class="mt-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
@@ -917,10 +917,10 @@
                     
                     <div class="flex justify-between items-center pt-2 text-xs font-bold">
                       <button onclick="editProduct('${p.id}')" class="text-blue-700 flex items-center space-x-1">
-                        <span>✎</span> <span>Edit</span>
+                        <span>✎</span> <span>${lang === 'BM' ? 'Edit' : 'Edit'}</span>
                       </button>
                       <button onclick="deleteProduct('${p.id}')" class="text-red-600 flex items-center space-x-1">
-                        <span>🗑</span> <span>Delete</span>
+                        <span>🗑</span> <span>${lang === 'BM' ? 'Padam' : 'Delete'}</span>
                       </button>
                     </div>
                   </div>
@@ -982,6 +982,10 @@
       const counterEl = document.getElementById('image-viewer-counter');
       imgEl.src = currentViewerImages[currentViewerIdx];
       counterEl.innerText = `${currentViewerIdx + 1} / ${currentViewerImages.length}`;
+      const hintEl = document.querySelector('.viewer-hint');
+      if (hintEl) {
+        hintEl.innerText = state.language === 'BM' ? 'Tatal atau guna anak panah untuk lihat gambar' : 'Swipe or use arrows to view images';
+      }
     }
 
     function nextImage() {
@@ -1007,8 +1011,8 @@
               <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
-              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
-              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black' : 'text-slate-500'}">BM</button>
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
             </div>
           </div>
 
@@ -1018,17 +1022,17 @@
                 ${lang === 'BM' ? 'Rekod jualan daripada payment gateway & bayaran manual' : 'Sales record from payment gateway & manual payment'}
               </h2>
               <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
-                ← Back
+                ← ${lang === 'BM' ? 'Kembali' : 'Back'}
               </button>
             </div>
 
             <!-- Table Header -->
             <div class="bg-pastel-coral rounded-xl p-2.5 text-[11px] font-bold text-black grid grid-cols-5 text-center border border-black/10">
-              <div>Date</div>
-              <div>Order No</div>
-              <div>Amount</div>
-              <div>Source</div>
-              <div>Action</div>
+              <div>${lang === 'BM' ? 'Tarikh' : 'Date'}</div>
+              <div>${lang === 'BM' ? 'No. Pesanan' : 'Order No'}</div>
+              <div>${lang === 'BM' ? 'Jumlah' : 'Amount'}</div>
+              <div>${lang === 'BM' ? 'Sumber' : 'Source'}</div>
+              <div>${lang === 'BM' ? 'Tindakan' : 'Action'}</div>
             </div>
 
             <!-- Table Rows -->
@@ -1063,13 +1067,13 @@
               <form onsubmit="handleSaveManualSale(event)" class="space-y-3">
                 <div class="grid grid-cols-2 gap-2">
                   <div>
-                    <label class="block text-[10px] font-bold mb-1">Date</label>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Tarikh' : 'Date'}</label>
                     <input type="text" id="manual-date" value="${todayDate}" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                   </div>
                   <div>
-                    <label class="block text-[10px] font-bold mb-1">Order No</label>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'No. Pesanan' : 'Order No'}</label>
                     <select id="manual-order" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
-                      ${state.products.length === 0 ? `<option value="QS000">Tiada Produk</option>` : ''}
+                      ${state.products.length === 0 ? `<option value="QS000">${lang === 'BM' ? 'Tiada Produk' : 'No Products'}</option>` : ''}
                       ${state.products.map(p => `<option value="${p.orderNo}">${p.orderNo} -${p.name.substring(0,12)}...</option>`).join('')}
                     </select>
                   </div>
@@ -1077,20 +1081,20 @@
 
                 <div class="grid grid-cols-2 gap-2">
                   <div>
-                    <label class="block text-[10px] font-bold mb-1">Source</label>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Sumber' : 'Source'}</label>
                     <select id="manual-source" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                       ${state.sources.map(src => `<option value="${src}">${src}</option>`).join('')}
                     </select>
                   </div>
                   <div>
-                    <label class="block text-[10px] font-bold mb-1">Amount (RM)</label>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Jumlah (RM)' : 'Amount (RM)'}</label>
                     <input type="number" step="0.01" id="manual-amount" required placeholder="0.00" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                   </div>
                 </div>
 
                 <div class="flex space-x-2 pt-1">
-                  <input type="text" id="new-source-input" placeholder="+ Add Source" class="flex-1 bg-white px-3 py-1.5 rounded-full text-xs border border-black/20">
-                  <button type="button" onclick="handleAddSource()" class="bg-pastel-coral px-3 py-1.5 rounded-full text-xs font-bold border border-black shadow-hard-sm">Save Source</button>
+                  <input type="text" id="new-source-input" placeholder="${lang === 'BM' ? '+ Tambah Sumber' : '+ Add Source'}" class="flex-1 bg-white px-3 py-1.5 rounded-full text-xs border border-black/20">
+                  <button type="button" onclick="handleAddSource()" class="bg-pastel-coral px-3 py-1.5 rounded-full text-xs font-bold border border-black shadow-hard-sm">${lang === 'BM' ? 'Simpan Sumber' : 'Save Source'}</button>
                 </div>
 
                 <div class="flex justify-end pt-2">
@@ -1171,16 +1175,16 @@
               <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
             </div>
             <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
-              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black' : 'text-slate-500'}">EN</button> |
-              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black' : 'text-slate-500'}">BM</button>
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
             </div>
           </div>
 
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
             <div class="flex justify-between items-center">
-              <span class="font-bold text-sm text-black">Shop Configuration</span>
+              <span class="font-bold text-sm text-black">${lang === 'BM' ? 'Konfigurasi Kedai' : 'Shop Configuration'}</span>
               <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
-                ← Back
+                ← ${lang === 'BM' ? 'Kembali' : 'Back'}
               </button>
             </div>
 
@@ -1194,7 +1198,6 @@
                   <div class="w-16 h-16 bg-pastel-coral/30 rounded-xl border border-black overflow-hidden flex items-center justify-center">
                     <img id="setting-logo-preview" src="${state.adminProfile.logoUrl}" class="w-full h-full object-contain">
                   </div>
-                  <!-- MENGAKSES SEMUA ALBUM & GALERI PHONE TANPA SEKATAN -->
                   <input type="file" id="setting-logo-input" accept="image/*" class="hidden" onchange="handleSettingLogoUpload(event)">
                   <button type="button" onclick="document.getElementById('setting-logo-input').click()" class="bg-pastel-coral px-4 py-2 rounded-full border border-black text-xs font-bold shadow-hard-sm hover:bg-rose-300">
                     ${lang === 'BM' ? 'Pilih Gambar dari Galeri' : 'Choose Image from Gallery'}
@@ -1224,7 +1227,7 @@
                 <div class="flex items-center space-x-2">
                   <input type="text" readonly value="${entireCatalogueUrl}" class="flex-1 bg-pastel-coral/50 px-4 py-2.5 rounded-2xl border-none text-[11px] font-bold text-slate-700 truncate">
                   <button type="button" onclick="copyCatalogueLink('${entireCatalogueUrl}')" class="bg-pastel-pink border border-black/20 px-3 py-2 rounded-2xl font-bold text-[10px] shadow-hard-sm text-black text-center leading-tight">
-                    Copy your<br>catalogue link
+                    ${lang === 'BM' ? 'Salin Pautan<br>Katalog Anda' : 'Copy your<br>catalogue link'}
                   </button>
                 </div>
               </div>
@@ -1298,8 +1301,6 @@
       return `
         <div class="bg-customer-gradient min-h-screen p-4 space-y-4 text-slate-800">
           
-          <!-- PUBLIC CUSTOMER-FACING CATALOGUE SAHAJA (TANPA BUTTON BACK TO DASHBOARD) -->
-
           <!-- Shop Header -->
           <div class="bg-pastel-peach/95 rounded-3xl p-6 border border-white/50 shadow-lg text-center relative overflow-hidden">
             <span class="absolute top-2 left-3 text-lg opacity-80">✈️</span>
@@ -1307,7 +1308,13 @@
             <span class="absolute bottom-2 left-4 text-xs opacity-80">💖</span>
             <span class="absolute bottom-2 right-4 text-xs opacity-80">🎀</span>
 
-            <h1 class="font-extrabold text-2xl text-black leading-tight tracking-wide">
+            <!-- Language Switcher in Public Catalog -->
+            <div class="absolute top-3 right-3 z-10 bg-white/80 border border-black rounded-full px-3 py-0.5 text-[10px] font-bold shadow-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
+            </div>
+
+            <h1 class="font-extrabold text-2xl text-black leading-tight tracking-wide mt-3">
               ${shopName}
             </h1>
             
@@ -1321,17 +1328,17 @@
           <!-- 2 DROPDOWN FILTERS -->
           <div class="bg-pastel-peach/95 rounded-3xl p-4 border border-white/50 shadow-md space-y-3">
             <div>
-              <label class="block text-xs font-bold mb-1 text-slate-800">Filter by Categories</label>
+              <label class="block text-xs font-bold mb-1 text-slate-800">${lang === 'BM' ? 'Penapis Kategori' : 'Filter by Categories'}</label>
               <select onchange="handlePublicCatFilter(this.value)" class="w-full bg-pastel-pink/80 px-4 py-2 rounded-full border-none text-xs font-bold text-black">
-                <option value="ALL">-- All Categories --</option>
+                <option value="ALL">${lang === 'BM' ? '-- Semua Kategori --' : '-- All Categories --'}</option>
                 ${state.categories.map(c => `<option value="${c}" ${publicCategoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
               </select>
             </div>
 
             <div>
-              <label class="block text-xs font-bold mb-1 text-slate-800">Filter by Products</label>
+              <label class="block text-xs font-bold mb-1 text-slate-800">${lang === 'BM' ? 'Penapis Produk' : 'Filter by Products'}</label>
               <select onchange="handlePublicProdFilter(this.value)" class="w-full bg-pastel-pink/80 px-4 py-2 rounded-full border-none text-xs font-bold text-black">
-                <option value="ALL">-- All Products --</option>
+                <option value="ALL">${lang === 'BM' ? '-- Semua Produk --' : '-- All Products --'}</option>
                 ${state.products.map(p => `<option value="${p.id}" ${publicProductNameFilter === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
               </select>
             </div>
@@ -1351,8 +1358,7 @@
                     <div class="text-[9px] font-extrabold text-black uppercase tracking-wider">
                       ${p.category} (${p.orderNo})
                     </div>
-                    <!-- Product-Specific Share Link Button -->
-                    <button onclick="shareProductLink('${p.id}', '${p.name}')" title="Kongsi Produk Ini" class="text-slate-800 hover:text-pink-600 p-0.5">
+                    <button onclick="shareProductLink('${p.id}', '${p.name}')" title="${lang === 'BM' ? 'Kongsi Produk Ini' : 'Share Product'}" class="text-slate-800 hover:text-pink-600 p-0.5">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                     </button>
                   </div>
@@ -1366,10 +1372,10 @@
 
                 <div class="space-y-1.5 mt-3">
                   <button onclick="handleCustomerBuyNow('${p.buyNowUrl}', '${p.orderNo}',${p.totalPrice})" class="w-full py-1.5 bg-pastel-softPink rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm active:scale-95 transition">
-                    Buy Now
+                    ${lang === 'BM' ? 'Beli Sekarang' : 'Buy Now'}
                   </button>
                   <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-softPink text-center rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm">
-                    Whatsapp Seller
+                    ${lang === 'BM' ? 'Hubungi WhatsApp' : 'Whatsapp Seller'}
                   </a>
                 </div>
               </div>
@@ -1393,7 +1399,7 @@
       if (buyUrl && buyUrl !== '#') {
         window.open(buyUrl, '_blank');
       } else {
-        alert('Membawa ke payment gateway BCL.my...');
+        alert(state.language === 'BM' ? 'Membawa ke payment gateway BCL.my...' : 'Redirecting to BCL.my payment gateway...');
       }
 
       setTimeout(() => {
@@ -1415,27 +1421,28 @@
       if (navigator.share) {
         navigator.share({
           title: prodName,
-          text: `Lihat produk ${prodName} di ${state.adminProfile.shopName}`,
+          text: (state.language === 'BM' ? `Lihat produk ${prodName} di ` : `Check out ${prodName} at `) + state.adminProfile.shopName,
           url: prodUrl
         }).catch(() => {});
       } else {
         navigator.clipboard.writeText(prodUrl).then(() => {
-          alert('Pautan khas produk berjaya disalin!');
+          alert(state.language === 'BM' ? 'Pautan khas produk berjaya disalin!' : 'Product link copied successfully!');
         });
       }
     }
 
     function renderSingleProductPage(productId) {
+      const lang = state.language;
       const product = state.products.find(p => p.id === productId);
       if (!product) {
-        return `<div class="p-8 text-center text-xs font-bold text-white">Produk tidak ditemui.</div>`;
+        return `<div class="p-8 text-center text-xs font-bold text-white">${lang === 'BM' ? 'Produk tidak ditemui.' : 'Product not found.'}</div>`;
       }
       return `
         <div class="bg-customer-gradient min-h-screen p-4 flex flex-col justify-center items-center">
           <div class="w-full max-w-sm bg-pastel-peach rounded-3xl p-5 border border-white/60 shadow-xl space-y-4">
             <div class="flex justify-between items-center">
               <span class="text-xs font-bold uppercase">${product.category}</span>
-              <button onclick="openCustomerCatalog()" class="text-xs font-bold underline">Lihat Semua Katalog</button>
+              <button onclick="openCustomerCatalog()" class="text-xs font-bold underline">${lang === 'BM' ? 'Lihat Semua Katalog' : 'View All Catalogue'}</button>
             </div>
             <div class="w-full h-48 bg-white rounded-2xl overflow-hidden border border-black/10">
               <img src="${product.images[0] || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover">
@@ -1443,8 +1450,8 @@
             <h2 class="font-bold text-base text-black">${product.name}</h2>
             <div class="font-bold text-lg text-red-600">RM ${product.totalPrice.toFixed(2)}</div>
             <div class="space-y-2 pt-2">
-              <button onclick="handleCustomerBuyNow('${product.buyNowUrl}', '${product.orderNo}', ${product.totalPrice})" class="w-full py-2.5 bg-pastel-yellow font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">BUY NOW</button>
-              <a href="${product.whatsappUrl || '#'}" target="_blank" class="block w-full py-2.5 bg-pastel-yellow text-center font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">WHATSAPP SELLER</a>
+              <button onclick="handleCustomerBuyNow('${product.buyNowUrl}', '${product.orderNo}', ${product.totalPrice})" class="w-full py-2.5 bg-pastel-yellow font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">${lang === 'BM' ? 'BELI SEKARANG' : 'BUY NOW'}</button>
+              <a href="${product.whatsappUrl || '#'}" target="_blank" class="block w-full py-2.5 bg-pastel-yellow text-center font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">${lang === 'BM' ? 'HUBUNGI WHATSAPP' : 'WHATSAPP SELLER'}</a>
             </div>
           </div>
         </div>
