@@ -28,6 +28,7 @@
         extend: {
           fontFamily: {
             sans: ['Plus Jakarta Sans', 'sans-serif'],
+            serif: ['Plus Jakarta Sans', 'sans-serif'],
           },
           colors: {
             pastel: {
@@ -43,6 +44,7 @@
           },
           boxShadow: {
             hard: '2px 3px 0px 0px rgba(0,0,0,1)',
+            'hard-lg': '4px 5px 0px 0px rgba(0,0,0,1)',
             'hard-sm': '1px 2px 0px 0px rgba(0,0,0,1)'
           }
         }
@@ -61,7 +63,7 @@
       overflow-x: hidden;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
       min-height: 100dvh;
       color: #1e293b;
@@ -74,12 +76,21 @@
       background: linear-gradient(135deg, #93c5fd 0%, #c084fc 50%, #f472b6 100%);
       background-attachment: fixed;
     }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
 <body class="bg-app-gradient text-slate-900 antialiased min-h-screen flex flex-col justify-between font-sans">
 
   <!-- APP ROOT CONTAINER -->
-  <div id="app" class="w-full max-w-md md:max-w-4xl mx-auto min-h-screen min-h-[100dvh] flex flex-col relative pb-20"></div>
+  <div id="app" class="w-full max-w-md md:max-w-4xl mx-auto min-h-screen min-h-[100dvh] flex flex-col relative pb-20">
+    <!-- Dynamic Views Rendered Here -->
+  </div>
 
   <!-- PERSISTENT BOTTOM NAVIGATION (ADMIN ONLY) -->
   <nav id="bottom-nav" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-black/10 shadow-lg max-w-md md:max-w-4xl mx-auto rounded-t-2xl">
@@ -111,71 +122,30 @@
     </div>
   </nav>
 
-  <!-- FULLSCREEN IMAGE VIEWER MODAL -->
+  <!-- FULLSCREEN IMAGE VIEWER MODAL OVERLAY -->
   <div id="image-viewer-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex flex-col justify-between items-center p-4">
     <div class="w-full flex justify-between items-center text-white pt-2">
-      <span id="image-viewer-counter" class="text-sm font-semibold">1 / 1</span>
-      <button onclick="closeImageViewer()" class="p-2 bg-white/20 rounded-full text-white hover:bg-white/40 transition">✕</button>
+      <span id="image-viewer-counter" class="text-sm font-semibold tracking-wider">1 / 1</span>
+      <button onclick="closeImageViewer()" class="p-2 bg-white/20 rounded-full text-white hover:bg-white/40 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
     </div>
     <div class="relative w-full flex-1 flex items-center justify-center my-auto overflow-hidden">
-      <img id="image-viewer-img" src="" alt="Full view" class="max-h-[80vh] max-w-full object-contain rounded-lg">
-      <button onclick="prevImage()" class="absolute left-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white font-bold">‹</button>
-      <button onclick="nextImage()" class="absolute right-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white font-bold">›</button>
+      <img id="image-viewer-img" src="" alt="Full view" class="max-h-[80vh] max-w-full object-contain rounded-lg transition-transform duration-300">
+      <button onclick="prevImage()" class="absolute left-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      </button>
+      <button onclick="nextImage()" class="absolute right-2 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      </button>
     </div>
     <div class="viewer-hint pb-4 text-xs text-white/70">Tatal atau guna anak panah untuk lihat gambar</div>
-  </div>
-
-  <!-- EDIT PRODUCT MODAL FOR MANAGE CATALOGUE (SAVE BUTTON READY) -->
-  <div id="edit-product-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-pastel-peach rounded-3xl p-6 border-2 border-black shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center">
-        <h3 class="font-extrabold text-base text-black">Kemaskini / Edit Produk</h3>
-        <button onclick="closeEditModal()" class="text-slate-700 font-bold text-lg px-2">✕</button>
-      </div>
-      <form id="edit-product-form" onsubmit="handleSaveEditedProduct(event)" class="space-y-3">
-        <input type="hidden" id="edit-prod-id">
-        <div>
-          <label class="block text-xs font-bold mb-1">Nama Produk</label>
-          <input type="text" id="edit-prod-name" required class="w-full bg-white px-4 py-2 rounded-xl border border-black text-xs font-semibold">
-        </div>
-        <div>
-          <label class="block text-xs font-bold mb-1">Kategori</label>
-          <select id="edit-prod-category" class="w-full bg-white px-4 py-2 rounded-xl border border-black text-xs font-bold"></select>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-xs font-bold mb-1">Harga (RM)</label>
-            <input type="number" step="0.01" id="edit-prod-price" required oninput="calculateEditTotal()" class="w-full bg-white px-3 py-2 rounded-xl border border-black text-xs font-bold">
-          </div>
-          <div>
-            <label class="block text-xs font-bold mb-1">Promo (RM)</label>
-            <input type="number" step="0.01" id="edit-prod-promo" value="0.00" oninput="calculateEditTotal()" class="w-full bg-white px-3 py-2 rounded-xl border border-black text-xs font-bold">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold mb-1">Jumlah Akhir (RM)</label>
-          <input type="text" id="edit-prod-total" readonly class="w-full bg-slate-100 px-3 py-2 rounded-xl border border-black text-xs font-extrabold text-black">
-        </div>
-        <div>
-          <label class="block text-xs font-bold mb-1">Buy Now URL</label>
-          <input type="url" id="edit-prod-buynow" class="w-full bg-white px-4 py-2 rounded-xl border border-black text-xs">
-        </div>
-        <div>
-          <label class="block text-xs font-bold mb-1">WhatsApp URL</label>
-          <input type="url" id="edit-prod-wa" class="w-full bg-white px-4 py-2 rounded-xl border border-black text-xs">
-        </div>
-        <div class="flex justify-end space-x-2 pt-2">
-          <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 rounded-full text-xs font-bold border border-black">Batal</button>
-          <button type="submit" id="btn-save-edit" class="px-6 py-2 bg-pastel-coral rounded-full text-xs font-bold border border-black shadow-hard hover:bg-rose-300">Simpan Perubahan</button>
-        </div>
-      </form>
-    </div>
   </div>
 
   <!-- APPLICATION LOGIC & STATE MANAGEMENT -->
   <script>
     const DB_KEY = 'SCHA_DIGITAL_HUB_DB';
-    const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam
+    const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam (7,200,000 ms)
     let inactivityTimer = null;
     
     function getInitialDB() {
@@ -200,6 +170,12 @@
     function loadDB() {
       const data = localStorage.getItem(DB_KEY);
       if (!data) {
+        const oldData = localStorage.getItem('SCHA_DIGITAL_DB_V4') || localStorage.getItem('SCHA_DIGITAL_DB_V3');
+        if (oldData) {
+          const parsedOld = JSON.parse(oldData);
+          localStorage.setItem(DB_KEY, JSON.stringify(parsedOld));
+          return parsedOld;
+        }
         const initial = getInitialDB();
         localStorage.setItem(DB_KEY, JSON.stringify(initial));
         return initial;
@@ -213,22 +189,45 @@
 
     let state = loadDB();
 
-    // Auto Lock 2 Jam Inaktif
+    // --- KETEGASAN AUTO LOCK / LOG OUT SELEPAS 2 JAM INAKTIF ---
     function resetInactivityTimer() {
       clearTimeout(inactivityTimer);
       if (state.session && state.session.loggedIn) {
         inactivityTimer = setTimeout(() => {
           state.session = null;
           saveDB(state);
-          alert('Sesi anda telah dikunci secara automatik selepas 2 jam tidak aktif.');
+          const alertMsg = state.language === 'BM' 
+            ? 'Sesi anda telah dikunci secara automatik selepas 2 jam tidak aktif. Sila log masuk semula.' 
+            : 'Your session has been automatically locked after 2 hours of inactivity. Please log in again.';
+          alert(alertMsg);
           navigate('/login');
         }, INACTIVITY_TIMEOUT);
       }
     }
 
+    // Pemantau aktiviti pengguna merentasi pelbagai tindakan
     ['mousemove', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
       window.addEventListener(evt, resetInactivityTimer, true);
     });
+
+    // PWA Manifest Setup
+    (function setupPWA() {
+      const manifestObj = {
+        name: "Scha Digital Learning Center",
+        short_name: "Scha Digital",
+        start_url: "./",
+        display: "standalone",
+        background_color: "#ffd1dc",
+        theme_color: "#fbcfe8",
+        icons: [{
+          src: "https://cdn-icons-png.flaticon.com/512/3429/3429402.png",
+          sizes: "512x512",
+          type: "image/png"
+        }]
+      };
+      const blob = new Blob([JSON.stringify(manifestObj)], {type: 'application/json'});
+      document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+    })();
 
     function getCurrentFormattedDate() {
       const now = new Date();
@@ -244,6 +243,7 @@
       renderCurrentRoute();
     }
 
+    // --- ROUTER & NAVIGATION ENGINE ---
     function navigate(path) {
       window.history.pushState({}, '', '#' + path);
       renderCurrentRoute();
@@ -265,7 +265,7 @@
 
       const isAuthenticated = state.session && state.session.loggedIn;
 
-      if (!isAuthenticated && !hash.startsWith('/catalog')) {
+      if (!isAuthenticated && !hash.startsWith('/catalog') && hash !== '/register' && hash !== '/forgot-password') {
         hash = '/login';
       } else if (isAuthenticated && (hash === '/' || hash === '/login')) {
         hash = '/my-sales';
@@ -280,6 +280,10 @@
 
       if (hash === '/login') {
         app.innerHTML = renderPage1Login();
+      } else if (hash === '/forgot-password') {
+        app.innerHTML = renderForgotPasswordModal();
+      } else if (hash === '/register') {
+        app.innerHTML = renderRegisterPage();
       } else if (hash === '/my-sales') {
         app.innerHTML = renderPage2MySales();
       } else if (hash === '/add-catalog') {
@@ -292,10 +296,17 @@
       } else if (hash === '/setting') {
         app.innerHTML = renderPage6Setting();
       } else if (hash.startsWith('/catalog')) {
-        app.innerHTML = renderPage7CustomerCatalog();
+        const parts = hash.split('/');
+        const productId = parts[3] === 'product' ? parts[4] : null; 
+        if (productId) {
+          app.innerHTML = renderSingleProductPage(productId);
+        } else {
+          app.innerHTML = renderPage7CustomerCatalog();
+        }
       } else {
         app.innerHTML = renderPage1Login();
       }
+      
       window.scrollTo(0, 0);
     }
 
@@ -313,49 +324,220 @@
           }
         }
       });
+      document.querySelectorAll('.nav-label').forEach(el => {
+        el.innerText = el.getAttribute(`data-${state.language.toLowerCase()}`);
+      });
     }
 
-    // --- PAGE 1: LOGIN ---
+    // --- PAGE 1: ADMIN LOGIN ---
     function renderPage1Login() {
       const lang = state.language;
       return `
         <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
-          <div class="w-[88%] bg-pastel-peach/90 rounded-3xl p-6 shadow-xl border border-white/50 text-center flex flex-col items-center">
+          <div class="w-full flex justify-end mb-4">
+            <div class="bg-white border-2 border-black rounded-full px-3 py-1 shadow-hard-sm flex space-x-2 text-xs font-bold">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-pink-600 underline font-extrabold' : 'text-black'}">EN</button>
+              <span>|</span>
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-pink-600 underline font-extrabold' : 'text-black'}">BM</button>
+            </div>
+          </div>
+
+          <div class="w-[88%] bg-pastel-peach/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/50 text-center flex flex-col items-center">
+            <div class="w-28 h-28 bg-white rounded-2xl border-2 border-black/10 shadow-md flex items-center justify-center p-2 mb-4 overflow-hidden">
+              <img id="admin-logo-img" src="${state.adminProfile.logoUrl}" alt="Logo" class="w-full h-full object-contain rounded-xl">
+            </div>
+
             <h1 class="text-2xl font-extrabold text-slate-900 mb-6">${lang === 'BM' ? 'Portal Admin' : 'Admin Portal'}</h1>
+
             <form onsubmit="handleLogin(event)" class="w-full space-y-4">
-              <input type="email" id="login-email" required value="${state.adminProfile.email}" class="w-full px-4 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm">
-              <input type="password" id="login-password" required value="${state.adminProfile.password}" class="w-full px-4 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm">
+              <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </span>
+                <input type="email" id="login-email" required placeholder="Email" value="${state.adminProfile.email}" class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pink-300">
+              </div>
+
+              <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </span>
+                <input type="password" id="login-password" required placeholder="${lang === 'BM' ? 'Kata Laluan' : 'Password'}" value="${state.adminProfile.password}" class="w-full pl-10 pr-10 py-3 bg-white rounded-2xl border border-black shadow-hard text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </button>
+              </div>
+
               <div id="login-error" class="text-xs text-red-600 font-bold hidden"></div>
-              <button type="submit" id="login-btn" class="w-full py-3 bg-white rounded-2xl border border-black shadow-hard text-base font-extrabold text-black hover:bg-slate-50">
+
+              <div class="py-1">
+                <button type="button" onclick="navigate('/forgot-password')" class="text-xs font-semibold text-slate-800 hover:underline">
+                  ${lang === 'BM' ? 'Lupa kata laluan?' : 'Forgot password?'}
+                </button>
+              </div>
+
+              <button type="submit" id="login-btn" class="w-full py-3 bg-white rounded-2xl border border-black shadow-hard text-base font-extrabold text-black hover:bg-slate-50 active:translate-y-0.5 transition">
                 ${lang === 'BM' ? 'Log Masuk' : 'Log In'}
               </button>
             </form>
           </div>
+
+          <div class="mt-6 text-center space-y-1">
+            <p class="text-xs text-slate-700 font-medium">${lang === 'BM' ? 'Belum ada akaun?' : "Don't have account?"}</p>
+            <button onclick="navigate('/register')" class="text-xs font-extrabold text-black underline">
+              ${lang === 'BM' ? 'Daftar di sini' : 'Register here'}
+            </button>
+          </div>
         </div>
       `;
+    }
+
+    function togglePasswordVisibility(id) {
+      const input = document.getElementById(id);
+      if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+      }
     }
 
     function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value.trim();
-      if (email === state.adminProfile.email && password === state.adminProfile.password) {
-        state.session = { loggedIn: true, email: email };
-        saveDB(state);
-        navigate('/my-sales');
-      } else {
-        const err = document.getElementById('login-error');
-        err.innerText = state.language === 'BM' ? 'Email atau kata laluan salah.' : 'Invalid credentials.';
-        err.classList.remove('hidden');
-      }
+      const btn = document.getElementById('login-btn');
+      const err = document.getElementById('login-error');
+
+      btn.disabled = true;
+      btn.innerText = state.language === 'BM' ? 'Memproses...' : 'Loading...';
+
+      setTimeout(() => {
+        if (email === state.adminProfile.email && password === state.adminProfile.password) {
+          state.session = { loggedIn: true, email: email, shopId: state.adminProfile.shopId };
+          saveDB(state);
+          navigate('/my-sales');
+        } else {
+          err.innerText = state.language === 'BM' ? 'Email atau kata laluan tidak betul.' : 'Invalid email or password.';
+          err.classList.remove('hidden');
+          btn.disabled = false;
+          btn.innerText = state.language === 'BM' ? 'Log Masuk' : 'Log In';
+        }
+      }, 500);
     }
 
-    // --- PAGE 2: MY SALES ---
+    function renderForgotPasswordModal() {
+      const lang = state.language;
+      return `
+        <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
+          <div class="w-[88%] bg-pastel-peach rounded-3xl p-6 shadow-xl border border-black/10 text-center">
+            <h2 class="text-lg font-bold mb-4">${lang === 'BM' ? 'Reset Kata Laluan' : 'Reset Password'}</h2>
+            <p class="text-xs text-slate-700 font-medium mb-4">${lang === 'BM' ? 'Masukkan email anda untuk menerima pautan reset.' : 'Enter your registered email to receive reset link.'}</p>
+            <input type="email" id="reset-email" placeholder="Email" class="w-full px-4 py-3 bg-white rounded-2xl border border-black shadow-hard-sm text-sm mb-4">
+            <div id="reset-msg" class="text-xs mb-4 hidden font-bold"></div>
+            <button onclick="handleResetPassword()" class="w-full py-3 bg-pastel-coral rounded-2xl border border-black shadow-hard font-bold text-sm mb-2">
+              ${lang === 'BM' ? 'Hantar Pautan Reset' : 'Send Reset Link'}
+            </button>
+            <button onclick="navigate('/login')" class="text-xs font-semibold text-slate-700 underline">${lang === 'BM' ? 'Kembali ke Log Masuk' : 'Back to Login'}</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleResetPassword() {
+      const email = document.getElementById('reset-email').value;
+      const msg = document.getElementById('reset-msg');
+      if (email === state.adminProfile.email) {
+        msg.className = "text-xs mb-4 font-bold text-green-700";
+        msg.innerText = state.language === 'BM' ? 'Pautan reset telah dihantar ke email anda.' : 'Reset link sent to your email.';
+      } else {
+        msg.className = "text-xs mb-4 font-bold text-red-600";
+        msg.innerText = state.language === 'BM' ? 'Email tidak dijumpai.' : 'Email not found.';
+      }
+      msg.classList.remove('hidden');
+    }
+
+    function renderRegisterPage() {
+      const lang = state.language;
+      return `
+        <div class="flex-1 flex flex-col justify-center items-center px-4 py-8">
+          <div class="w-[88%] bg-pastel-peach rounded-3xl p-6 shadow-xl border border-black/10">
+            <h2 class="text-lg font-bold mb-4 text-center">${lang === 'BM' ? 'Pendaftaran Admin' : 'Admin Registration'}</h2>
+            <form onsubmit="handleRegister(event)" class="space-y-3">
+              <input type="text" id="reg-shop" required placeholder="${lang === 'BM' ? 'Nama Kedai' : 'Shop Name'}" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
+              <input type="email" id="reg-email" required placeholder="Email" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
+              <input type="password" id="reg-pass" required placeholder="${lang === 'BM' ? 'Kata Laluan' : 'Password'}" class="w-full px-4 py-2.5 bg-white rounded-xl border border-black shadow-hard-sm text-sm">
+              <div id="reg-err" class="text-xs text-red-600 hidden font-bold"></div>
+              <button type="submit" class="w-full py-3 bg-pastel-coral rounded-2xl border border-black shadow-hard font-bold text-sm">
+                ${lang === 'BM' ? 'Daftar Akaun' : 'Register Account'}
+              </button>
+            </form>
+            <div class="text-center mt-4">
+              <button onclick="navigate('/login')" class="text-xs font-semibold text-slate-700 underline">${lang === 'BM' ? 'Sudah ada akaun? Log Masuk' : 'Already registered? Log In'}</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const shop = document.getElementById('reg-shop').value;
+      const email = document.getElementById('reg-email').value;
+      const pass = document.getElementById('reg-pass').value;
+
+      if (email === state.adminProfile.email) {
+        const err = document.getElementById('reg-err');
+        err.innerText = state.language === 'BM' ? 'Email ini sudah mempunyai akaun. Sila terus Log Masuk.' : 'This email already has an account. Please Log In directly.';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      state.adminProfile.shopName = shop;
+      state.adminProfile.email = email;
+      state.adminProfile.password = pass;
+      state.session = { loggedIn: true, email: email, shopId: state.adminProfile.shopId };
+      saveDB(state);
+      navigate('/my-sales');
+    }
+
+    // --- PAGE 2: MY SALES DASHBOARD ---
+    let currentSalesFilter = 'THIS_MONTH';
+
     function renderPage2MySales() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
+      const currentYear = new Date().getFullYear();
+
+      const now = new Date();
+      const currentMonthNum = now.getMonth();
+      const currentYearNum = now.getFullYear();
+
+      let totalOrderThisMonth = 0;
+      let salesAmountToday = 0;
+      let totalSalesThisMonth = 0;
       let totalRevenue = 0;
-      state.sales.forEach(s => { totalRevenue += Number(s.amount); });
+
+      state.sales.forEach(s => {
+        const [d, m, y] = s.date.split('/').map(Number);
+        totalRevenue += Number(s.amount);
+
+        if (m - 1 === currentMonthNum && y === currentYearNum) {
+          totalOrderThisMonth += 1;
+          totalSalesThisMonth += Number(s.amount);
+        }
+
+        if (d === now.getDate() && m - 1 === currentMonthNum && y === currentYearNum) {
+          salesAmountToday += Number(s.amount);
+        }
+      });
+
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthsBM = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+
+      const monthlyTotals = new Array(12).fill(0);
+      state.sales.forEach(s => {
+        const [d, m, y] = s.date.split('/').map(Number);
+        if (y === currentYearNum) {
+          monthlyTotals[m - 1] += Number(s.amount);
+        }
+      });
 
       return `
         <div class="p-4 space-y-4">
@@ -364,80 +546,171 @@
               <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Jualan Saya' : 'My Sales'}</h1>
               <p class="text-xs text-slate-700 mt-1 font-bold">${todayDate}</p>
             </div>
-            <button onclick="switchLanguage('${lang === 'BM' ? 'EN' : 'BM'}')" class="bg-pastel-pink px-3 py-1 rounded-full text-xs font-bold border border-black">${lang}</button>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm flex space-x-1">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button>
+              <span>|</span>
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
+            </div>
           </div>
+
+          <div class="bg-pastel-peach rounded-3xl p-4 border border-black/10 shadow-sm space-y-3">
+            <h2 class="text-sm font-bold text-black">
+              ${lang === 'BM' ? 'Penapis Ringkasan Prestasi Jualan' : 'Sales Performance Summary Filter'}
+            </h2>
+            <div class="grid grid-cols-4 gap-1.5 text-[10px] font-bold">
+              <button onclick="setSalesFilter('TODAY')" class="py-2 rounded-full border border-black transition ${currentSalesFilter === 'TODAY' ? 'bg-pastel-coral text-black shadow-hard-sm' : 'bg-white text-slate-700'}">${lang === 'BM' ? 'Hari Ini' : 'Today'}</button>
+              <button onclick="setSalesFilter('YESTERDAY')" class="py-2 rounded-full border border-black transition ${currentSalesFilter === 'YESTERDAY' ? 'bg-pastel-coral text-black shadow-hard-sm' : 'bg-white text-slate-700'}">${lang === 'BM' ? 'Semalam' : 'Yesterday'}</button>
+              <button onclick="setSalesFilter('7_DAYS')" class="py-2 rounded-full border border-black transition ${currentSalesFilter === '7_DAYS' ? 'bg-pastel-coral text-black shadow-hard-sm' : 'bg-white text-slate-700'}">${lang === 'BM' ? '7 Hari' : '7 Days'}</button>
+              <button onclick="setSalesFilter('THIS_MONTH')" class="py-2 rounded-full border border-black transition ${currentSalesFilter === 'THIS_MONTH' ? 'bg-pastel-coral text-black shadow-hard-sm' : 'bg-white text-slate-700'}">${lang === 'BM' ? 'Bulan Ini' : 'This Month'}</button>
+            </div>
+          </div>
+
           <div class="grid grid-cols-2 gap-3">
-            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10">
-              <span class="text-xs text-slate-700 font-semibold">Jumlah Hasil</span>
-              <div class="text-xl font-extrabold text-black mt-2">RM ${totalRevenue.toFixed(2)}</div>
+            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
+              <span class="text-xs text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Pesanan Bulan Ini' : 'Total Order This Month'}</span>
+              <span class="text-xl font-extrabold text-black mt-2">${totalOrderThisMonth}</span>
+            </div>
+            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
+              <span class="text-xs text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Jualan Hari Ini' : 'Sales Amount Today'}</span>
+              <span class="text-xl font-extrabold text-black mt-2">RM ${salesAmountToday.toFixed(2)}</span>
+            </div>
+            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
+              <span class="text-xs text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Jualan Bulan Ini' : 'Total Sales This Month'}</span>
+              <span class="text-xl font-extrabold text-black mt-2">RM ${totalSalesThisMonth.toFixed(2)}</span>
+            </div>
+            <div class="bg-pastel-peach p-4 rounded-3xl border border-black/10 shadow-sm flex flex-col justify-between">
+              <span class="text-xs text-slate-700 font-semibold leading-tight">${lang === 'BM' ? 'Jumlah Hasil (Revenue)' : 'Total Revenue'}</span>
+              <span class="text-xl font-extrabold text-black mt-2">RM ${totalRevenue.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <h2 class="text-center font-extrabold text-base tracking-wide text-black">
+              ${lang === 'BM' ? 'JUALAN BULANAN' : 'MONTHLY SALES'} ${currentYear}
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+              ${months.map((m, idx) => `
+                <div class="bg-pastel-coral p-3 rounded-2xl border border-black/10 shadow-sm text-center">
+                  <div class="font-bold text-xs text-black">${lang === 'BM' ? monthsBM[idx] : m} ${currentYear}</div>
+                  <div class="font-extrabold text-sm text-black mt-1">RM ${monthlyTotals[idx].toFixed(2)}</div>
+                </div>
+              `).join('')}
             </div>
           </div>
         </div>
       `;
     }
 
-    // --- PAGE 3: ADD CATALOGUE (SAVE BUTTON READY) ---
+    function setSalesFilter(filter) {
+      currentSalesFilter = filter;
+      renderCurrentRoute();
+    }
+
+    // --- PAGE 3: ADD CATALOGUE ---
     let tempAddProductMedia = [];
 
     function renderPage3AddCatalogue() {
       const lang = state.language;
-      const autoOrderNo = `QS` + String(state.products.length + 1).padStart(3, '0');
+      const todayDate = getCurrentFormattedDate();
+      
+      const nextNum = state.products.length + 1;
+      const autoOrderNo = `QS` + String(nextNum).padStart(3, '0');
 
       return `
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Tambah Katalog' : 'Add Catalogue'}</h1>
-            <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black">← Kembali</button>
+            <div>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Tambah Katalog' : 'Add Catalogue'}</h1>
+              <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
+            </div>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
+            </div>
           </div>
 
-          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4 relative">
+            <div class="flex justify-between items-center">
+              <h2 class="font-bold text-base text-black">+ ${lang === 'BM' ? 'Tambah Produk' : 'Add Product'}</h2>
+              <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
+                ← ${lang === 'BM' ? 'Kembali' : 'Back'}
+              </button>
+            </div>
+
             <form onsubmit="handleSaveProduct(event)" class="space-y-3">
-              <div>
-                <label class="block text-xs font-bold mb-1">Nama Produk</label>
-                <input type="text" id="prod-name" required class="w-full bg-white px-4 py-2 rounded-full border border-black text-xs">
-              </div>
-              <div class="grid grid-cols-2 gap-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-xs font-bold mb-1">No Pesanan</label>
-                  <input type="text" id="prod-order" value="${autoOrderNo}" readonly class="w-full bg-slate-100 px-4 py-2 rounded-full border border-black text-xs font-bold">
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Nama Produk' : 'Product Name'}</label>
+                  <input type="text" id="prod-name" required class="w-full bg-pastel-coral/50 px-4 py-2.5 rounded-full border-none text-xs font-semibold focus:ring-2 focus:ring-pink-300">
                 </div>
                 <div>
-                  <label class="block text-xs font-bold mb-1">Kategori</label>
-                  <select id="prod-category" required class="w-full bg-white px-4 py-2 rounded-full border border-black text-xs font-bold">
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'No. Pesanan (Auto)' : 'Order Number (auto generate)'}</label>
+                  <input type="text" id="prod-order" value="${autoOrderNo}" readonly class="w-full bg-pastel-coral/30 px-4 py-2.5 rounded-full border-none text-xs font-bold text-slate-600">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Kategori' : 'Category'}</label>
+                  <select id="prod-category" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold">
+                    <option value="">--${lang === 'BM' ? 'Pilih Kategori' : 'Select Category'}--</option>
                     ${state.categories.map(c => `<option value="${c}">${c}</option>`).join('')}
                   </select>
                 </div>
+                <div>
+                  <label class="block text-xs font-bold mb-1">+ ${lang === 'BM' ? 'Tambah Kategori Baru' : 'Add Category'}</label>
+                  <div class="flex space-x-2">
+                    <input type="text" id="new-cat-input" placeholder="${lang === 'BM' ? 'Kategori baru...' : 'New category...'}" class="flex-1 bg-white px-3 py-2 rounded-full text-xs border border-black/20">
+                    <button type="button" onclick="handleAddCategory()" class="bg-pastel-coral px-3 py-2 rounded-full text-xs font-bold border border-black shadow-hard-sm">${lang === 'BM' ? 'Simpan' : 'Save'}</button>
+                  </div>
+                </div>
               </div>
+
               <div class="grid grid-cols-3 gap-2">
                 <div>
-                  <label class="block text-xs font-bold mb-1">Harga (RM)</label>
-                  <input type="number" step="0.01" id="prod-price" required oninput="calculateTotalPrice()" class="w-full bg-white px-3 py-2 rounded-xl border border-black text-xs font-bold">
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Harga (RM)' : 'Price (RM)'}</label>
+                  <input type="number" step="0.01" id="prod-price" required oninput="calculateTotalPrice()" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                 </div>
                 <div>
-                  <label class="block text-xs font-bold mb-1">Promo (RM)</label>
-                  <input type="number" step="0.01" id="prod-promo" value="0.00" oninput="calculateTotalPrice()" class="w-full bg-white px-3 py-2 rounded-xl border border-black text-xs font-bold">
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Promo (RM)' : 'Promo (RM)'}</label>
+                  <input type="number" step="0.01" id="prod-promo" value="0.00" oninput="calculateTotalPrice()" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                 </div>
                 <div>
-                  <label class="block text-xs font-bold mb-1">Jumlah</label>
-                  <input type="text" id="prod-total" readonly value="0.00" class="w-full bg-slate-100 px-3 py-2 rounded-xl border border-black text-xs font-extrabold">
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Jumlah (RM)' : 'Total Price (RM)'}</label>
+                  <input type="text" id="prod-total" readonly value="0.00" class="w-full bg-pastel-coral/40 px-3 py-2 rounded-2xl text-xs font-extrabold text-black">
                 </div>
               </div>
+
               <div>
-                <label class="block text-xs font-bold mb-1">Gambar (Maks 6)</label>
+                <label class="block text-xs font-bold mb-1">
+                  ${lang === 'BM' ? 'Muat Naik Gambar (Bebas Dari Mana-mana Galeri/Folder, Maks 6 Gambar)' : 'Image Upload (All Gallery/Folders Access, Max 6 Images)'}
+                </label>
                 <input type="file" id="media-picker" accept="image/*" multiple class="hidden" onchange="handleNativeImageUpload(event)">
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container"></div>
               </div>
+
               <div>
-                <label class="block text-xs font-bold mb-1">Buy Now URL</label>
-                <input type="url" id="prod-buynow" placeholder="https://..." class="w-full bg-white px-4 py-2 rounded-full border border-black text-xs">
+                <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Muat Naik Video (Maks 1 video, 2GB)' : 'Video upload. Max 1 video. Size 2GB'}</label>
+                <input type="file" id="video-picker" accept="video/*" class="hidden" onchange="handleVideoUpload(event)">
+                <div onclick="document.getElementById('video-picker').click()" class="w-full h-16 bg-pastel-coral/40 rounded-2xl border-2 border-dashed border-black/30 flex items-center justify-center cursor-pointer text-xs font-semibold text-slate-700">
+                  <span id="video-slot-label">${lang === 'BM' ? '+ Muat Naik Video' : '+ Upload Video'}</span>
+                </div>
               </div>
-              <div>
-                <label class="block text-xs font-bold mb-1">WhatsApp URL</label>
-                <input type="url" id="prod-wa" placeholder="https://wa.me/..." class="w-full bg-white px-4 py-2 rounded-full border border-black text-xs">
+
+              <div class="space-y-2 pt-2">
+                <div>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Pautan Butang Beli Sekarang (Buy Now)' : 'Buy Now Button URL'}</label>
+                  <input type="url" id="prod-buynow" placeholder="https://bcl.my/..." class="w-full bg-white px-4 py-2.5 rounded-full border border-black/20 text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Pautan Butang WhatsApp Penjual' : 'Whatsapp Seller Button URL'}</label>
+                  <input type="url" id="prod-wa" placeholder="https://wa.me/..." class="w-full bg-white px-4 py-2.5 rounded-full border border-black/20 text-xs">
+                </div>
               </div>
+
               <div class="flex justify-end pt-3">
                 <button type="submit" id="save-prod-btn" class="bg-pastel-coral px-8 py-3 rounded-full font-bold text-sm border border-black shadow-hard hover:bg-rose-300">
-                  Simpan Katalog
+                  ${lang === 'BM' ? 'Simpan' : 'Save'}
                 </button>
               </div>
             </form>
@@ -457,9 +730,19 @@
       let html = '';
       for (let i = 0; i < 6; i++) {
         if (tempAddProductMedia[i]) {
-          html += `<div class="relative w-full h-16 bg-white rounded-xl border border-black overflow-hidden"><img src="${tempAddProductMedia[i]}" class="w-full h-full object-cover"><button type="button" onclick="removeTempImage(${i})" class="absolute top-0 right-0 bg-red-600 text-white px-1 text-[10px]">✕</button></div>`;
+          html += `
+            <div class="relative w-full h-20 bg-white rounded-xl border border-black overflow-hidden group">
+              <img src="${tempAddProductMedia[i]}" class="w-full h-full object-cover">
+              <button type="button" onclick="removeTempImage(${i})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-[10px] shadow">✕</button>
+            </div>
+          `;
         } else {
-          html += `<div onclick="document.getElementById('media-picker').click()" class="w-full h-16 bg-pastel-coral/30 rounded-xl border-2 border-dashed border-black/30 flex items-center justify-center cursor-pointer text-xs font-bold">+ Slot ${i+1}</div>`;
+          html += `
+            <div onclick="document.getElementById('media-picker').click()" class="w-full h-20 bg-pastel-coral/30 rounded-xl border-2 border-dashed border-black/20 flex flex-col items-center justify-center cursor-pointer hover:bg-pastel-coral/50">
+              <span class="text-xl text-slate-500">+</span>
+              <span class="text-[9px] text-slate-600">Slot ${i+1}</span>
+            </div>
+          `;
         }
       }
       container.innerHTML = html;
@@ -467,13 +750,15 @@
 
     function handleNativeImageUpload(e) {
       const files = Array.from(e.target.files);
+      if (tempAddProductMedia.length + files.length > 6) {
+        alert(state.language === 'BM' ? 'Maksimum 6 gambar sahaja.' : 'Maximum 6 images allowed.');
+        return;
+      }
       files.forEach(file => {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          if (tempAddProductMedia.length < 6) {
-            tempAddProductMedia.push(evt.target.result);
-            renderImageSlots();
-          }
+          tempAddProductMedia.push(evt.target.result);
+          renderImageSlots();
         };
         reader.readAsDataURL(file);
       });
@@ -484,10 +769,35 @@
       renderImageSlots();
     }
 
+    function handleVideoUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const labelText = state.language === 'BM' ? 'Video Dipilih: ' : 'Video Selected: ';
+        document.getElementById('video-slot-label').innerText = labelText + file.name.substring(0, 15) + '...';
+      }
+    }
+
     function calculateTotalPrice() {
       const p = parseFloat(document.getElementById('prod-price').value) || 0;
       const pr = parseFloat(document.getElementById('prod-promo').value) || 0;
-      document.getElementById('prod-total').value = Math.max(0, p - pr).toFixed(2);
+      const tot = Math.max(0, p - pr);
+      document.getElementById('prod-total').value = tot.toFixed(2);
+    }
+
+    function handleAddCategory() {
+      const input = document.getElementById('new-cat-input');
+      const val = input.value.trim();
+      if (val && !state.categories.includes(val)) {
+        state.categories.push(val);
+        saveDB(state);
+        const sel = document.getElementById('prod-category');
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.innerText = val;
+        sel.appendChild(opt);
+        sel.value = val;
+        input.value = '';
+      }
     }
 
     function handleSaveProduct(e) {
@@ -509,105 +819,186 @@
         price,
         promo,
         totalPrice,
-        images: tempAddProductMedia.length > 0 ? tempAddProductMedia : ['https://cdn-icons-png.flaticon.com/512/3429/3429402.png'],
+        images: tempAddProductMedia.length > 0 ? tempAddProductMedia : ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&auto=format&fit=crop'],
+        video: '',
         buyNowUrl,
         whatsappUrl,
-        status: 'ACTIVE'
+        status: 'ACTIVE',
+        createdDate: new Date().toISOString()
       };
 
       state.products.push(newProd);
       saveDB(state);
-      alert('Produk berjaya disimpan!');
+      alert(state.language === 'BM' ? 'Produk berjaya disimpan!' : 'Product saved successfully!');
       navigate('/manage-catalog');
     }
 
-    // --- PAGE 4: MANAGE CATALOGUE (EDIT & SAVE MODAL) ---
+    // --- PAGE 4: MANAGE CATALOGUE ---
+    let filterCategoryValue = 'ALL';
+    let filterProductNameValue = 'ALL';
+
     function renderPage4ManageCatalogue() {
       const lang = state.language;
+      const todayDate = getCurrentFormattedDate();
+
+      let filteredProds = state.products;
+      if (filterCategoryValue !== 'ALL') {
+        filteredProds = filteredProds.filter(p => p.category === filterCategoryValue);
+      }
+      if (filterProductNameValue !== 'ALL') {
+        filteredProds = filteredProds.filter(p => p.id === filterProductNameValue);
+      }
+
       return `
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Urus Katalog' : 'Manage Catalogue'}</h1>
-            <button onclick="navigate('/add-catalog')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black">+ Tambah</button>
+            <div>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Urus Katalog' : 'Manage Catalogue'}</h1>
+              <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
+            </div>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
+            </div>
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            ${state.products.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">Tiada produk.</div>` : ''}
-            ${state.products.map(p => `
-              <div class="bg-white p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
-                <div>
-                  <img src="${p.images[0]}" class="w-full h-28 object-cover rounded-xl border">
-                  <div class="text-[10px] font-bold text-slate-500 mt-1">${p.category} (${p.orderNo})</div>
-                  <div class="font-bold text-xs text-black line-clamp-1">${p.name}</div>
-                  <div class="font-extrabold text-sm text-black mt-1">RM ${p.totalPrice.toFixed(2)}</div>
-                </div>
-                <div class="flex justify-between items-center pt-3 text-xs font-bold">
-                  <button onclick="openEditModal('${p.id}')" class="text-blue-700 bg-pastel-yellow px-3 py-1 rounded-full border border-black shadow-hard-sm">Edit</button>
-                  <button onclick="deleteProduct('${p.id}')" class="text-red-600 bg-pastel-coral px-3 py-1 rounded-full border border-black shadow-hard-sm">Padam</button>
-                </div>
+
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+              <h2 class="font-bold text-sm text-black">${lang === 'BM' ? 'Urus & Buang Produk' : 'Edit & Remove Product'}</h2>
+              <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
+                ← ${lang === 'BM' ? 'Kembali' : 'Back'}
+              </button>
+            </div>
+
+            <!-- 2 DROPDOWN FILTERS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Penapis Kategori' : 'Filter by Category'}</label>
+                <select onchange="handleManageCatFilter(this.value)" class="w-full bg-pastel-coral px-4 py-2 rounded-full border-none text-xs font-bold">
+                  <option value="ALL">-- ${lang === 'BM' ? 'Semua Kategori' : 'All Category'} --</option>
+                  ${state.categories.map(c => `<option value="${c}" ${filterCategoryValue === c ? 'selected' : ''}>${c}</option>`).join('')}
+                </select>
               </div>
-            `).join('')}
+
+              <div>
+                <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Penapis Nama Produk' : 'Filter by Product Name'}</label>
+                <select onchange="handleManageProdFilter(this.value)" class="w-full bg-pastel-coral px-4 py-2 rounded-full border-none text-xs font-bold">
+                  <option value="ALL">-- ${lang === 'BM' ? 'Semua Produk' : 'All Product'} --</option>
+                  ${state.products.map(p => `<option value="${p.id}" ${filterProductNameValue === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              ${filteredProds.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">${lang === 'BM' ? 'Tiada produk tersedia. Sila tambah produk di halaman + Katalog.' : 'No products available. Please add products in + Catalog page.'}</div>` : ''}
+              ${filteredProds.map(p => `
+                <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden cursor-pointer relative group">
+                      <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                      <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full">🔍 ${lang === 'BM' ? 'Lihat' : 'View'} (${p.images.length})</span>
+                    </div>
+
+                    <div class="mt-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
+                      ${p.category} (${p.orderNo})
+                    </div>
+                    <div class="font-bold text-xs text-black line-clamp-2 mt-0.5">
+                      ${p.name}
+                    </div>
+                    <div class="font-extrabold text-sm text-black mt-1">
+                      RM ${p.totalPrice.toFixed(2)}
+                    </div>
+                  </div>
+
+                  <div class="space-y-1.5 mt-3">
+                    <a href="${p.buyNowUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">BUY NOW</a>
+                    <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-yellow text-center rounded-full text-[10px] font-bold border border-black/20 shadow-hard-sm">WHATSAPP SELLER</a>
+                    
+                    <div class="flex justify-between items-center pt-2 text-xs font-bold">
+                      <button onclick="editProduct('${p.id}')" class="text-blue-700 flex items-center space-x-1">
+                        <span>✎</span> <span>${lang === 'BM' ? 'Edit' : 'Edit'}</span>
+                      </button>
+                      <button onclick="deleteProduct('${p.id}')" class="text-red-600 flex items-center space-x-1">
+                        <span>🗑</span> <span>${lang === 'BM' ? 'Padam' : 'Delete'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
           </div>
         </div>
       `;
     }
 
+    function handleManageCatFilter(val) {
+      filterCategoryValue = val;
+      renderCurrentRoute();
+    }
+
+    function handleManageProdFilter(val) {
+      filterProductNameValue = val;
+      renderCurrentRoute();
+    }
+
     function deleteProduct(prodId) {
-      if (confirm('Padam produk ini?')) {
+      if (confirm(state.language === 'BM' ? 'Adakah anda pasti mahu memadam produk ini?' : 'Are you sure you want to delete this product?')) {
         state.products = state.products.filter(p => p.id !== prodId);
         saveDB(state);
         renderCurrentRoute();
       }
     }
 
-    function openEditModal(prodId) {
+    function editProduct(prodId) {
       const prod = state.products.find(p => p.id === prodId);
-      if (!prod) return;
-
-      document.getElementById('edit-prod-id').value = prod.id;
-      document.getElementById('edit-prod-name').value = prod.name;
-      document.getElementById('edit-prod-price').value = prod.price;
-      document.getElementById('edit-prod-promo').value = prod.promo || 0;
-      document.getElementById('edit-prod-total').value = prod.totalPrice.toFixed(2);
-      document.getElementById('edit-prod-buynow').value = prod.buyNowUrl || '';
-      document.getElementById('edit-prod-wa').value = prod.whatsappUrl || '';
-
-      const catSelect = document.getElementById('edit-prod-category');
-      catSelect.innerHTML = state.categories.map(c => `<option value="${c}" ${c === prod.category ? 'selected' : ''}>${c}</option>`).join('');
-
-      document.getElementById('edit-product-modal').classList.remove('hidden');
-    }
-
-    function closeEditModal() {
-      document.getElementById('edit-product-modal').classList.add('hidden');
-    }
-
-    function calculateEditTotal() {
-      const p = parseFloat(document.getElementById('edit-prod-price').value) || 0;
-      const pr = parseFloat(document.getElementById('edit-prod-promo').value) || 0;
-      document.getElementById('edit-prod-total').value = Math.max(0, p - pr).toFixed(2);
-    }
-
-    function handleSaveEditedProduct(e) {
-      e.preventDefault();
-      const id = document.getElementById('edit-prod-id').value;
-      const prod = state.products.find(p => p.id === id);
       if (prod) {
-        prod.name = document.getElementById('edit-prod-name').value.trim();
-        prod.category = document.getElementById('edit-prod-category').value;
-        prod.price = parseFloat(document.getElementById('edit-prod-price').value) || 0;
-        prod.promo = parseFloat(document.getElementById('edit-prod-promo').value) || 0;
-        prod.totalPrice = parseFloat(document.getElementById('edit-prod-total').value) || 0;
-        prod.buyNowUrl = document.getElementById('edit-prod-buynow').value.trim();
-        prod.whatsappUrl = document.getElementById('edit-prod-wa').value.trim();
-
-        saveDB(state);
-        closeEditModal();
-        alert('Perubahan produk berjaya disimpan!');
-        renderCurrentRoute();
+        const newName = prompt(state.language === 'BM' ? 'Kemaskini Nama Produk:' : 'Update Product Name:', prod.name);
+        if (newName) {
+          prod.name = newName.trim();
+          saveDB(state);
+          renderCurrentRoute();
+        }
       }
     }
 
-    // --- PAGE 5: SALES RECORD (SAVE BUTTON READY) ---
+    // --- FULLSCREEN IMAGE VIEWER MODAL LOGIC ---
+    let currentViewerImages = [];
+    let currentViewerIdx = 0;
+
+    function openImageViewer(imagesArr) {
+      currentViewerImages = imagesArr && imagesArr.length > 0 ? imagesArr : ['https://via.placeholder.com/300'];
+      currentViewerIdx = 0;
+      updateImageViewerContent();
+      document.getElementById('image-viewer-modal').classList.remove('hidden');
+    }
+
+    function closeImageViewer() {
+      document.getElementById('image-viewer-modal').classList.add('hidden');
+    }
+
+    function updateImageViewerContent() {
+      const imgEl = document.getElementById('image-viewer-img');
+      const counterEl = document.getElementById('image-viewer-counter');
+      imgEl.src = currentViewerImages[currentViewerIdx];
+      counterEl.innerText = `${currentViewerIdx + 1} / ${currentViewerImages.length}`;
+      const hintEl = document.querySelector('.viewer-hint');
+      if (hintEl) {
+        hintEl.innerText = state.language === 'BM' ? 'Tatal atau guna anak panah untuk lihat gambar' : 'Swipe or use arrows to view images';
+      }
+    }
+
+    function nextImage() {
+      currentViewerIdx = (currentViewerIdx + 1) % currentViewerImages.length;
+      updateImageViewerContent();
+    }
+
+    function prevImage() {
+      currentViewerIdx = (currentViewerIdx - 1 + currentViewerImages.length) % currentViewerImages.length;
+      updateImageViewerContent();
+    }
+
+    // --- PAGE 5: SALES RECORD ---
     function renderPage5SalesRecord() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
@@ -615,54 +1006,137 @@
       return `
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Rekod Jualan' : 'Sales Record'}</h1>
+            <div>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Rekod Jualan' : 'Sales Record'}</h1>
+              <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
+            </div>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
+            </div>
           </div>
 
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
-            <div class="space-y-1.5 max-h-48 overflow-y-auto">
-              ${state.sales.length === 0 ? `<div class="text-center text-xs text-slate-500 py-3">Tiada rekod jualan.</div>` : ''}
+            <div class="flex justify-between items-start">
+              <h2 class="font-bold text-xs text-black max-w-[70%]">
+                ${lang === 'BM' ? 'Rekod jualan daripada payment gateway & bayaran manual' : 'Sales record from payment gateway & manual payment'}
+              </h2>
+              <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
+                ← ${lang === 'BM' ? 'Kembali' : 'Back'}
+              </button>
+            </div>
+
+            <!-- Table Header -->
+            <div class="bg-pastel-coral rounded-xl p-2.5 text-[11px] font-bold text-black grid grid-cols-5 text-center border border-black/10">
+              <div>${lang === 'BM' ? 'Tarikh' : 'Date'}</div>
+              <div>${lang === 'BM' ? 'No. Pesanan' : 'Order No'}</div>
+              <div>${lang === 'BM' ? 'Jumlah' : 'Amount'}</div>
+              <div>${lang === 'BM' ? 'Sumber' : 'Source'}</div>
+              <div>${lang === 'BM' ? 'Tindakan' : 'Action'}</div>
+            </div>
+
+            <!-- Table Rows -->
+            <div class="space-y-1.5 max-h-56 overflow-y-auto">
+              ${state.sales.length === 0 ? `<div class="text-center text-xs text-slate-500 py-3">${lang === 'BM' ? 'Tiada rekod jualan.' : 'No sales record available.'}</div>` : ''}
               ${state.sales.map(s => `
-                <div class="bg-white rounded-xl p-2.5 text-xs font-semibold grid grid-cols-4 text-center items-center border border-black/10">
-                  <div>${s.date}</div>
-                  <div class="font-bold">${s.orderNo}</div>
-                  <div class="font-bold">RM ${Number(s.amount).toFixed(2)}</div>
-                  <div><button onclick="removeSaleRecord('${s.id}')" class="text-red-600 font-bold">✕</button></div>
+                <div class="bg-pastel-pink/60 rounded-xl p-2 text-xs font-semibold text-slate-800 grid grid-cols-5 text-center items-center border border-black/5">
+                  <div class="text-[10px]">${s.date}</div>
+                  <div class="font-bold text-[10px]">${s.orderNo}</div>
+                  <div class="font-bold text-[11px]">RM ${Number(s.amount).toFixed(2)}</div>
+                  <div class="text-[9px] bg-white/60 px-1 py-0.5 rounded-full border border-black/10 truncate">${s.source}</div>
+                  <div class="flex justify-center items-center space-x-1.5">
+                    <button onclick="editSaleRecord('${s.id}')" title="Edit" class="p-1 bg-white rounded-full border border-black/20 text-blue-700 hover:bg-blue-50">
+                      ✎
+                    </button>
+                    <button onclick="removeSaleRecord('${s.id}')" title="Remove" class="p-1 bg-white rounded-full border border-black/20 text-red-600 hover:bg-red-50">
+                      🗑
+                    </button>
+                  </div>
                 </div>
               `).join('')}
             </div>
 
-            <hr class="border-black/10">
+            <hr class="border-black/10 my-4">
 
-            <h3 class="font-bold text-xs text-black">Tambah Jualan Manual</h3>
-            <form onsubmit="handleSaveManualSale(event)" class="space-y-3">
-              <div class="grid grid-cols-2 gap-2">
-                <input type="text" id="manual-date" value="${todayDate}" required class="bg-white px-3 py-2 rounded-xl border border-black text-xs font-bold">
-                <select id="manual-order" required class="bg-white px-3 py-2 rounded-xl border border-black text-xs font-bold">
-                  ${state.products.length === 0 ? `<option value="QS000">Tiada Produk</option>` : ''}
-                  ${state.products.map(p => `<option value="${p.orderNo}">${p.orderNo} -${p.name.substring(0,10)}</option>`).join('')}
-                </select>
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <select id="manual-source" required class="bg-white px-3 py-2 rounded-xl border border-black text-xs font-bold">
-                  ${state.sources.map(src => `<option value="${src}">${src}</option>`).join('')}
-                </select>
-                <input type="number" step="0.01" id="manual-amount" required placeholder="0.00" class="bg-white px-3 py-2 rounded-xl border border-black text-xs font-bold">
-              </div>
-              <div class="flex justify-end">
-                <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard hover:bg-rose-300">
-                  Simpan Rekod Jualan
-                </button>
-              </div>
-            </form>
+            <!-- Manual Sales Section -->
+            <div class="space-y-3">
+              <h3 class="font-bold text-xs text-black">
+                ${lang === 'BM' ? 'Tambah jualan manual (pembeli beli luar bcl.my)' : 'Add sales manually if buyer buy product not from bcl payment gateway'}
+              </h3>
+
+              <form onsubmit="handleSaveManualSale(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Tarikh' : 'Date'}</label>
+                    <input type="text" id="manual-date" value="${todayDate}" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'No. Pesanan' : 'Order No'}</label>
+                    <select id="manual-order" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                      ${state.products.length === 0 ? `<option value="QS000">${lang === 'BM' ? 'Tiada Produk' : 'No Products'}</option>` : ''}
+                      ${state.products.map(p => `<option value="${p.orderNo}">${p.orderNo} -${p.name.substring(0,12)}...</option>`).join('')}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Sumber' : 'Source'}</label>
+                    <select id="manual-source" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                      ${state.sources.map(src => `<option value="${src}">${src}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Jumlah (RM)' : 'Amount (RM)'}</label>
+                    <input type="number" step="0.01" id="manual-amount" required placeholder="0.00" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                  </div>
+                </div>
+
+                <div class="flex space-x-2 pt-1">
+                  <input type="text" id="new-source-input" placeholder="${lang === 'BM' ? '+ Tambah Sumber' : '+ Add Source'}" class="flex-1 bg-white px-3 py-1.5 rounded-full text-xs border border-black/20">
+                  <button type="button" onclick="handleAddSource()" class="bg-pastel-coral px-3 py-1.5 rounded-full text-xs font-bold border border-black shadow-hard-sm">${lang === 'BM' ? 'Simpan Sumber' : 'Save Source'}</button>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                  <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard">
+                    ${lang === 'BM' ? 'Simpan' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       `;
     }
 
-    function removeSaleRecord(id) {
-      state.sales = state.sales.filter(s => s.id !== id);
-      saveDB(state);
-      renderCurrentRoute();
+    function editSaleRecord(saleId) {
+      const sale = state.sales.find(s => s.id === saleId);
+      if (sale) {
+        const newAmt = prompt(state.language === 'BM' ? 'Kemaskini Jumlah Jualan (RM):' : 'Update Sales Amount (RM):', sale.amount);
+        if (newAmt !== null) {
+          sale.amount = parseFloat(newAmt) || 0;
+          saveDB(state);
+          renderCurrentRoute();
+        }
+      }
+    }
+
+    function removeSaleRecord(saleId) {
+      if (confirm(state.language === 'BM' ? 'Adakah anda pasti mahu memadam rekod jualan ini?' : 'Are you sure you want to remove this sale record?')) {
+        state.sales = state.sales.filter(s => s.id !== saleId);
+        saveDB(state);
+        renderCurrentRoute();
+      }
+    }
+
+    function handleAddSource() {
+      const input = document.getElementById('new-source-input');
+      const val = input.value.trim();
+      if (val && !state.sources.includes(val)) {
+        state.sources.push(val);
+        saveDB(state);
+        renderCurrentRoute();
+      }
     }
 
     function handleSaveManualSale(e) {
@@ -672,46 +1146,238 @@
       const source = document.getElementById('manual-source').value;
       const amount = parseFloat(document.getElementById('manual-amount').value) || 0;
 
-      const newSale = { id: 'SALE_' + Date.now(), date, orderNo, amount, source };
+      const newSale = {
+        id: 'SALE_' + Date.now(),
+        date,
+        orderNo,
+        amount,
+        source,
+        createdDate: new Date().toISOString()
+      };
+
       state.sales.unshift(newSale);
       saveDB(state);
-      alert('Rekod jualan berjaya disimpan!');
+      alert(state.language === 'BM' ? 'Rekod jualan disimpan!' : 'Sale recorded successfully!');
       renderCurrentRoute();
     }
 
     // --- PAGE 6: SETTING ---
     function renderPage6Setting() {
+      const lang = state.language;
+      const todayDate = getCurrentFormattedDate();
+      const entireCatalogueUrl = `https://syaaetelier.github.io/Scha-Digital-Hub/#/catalog`;
+
       return `
         <div class="p-4 space-y-4">
           <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold text-black">Tetapan</h1>
-            <button onclick="handleSignOut()" class="bg-red-500 text-white px-4 py-2 rounded-full text-xs font-bold border border-black">Daftar Keluar</button>
+            <div>
+              <h1 class="text-2xl font-extrabold text-black">${lang === 'BM' ? 'Tetapan' : 'Setting'}</h1>
+              <p class="text-xs text-slate-700 mt-0.5 font-medium">${todayDate}</p>
+            </div>
+            <div class="bg-pastel-pink border border-black rounded-full px-3 py-1 text-xs font-bold shadow-hard-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
+            </div>
+          </div>
+
+          <div class="bg-pastel-peach rounded-3xl p-5 border border-black/10 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-sm text-black">${lang === 'BM' ? 'Konfigurasi Kedai' : 'Shop Configuration'}</span>
+              <button onclick="navigate('/my-sales')" class="bg-pastel-coral px-3 py-1 rounded-full text-xs font-bold border border-black shadow-hard-sm">
+                ← ${lang === 'BM' ? 'Kembali' : 'Back'}
+              </button>
+            </div>
+
+            <form onsubmit="handleSaveSettings(event)" class="space-y-4">
+              <!-- UI UPLOAD GAMBAR LOGO DENGAN AKSES PENUH GALERI PHONE -->
+              <div class="bg-white/80 p-4 rounded-2xl border border-black/10 space-y-3">
+                <label class="block font-bold text-xs text-black">
+                  ${lang === 'BM' ? 'Muat Naik Logo Admin Portal (Bebas Dari Mana-mana Folder/Galeri Phone)' : 'Upload Admin Portal Logo (Access All Gallery/Folder)'}
+                </label>
+                <div class="flex items-center space-x-4">
+                  <div class="w-16 h-16 bg-pastel-coral/30 rounded-xl border border-black overflow-hidden flex items-center justify-center">
+                    <img id="setting-logo-preview" src="${state.adminProfile.logoUrl}" class="w-full h-full object-contain">
+                  </div>
+                  <input type="file" id="setting-logo-input" accept="image/*" class="hidden" onchange="handleSettingLogoUpload(event)">
+                  <button type="button" onclick="document.getElementById('setting-logo-input').click()" class="bg-pastel-coral px-4 py-2 rounded-full border border-black text-xs font-bold shadow-hard-sm hover:bg-rose-300">
+                    ${lang === 'BM' ? 'Pilih Gambar dari Galeri' : 'Choose Image from Gallery'}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-bold text-xs text-black mb-1">
+                  ${lang === 'BM' ? 'Nama kedai yang ingin dipaparkan di katalog' : 'Shop name you want to display at catalogue'}
+                </label>
+                <input type="text" id="setting-shop-name" value="${state.adminProfile.shopName}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
+              </div>
+
+              <div>
+                <label class="block font-bold text-xs text-black mb-1">
+                  ${lang === 'BM' ? 'Ucapan alu-aluan yang ingin dipaparkan di katalog' : 'Welcome greetings you want to display at catalogue'}
+                </label>
+                <input type="text" id="setting-greeting" value="${state.adminProfile.welcomeGreeting}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
+              </div>
+
+              <!-- Entire Catalogue Link Section -->
+              <div>
+                <label class="block font-bold text-xs text-black mb-1">
+                  ${lang === 'BM' ? 'Pautan Keseluruhan Katalog Anda (Auto Generate)' : 'Your Catalogue Link. This link auto generate from your catalogue'}
+                </label>
+                <div class="flex items-center space-x-2">
+                  <input type="text" readonly value="${entireCatalogueUrl}" class="flex-1 bg-pastel-coral/50 px-4 py-2.5 rounded-2xl border-none text-[11px] font-bold text-slate-700 truncate">
+                  <button type="button" onclick="copyCatalogueLink('${entireCatalogueUrl}')" class="bg-pastel-pink border border-black/20 px-3 py-2 rounded-2xl font-bold text-[10px] shadow-hard-sm text-black text-center leading-tight">
+                    ${lang === 'BM' ? 'Salin Pautan<br>Katalog Anda' : 'Copy your<br>catalogue link'}
+                  </button>
+                </div>
+              </div>
+
+              <!-- SAVE & SIGN OUT BUTTONS -->
+              <div class="flex justify-between items-center pt-2">
+                <button type="button" onclick="handleSignOut()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard transition">
+                  ${lang === 'BM' ? 'Daftar Keluar' : 'Sign Out'}
+                </button>
+                <button type="submit" class="bg-pastel-coral px-8 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard">
+                  ${lang === 'BM' ? 'Simpan' : 'Save'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       `;
     }
 
-    function handleSignOut() {
-      state.session = null;
-      saveDB(state);
-      navigate('/login');
+    function handleSettingLogoUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          state.adminProfile.logoUrl = evt.target.result;
+          document.getElementById('setting-logo-preview').src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
     }
 
-    // --- PAGE 7: CUSTOMER CATALOGUE ---
+    function copyCatalogueLink(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        alert(state.language === 'BM' ? 'Pautan keseluruhan katalog berjaya disalin!' : 'Entire catalogue link copied to clipboard!');
+      });
+    }
+
+    function handleSaveSettings(e) {
+      e.preventDefault();
+      state.adminProfile.shopName = document.getElementById('setting-shop-name').value.trim();
+      state.adminProfile.welcomeGreeting = document.getElementById('setting-greeting').value.trim();
+      saveDB(state);
+      alert(state.language === 'BM' ? 'Tetapan disimpan!' : 'Settings saved successfully!');
+    }
+
+    function handleSignOut() {
+      if (confirm(state.language === 'BM' ? 'Adakah anda pasti mahu daftar keluar?' : 'Are you sure you want to sign out?')) {
+        state.session = null;
+        saveDB(state);
+        navigate('/login');
+      }
+    }
+
+    // --- PAGE 7: PUBLIC CUSTOMER CATALOGUE VIEW ---
+    let publicCategoryFilter = 'ALL';
+    let publicProductNameFilter = 'ALL';
+
     function renderPage7CustomerCatalog() {
+      const lang = state.language;
+      const shopName = state.adminProfile.shopName || 'Scha Digital Learning Center';
+      const greeting = state.adminProfile.welcomeGreeting || 'Selamat datang ke kedai kami!';
+
+      let activeProducts = state.products.filter(p => p.status === 'ACTIVE');
+      if (publicCategoryFilter !== 'ALL') {
+        activeProducts = activeProducts.filter(p => p.category === publicCategoryFilter);
+      }
+      if (publicProductNameFilter !== 'ALL') {
+        activeProducts = activeProducts.filter(p => p.id === publicProductNameFilter);
+      }
+
       return `
-        <div class="bg-customer-gradient min-h-screen p-4 space-y-4">
-          <div class="bg-pastel-peach/95 rounded-3xl p-6 border text-center shadow-lg">
-            <h1 class="font-extrabold text-2xl text-black">${state.adminProfile.shopName}</h1>
-            <p class="text-sm font-bold mt-2">${state.adminProfile.welcomeGreeting}</p>
-            <button onclick="navigate('/my-sales')" class="mt-4 bg-white px-4 py-1.5 rounded-full text-xs font-bold border border-black">Kembali ke Admin</button>
+        <div class="bg-customer-gradient min-h-screen p-4 space-y-4 text-slate-800">
+          
+          <!-- Shop Header -->
+          <div class="bg-pastel-peach/95 rounded-3xl p-6 border border-white/50 shadow-lg text-center relative overflow-hidden">
+            <span class="absolute top-2 left-3 text-lg opacity-80">✈️</span>
+            <span class="absolute top-2 right-3 text-lg opacity-80">💌</span>
+            <span class="absolute bottom-2 left-4 text-xs opacity-80">💖</span>
+            <span class="absolute bottom-2 right-4 text-xs opacity-80">🎀</span>
+
+            <!-- Language Switcher in Public Catalog -->
+            <div class="absolute top-3 right-3 z-10 bg-white/80 border border-black rounded-full px-3 py-0.5 text-[10px] font-bold shadow-sm">
+              <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
+              <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
+            </div>
+
+            <h1 class="font-extrabold text-2xl text-black leading-tight tracking-wide mt-3">
+              ${shopName}
+            </h1>
+            
+            <div class="mt-3 flex items-center justify-center space-x-1">
+              <span class="text-xs">🎀</span>
+              <p class="font-bold text-sm text-black italic">${greeting}</p>
+              <span class="text-xs">🎀</span>
+            </div>
           </div>
+
+          <!-- 2 DROPDOWN FILTERS -->
+          <div class="bg-pastel-peach/95 rounded-3xl p-4 border border-white/50 shadow-md space-y-3">
+            <div>
+              <label class="block text-xs font-bold mb-1 text-slate-800">${lang === 'BM' ? 'Penapis Kategori' : 'Filter by Categories'}</label>
+              <select onchange="handlePublicCatFilter(this.value)" class="w-full bg-pastel-pink/80 px-4 py-2 rounded-full border-none text-xs font-bold text-black">
+                <option value="ALL">${lang === 'BM' ? '-- Semua Kategori --' : '-- All Categories --'}</option>
+                ${state.categories.map(c => `<option value="${c}" ${publicCategoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold mb-1 text-slate-800">${lang === 'BM' ? 'Penapis Produk' : 'Filter by Products'}</label>
+              <select onchange="handlePublicProdFilter(this.value)" class="w-full bg-pastel-pink/80 px-4 py-2 rounded-full border-none text-xs font-bold text-black">
+                <option value="ALL">${lang === 'BM' ? '-- Semua Produk --' : '-- All Products --'}</option>
+                ${state.products.map(p => `<option value="${p.id}" ${publicProductNameFilter === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <!-- Product Grid -->
           <div class="grid grid-cols-2 gap-3">
-            ${state.products.map(p => `
-              <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md">
-                <img src="${p.images[0]}" class="w-full h-28 object-cover rounded-xl">
-                <h3 class="font-bold text-xs mt-2">${p.name}</h3>
-                <div class="text-red-600 font-extrabold text-xs mt-1">RM ${p.totalPrice.toFixed(2)}</div>
+            ${activeProducts.length === 0 ? `<div class="col-span-2 text-center text-xs text-white py-8 font-semibold">${lang === 'BM' ? 'Tiada produk tersedia buat masa ini.' : 'No products available at the moment.'}</div>` : ''}
+            ${activeProducts.map(p => `
+              <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md flex flex-col justify-between relative">
+                <div>
+                  <div onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-28 bg-pastel-pink/40 rounded-xl overflow-hidden cursor-pointer relative">
+                    <img src="${p.images[0] || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover">
+                  </div>
+
+                  <div class="flex justify-between items-start mt-2">
+                    <div class="text-[9px] font-extrabold text-black uppercase tracking-wider">
+                      ${p.category} (${p.orderNo})
+                    </div>
+                    <button onclick="shareProductLink('${p.id}', '${p.name}')" title="${lang === 'BM' ? 'Kongsi Produk Ini' : 'Share Product'}" class="text-slate-800 hover:text-pink-600 p-0.5">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    </button>
+                  </div>
+
+                  <h3 class="font-bold text-xs text-black line-clamp-2 mt-0.5">${p.name}</h3>
+
+                  <div class="mt-2 inline-block bg-pastel-yellow px-2.5 py-1 rounded-lg border border-black/10">
+                    <span class="font-bold text-xs text-red-600">RM ${p.totalPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5 mt-3">
+                  <button onclick="handleCustomerBuyNow('${p.buyNowUrl}', '${p.orderNo}',${p.totalPrice})" class="w-full py-1.5 bg-pastel-softPink rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm active:scale-95 transition">
+                    ${lang === 'BM' ? 'Beli Sekarang' : 'Buy Now'}
+                  </button>
+                  <a href="${p.whatsappUrl || '#'}" target="_blank" class="block w-full py-1.5 bg-pastel-softPink text-center rounded-full text-[10px] font-extrabold text-black border border-black/10 shadow-sm">
+                    ${lang === 'BM' ? 'Hubungi WhatsApp' : 'Whatsapp Seller'}
+                  </a>
+                </div>
               </div>
             `).join('')}
           </div>
@@ -719,26 +1385,82 @@
       `;
     }
 
-    // Modal Image Viewer
-    let currentViewerImages = [];
-    let currentViewerIdx = 0;
-    function openImageViewer(arr) {
-      currentViewerImages = arr;
-      currentViewerIdx = 0;
-      document.getElementById('image-viewer-img').src = currentViewerImages[0];
-      document.getElementById('image-viewer-modal').classList.remove('hidden');
-    }
-    function closeImageViewer() { document.getElementById('image-viewer-modal').classList.add('hidden'); }
-    function nextImage() {
-      currentViewerIdx = (currentViewerIdx + 1) % currentViewerImages.length;
-      document.getElementById('image-viewer-img').src = currentViewerImages[currentViewerIdx];
-    }
-    function prevImage() {
-      currentViewerIdx = (currentViewerIdx - 1 + currentViewerImages.length) % currentViewerImages.length;
-      document.getElementById('image-viewer-img').src = currentViewerImages[currentViewerIdx];
+    function handlePublicCatFilter(val) {
+      publicCategoryFilter = val;
+      renderCurrentRoute();
     }
 
-    window.addEventListener('DOMContentLoaded', () => { renderCurrentRoute(); });
+    function handlePublicProdFilter(val) {
+      publicProductNameFilter = val;
+      renderCurrentRoute();
+    }
+
+    function handleCustomerBuyNow(buyUrl, orderNo, amount) {
+      if (buyUrl && buyUrl !== '#') {
+        window.open(buyUrl, '_blank');
+      } else {
+        alert(state.language === 'BM' ? 'Membawa ke payment gateway BCL.my...' : 'Redirecting to BCL.my payment gateway...');
+      }
+
+      setTimeout(() => {
+        const autoSale = {
+          id: 'SALE_' + Date.now(),
+          date: getCurrentFormattedDate(),
+          orderNo: orderNo,
+          amount: amount,
+          source: 'bcl.my',
+          createdDate: new Date().toISOString()
+        };
+        state.sales.unshift(autoSale);
+        saveDB(state);
+      }, 1000);
+    }
+
+    function shareProductLink(prodId, prodName) {
+      const prodUrl = `https://syaaetelier.github.io/Scha-Digital-Hub/#/catalog/product/${prodId}`;
+      if (navigator.share) {
+        navigator.share({
+          title: prodName,
+          text: (state.language === 'BM' ? `Lihat produk ${prodName} di ` : `Check out ${prodName} at `) + state.adminProfile.shopName,
+          url: prodUrl
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(prodUrl).then(() => {
+          alert(state.language === 'BM' ? 'Pautan khas produk berjaya disalin!' : 'Product link copied successfully!');
+        });
+      }
+    }
+
+    function renderSingleProductPage(productId) {
+      const lang = state.language;
+      const product = state.products.find(p => p.id === productId);
+      if (!product) {
+        return `<div class="p-8 text-center text-xs font-bold text-white">${lang === 'BM' ? 'Produk tidak ditemui.' : 'Product not found.'}</div>`;
+      }
+      return `
+        <div class="bg-customer-gradient min-h-screen p-4 flex flex-col justify-center items-center">
+          <div class="w-full max-w-sm bg-pastel-peach rounded-3xl p-5 border border-white/60 shadow-xl space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold uppercase">${product.category}</span>
+              <button onclick="openCustomerCatalog()" class="text-xs font-bold underline">${lang === 'BM' ? 'Lihat Semua Katalog' : 'View All Catalogue'}</button>
+            </div>
+            <div class="w-full h-48 bg-white rounded-2xl overflow-hidden border border-black/10">
+              <img src="${product.images[0] || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover">
+            </div>
+            <h2 class="font-bold text-base text-black">${product.name}</h2>
+            <div class="font-bold text-lg text-red-600">RM ${product.totalPrice.toFixed(2)}</div>
+            <div class="space-y-2 pt-2">
+              <button onclick="handleCustomerBuyNow('${product.buyNowUrl}', '${product.orderNo}', ${product.totalPrice})" class="w-full py-2.5 bg-pastel-yellow font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">${lang === 'BM' ? 'BELI SEKARANG' : 'BUY NOW'}</button>
+              <a href="${product.whatsappUrl || '#'}" target="_blank" class="block w-full py-2.5 bg-pastel-yellow text-center font-bold text-xs rounded-full border border-black/20 shadow-hard-sm">${lang === 'BM' ? 'HUBUNGI WHATSAPP' : 'WHATSAPP SELLER'}</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCurrentRoute();
+    });
   </script>
 </body>
 </html>
