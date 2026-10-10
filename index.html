@@ -132,10 +132,10 @@
     </div>
     <div class="relative w-full flex-1 flex items-center justify-center my-auto overflow-hidden">
       <img id="image-viewer-img" src="" alt="Full view" class="max-h-[80vh] max-w-full object-contain rounded-lg transition-transform duration-300">
-      <button onclick="prevImage()" class="absolute left-2 p-3 bg-white/90 hover:bg-white text-black font-extrabold rounded-full shadow-lg">
+      <button onclick="prevImage()" class="absolute left-2 p-3 bg-white/80 hover:bg-white text-black font-extrabold rounded-full shadow-lg">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
       </button>
-      <button onclick="nextImage()" class="absolute right-2 p-3 bg-white/90 hover:bg-white text-black font-extrabold rounded-full shadow-lg">
+      <button onclick="nextImage()" class="absolute right-2 p-3 bg-white/80 hover:bg-white text-black font-extrabold rounded-full shadow-lg">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
       </button>
     </div>
@@ -148,11 +148,11 @@
     const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam
     let inactivityTimer = null;
     
-    // Simpanan memori indeks gambar semasa & status tunjuk arrow untuk setiap kad produk
+    // Simpanan memori indeks gambar semasa untuk setiap kad produk
     window.cardImageIndices = {};
-    window.cardShowArrows = {};
-    
-    // Variabel untuk Swipe Touch Gestures
+    window.publicShowArrows = {}; // Status kemunculan arrow untuk Public Customer Catalog selepas klik imej
+
+    // Fungsi Pengurusan Touch Swipe untuk Slider Kad Produk
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -382,18 +382,16 @@
       }
     }
 
-    // Fungsi klik gambar untuk public customer: tampilkan arrow selepas klik pertama
-    function handlePublicImageClick(event, prodId, maxLen) {
+    // Fungsi interaksi klik imej Public Customer: Paparkan arrow navigasi kad apabila diklik
+    function handlePublicImageClick(event, prodId, maxLen, imagesArr) {
       event.stopPropagation();
-      if (!window.cardShowArrows[prodId]) {
-        window.cardShowArrows[prodId] = true;
-        const arrowsEl = document.getElementById(`card-arrows-${prodId}`);
-        if (arrowsEl) arrowsEl.classList.remove('hidden');
-      } else {
-        // Jika sudah show arrows, boleh buka full image viewer
-        const prod = state.products.find(p => p.id === prodId);
-        if (prod) openImageViewer(prod.images);
+      window.publicShowArrows[prodId] = true;
+      const arrowContainer = document.getElementById(`public-arrows-${prodId}`);
+      if (arrowContainer) {
+        arrowContainer.classList.remove('hidden');
       }
+      // Buka juga modal gambar penuh
+      openImageViewer(imagesArr);
     }
 
     // --- PAGE 1: ADMIN LOGIN ---
@@ -970,7 +968,7 @@
                 return `
                   <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
                     <div>
-                      <!-- IMAGE SLIDER CONTAINER WITH SWIPE & HIGH OPACITY ARROWS (MANAGE CATALOGUE) -->
+                      <!-- IMAGE SLIDER CONTAINER (MANAGE CATALOGUE) -->
                       <div class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden relative group"
                            ontouchstart="handleTouchStart(event)" 
                            ontouchend="handleTouchEnd(event, '${p.id}',${p.images.length})">
@@ -1448,19 +1446,19 @@
             ${activeProducts.map(p => {
               const currentIdx = window.cardImageIndices[p.id] || 0;
               const activeImg = p.images[currentIdx] || p.images[0] || 'https://via.placeholder.com/150';
-              const isArrowsShown = window.cardShowArrows[p.id] || false;
+              const showArrows = window.publicShowArrows[p.id] || false;
               return `
                 <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md flex flex-col justify-between relative">
                   <div>
-                    <!-- IMAGE SLIDER CONTAINER WITH SWIPE & CONDITIONAL HIGH OPACITY ARROWS (PUBLIC) -->
+                    <!-- IMAGE SLIDER CONTAINER: ARROWS HIDDEN BY DEFAULT, APPEAR AFTER CLICKING IMAGE -->
                     <div class="w-full h-28 bg-pastel-pink/40 rounded-xl overflow-hidden relative group"
                          ontouchstart="handleTouchStart(event)" 
                          ontouchend="handleTouchEnd(event, '${p.id}',${p.images.length})">
-                      <img id="card-img-${p.id}" src="${activeImg}" onclick="handlePublicImageClick(event, '${p.id}',${p.images.length})" class="w-full h-full object-cover cursor-pointer">
+                      <img id="card-img-${p.id}" src="${activeImg}" onclick="handlePublicImageClick(event, '${p.id}', ${p.images.length},${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
                       
-                      <!-- High Opacity Navigation Arrows (Hidden by default, appear after click) -->
+                      <!-- Navigation Arrows (Hidden by default, shown via state after user clicks image) -->
                       ${p.images && p.images.length > 1 ? `
-                        <div id="card-arrows-${p.id}" class="${isArrowsShown ? '' : 'hidden'}">
+                        <div id="public-arrows-${p.id}" class="${showArrows ? '' : 'hidden'}">
                           <button type="button" onclick="prevCardImage(event, '${p.id}', ${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
                             ❮
                           </button>
