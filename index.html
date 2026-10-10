@@ -148,11 +148,9 @@
     const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 Jam
     let inactivityTimer = null;
     
-    // Simpanan memori indeks gambar semasa untuk setiap kad produk
     window.cardImageIndices = {};
-    window.publicShowArrows = {}; // Status kemunculan arrow untuk Public Customer Catalog selepas klik imej
+    window.publicShowArrows = {};
 
-    // Fungsi Pengurusan Touch Swipe untuk Slider Kad Produk
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -163,13 +161,11 @@
     function handleTouchEnd(e, prodId, maxLen) {
       touchEndX = e.changedTouches[0].screenX;
       if (touchEndX < touchStartX - 40) {
-        // Swipe Kiri (Next Image)
         if (!window.cardImageIndices[prodId]) window.cardImageIndices[prodId] = 0;
         window.cardImageIndices[prodId] = (window.cardImageIndices[prodId] + 1) % maxLen;
         updateCardImageDisplay(prodId);
       }
       if (touchEndX > touchStartX + 40) {
-        // Swipe Kanan (Prev Image)
         if (!window.cardImageIndices[prodId]) window.cardImageIndices[prodId] = 0;
         window.cardImageIndices[prodId] = (window.cardImageIndices[prodId] - 1 + maxLen) % maxLen;
         updateCardImageDisplay(prodId);
@@ -241,7 +237,6 @@
       window.addEventListener(evt, resetInactivityTimer, true);
     });
 
-    // PWA Manifest Setup
     (function setupPWA() {
       const manifestObj = {
         name: "Scha Digital Learning Center",
@@ -359,7 +354,6 @@
       });
     }
 
-    // --- FUNGSI SLIDE IMEG PADA KAD PRODUK (MANAGE & CATALOGUE) ---
     function nextCardImage(event, prodId, maxLen) {
       event.stopPropagation();
       if (!window.cardImageIndices[prodId]) window.cardImageIndices[prodId] = 0;
@@ -387,7 +381,6 @@
       }
     }
 
-    // Fungsi interaksi klik imej Public Customer: Paparkan arrow navigasi kad apabila diklik
     function handlePublicImageClick(event, prodId, maxLen, imagesArr) {
       event.stopPropagation();
       window.publicShowArrows[prodId] = true;
@@ -398,7 +391,6 @@
       openImageViewer(imagesArr);
     }
 
-    // --- PAGE 1: ADMIN LOGIN ---
     function renderPage1Login() {
       const lang = state.language;
       return `
@@ -566,7 +558,6 @@
       navigate('/my-sales');
     }
 
-    // --- PAGE 2: MY SALES DASHBOARD ---
     let currentSalesFilter = 'THIS_MONTH';
 
     function renderPage2MySales() {
@@ -675,7 +666,6 @@
       renderCurrentRoute();
     }
 
-    // --- PAGE 3: ADD CATALOGUE ---
     let tempAddProductMedia = [];
 
     function renderPage3AddCatalogue() {
@@ -817,7 +807,6 @@
       container.innerHTML = html;
     }
 
-    // Fungsi Auto Mampat Imej (Image Compression) Melalui Canvas untuk Kelajuan & Jimat Storan
     function handleNativeImageUpload(e) {
       const files = Array.from(e.target.files);
       if (tempAddProductMedia.length + files.length > 6) {
@@ -854,7 +843,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Mampat imej kepada format JPEG berkualiti 0.7 supaya saiz kecil & laju
             const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
             tempAddProductMedia.push(compressedDataUrl);
             renderImageSlots();
@@ -909,17 +897,32 @@
 
     function handleSaveProduct(e) {
       e.preventDefault();
-      const name = document.getElementById('prod-name').value.trim();
-      const orderNo = document.getElementById('prod-order').value;
-      const category = document.getElementById('prod-category').value;
-      const price = parseFloat(document.getElementById('prod-price').value) || 0;
-      const promo = parseFloat(document.getElementById('prod-promo').value) || 0;
-      const totalPrice = parseFloat(document.getElementById('prod-total').value) || 0;
-      const buyNowUrl = document.getElementById('prod-buynow').value.trim();
-      const whatsappUrl = document.getElementById('prod-wa').value.trim();
+      
+      const nameEl = document.getElementById('prod-name');
+      const orderEl = document.getElementById('prod-order');
+      const catEl = document.getElementById('prod-category');
+      const priceEl = document.getElementById('prod-price');
+      const promoEl = document.getElementById('prod-promo');
+      const totalEl = document.getElementById('prod-total');
+      const buyNowEl = document.getElementById('prod-buynow');
+      const waEl = document.getElementById('prod-wa');
+
+      if (!nameEl || !orderEl || !catEl || !priceEl) {
+        alert(state.language === 'BM' ? 'Ralat borang tidak dijumpai. Sila muat semula halaman.' : 'Form error. Please refresh page.');
+        return;
+      }
+
+      const name = nameEl.value.trim();
+      const orderNo = orderEl.value;
+      const category = catEl.value;
+      const price = parseFloat(priceEl.value) || 0;
+      const promo = parseFloat(promoEl ? promoEl.value : 0) || 0;
+      const totalPrice = parseFloat(totalEl ? totalEl.value : price) || 0;
+      const buyNowUrl = buyNowEl ? buyNowEl.value.trim() : '';
+      const whatsappUrl = waEl ? waEl.value.trim() : '';
 
       const newProd = {
-        id: 'PROD_' + Date.now(),
+        id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random()*1000),
         orderNo,
         name,
         category,
@@ -942,7 +945,6 @@
         return;
       }
       
-      // Kosongkan semula memori imej sementara & set semula borang sepenuhnya untuk produk seterusnya
       tempAddProductMedia = [];
       const formEl = document.getElementById('add-product-form');
       if (formEl) formEl.reset();
@@ -951,7 +953,6 @@
       navigate('/add-catalog');
     }
 
-    // --- PAGE 4: MANAGE CATALOGUE ---
     let filterCategoryValue = 'ALL';
     let filterProductNameValue = 'ALL';
 
@@ -988,7 +989,6 @@
               </button>
             </div>
 
-            <!-- 2 DROPDOWN FILTERS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-bold mb-1">${lang === 'BM' ? 'Penapis Kategori' : 'Filter by Category'}</label>
@@ -1007,7 +1007,6 @@
               </div>
             </div>
 
-            <!-- Product Grid -->
             <div class="grid grid-cols-2 gap-3 pt-2">
               ${filteredProds.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">${lang === 'BM' ? 'Tiada produk tersedia. Sila tambah produk di halaman + Katalog.' : 'No products available. Please add products in + Catalog page.'}</div>` : ''}
               ${filteredProds.map(p => {
@@ -1016,13 +1015,11 @@
                 return `
                   <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
                     <div>
-                      <!-- IMAGE SLIDER CONTAINER (MANAGE CATALOGUE) -->
                       <div class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden relative group"
                            ontouchstart="handleTouchStart(event)" 
                            ontouchend="handleTouchEnd(event, '${p.id}',${p.images.length})">
                         <img id="card-img-${p.id}" src="${activeImg}" onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
                         
-                        <!-- High Opacity Navigation Arrows -->
                         ${p.images && p.images.length > 1 ? `
                           <button type="button" onclick="prevCardImage(event, '${p.id}', ${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
                             ❮
@@ -1100,7 +1097,6 @@
       }
     }
 
-    // --- FULLSCREEN IMAGE VIEWER MODAL LOGIC ---
     let currentViewerImages = [];
     let currentViewerIdx = 0;
 
@@ -1136,7 +1132,6 @@
       updateImageViewerContent();
     }
 
-    // --- PAGE 5: SALES RECORD ---
     function renderPage5SalesRecord() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
@@ -1164,7 +1159,6 @@
               </button>
             </div>
 
-            <!-- Table Header -->
             <div class="bg-pastel-coral rounded-xl p-2.5 text-[11px] font-bold text-black grid grid-cols-5 text-center border border-black/10">
               <div>${lang === 'BM' ? 'Tarikh' : 'Date'}</div>
               <div>${lang === 'BM' ? 'No. Pesanan' : 'Order No'}</div>
@@ -1173,7 +1167,6 @@
               <div>${lang === 'BM' ? 'Tindakan' : 'Action'}</div>
             </div>
 
-            <!-- Table Rows -->
             <div class="space-y-1.5 max-h-56 overflow-y-auto">
               ${state.sales.length === 0 ? `<div class="text-center text-xs text-slate-500 py-3">${lang === 'BM' ? 'Tiada rekod jualan.' : 'No sales record available.'}</div>` : ''}
               ${state.sales.map(s => `
@@ -1196,7 +1189,6 @@
 
             <hr class="border-black/10 my-4">
 
-            <!-- Manual Sales Section -->
             <div class="space-y-3">
               <h3 class="font-bold text-xs text-black">
                 ${lang === 'BM' ? 'Tambah jualan manual (pembeli beli luar bcl.my)' : 'Add sales manually if buyer buy product not from bcl payment gateway'}
@@ -1304,7 +1296,6 @@
       renderCurrentRoute();
     }
 
-    // --- PAGE 6: SETTING ---
     function renderPage6Setting() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
@@ -1332,7 +1323,6 @@
             </div>
 
             <form onsubmit="handleSaveSettings(event)" class="space-y-4">
-              <!-- UI UPLOAD GAMBAR LOGO DENGAN AKSES PENUH GALERI PHONE -->
               <div class="bg-white/80 p-4 rounded-2xl border border-black/10 space-y-3">
                 <label class="block font-bold text-xs text-black">
                   ${lang === 'BM' ? 'Muat Naik Logo Admin Portal (Bebas Dari Mana-mana Folder/Galeri Phone)' : 'Upload Admin Portal Logo (Access All Gallery/Folder)'}
@@ -1362,7 +1352,6 @@
                 <input type="text" id="setting-greeting" value="${state.adminProfile.welcomeGreeting}" required class="w-full bg-pastel-coral px-4 py-2.5 rounded-full border-none text-xs font-bold text-black">
               </div>
 
-              <!-- Entire Catalogue Link Section -->
               <div>
                 <label class="block font-bold text-xs text-black mb-1">
                   ${lang === 'BM' ? 'Pautan Keseluruhan Katalog Anda (Auto Generate)' : 'Your Catalogue Link. This link auto generate from your catalogue'}
@@ -1375,7 +1364,6 @@
                 </div>
               </div>
 
-              <!-- SAVE & SIGN OUT BUTTONS -->
               <div class="flex justify-between items-center pt-2">
                 <button type="button" onclick="handleSignOut()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-full font-bold text-xs border border-black shadow-hard transition">
                   ${lang === 'BM' ? 'Daftar Keluar' : 'Sign Out'}
@@ -1425,7 +1413,6 @@
       }
     }
 
-    // --- PAGE 7: PUBLIC CUSTOMER CATALOGUE VIEW ---
     let publicCategoryFilter = 'ALL';
     let publicProductNameFilter = 'ALL';
 
@@ -1444,15 +1431,12 @@
 
       return `
         <div class="bg-customer-gradient min-h-screen p-4 space-y-4 text-slate-800">
-          
-          <!-- Shop Header -->
           <div class="bg-pastel-peach/95 rounded-3xl p-6 border border-white/50 shadow-lg text-center relative overflow-hidden">
             <span class="absolute top-2 left-3 text-lg opacity-80">✈️</span>
             <span class="absolute top-2 right-3 text-lg opacity-80">💌</span>
             <span class="absolute bottom-2 left-4 text-xs opacity-80">💖</span>
             <span class="absolute bottom-2 right-4 text-xs opacity-80">🎀</span>
 
-            <!-- Language Switcher in Public Catalog -->
             <div class="absolute top-3 right-3 z-10 bg-white/80 border border-black rounded-full px-3 py-0.5 text-[10px] font-bold shadow-sm">
               <button onclick="switchLanguage('EN')" class="${lang === 'EN' ? 'text-black font-extrabold underline' : 'text-slate-500'}">EN</button> |
               <button onclick="switchLanguage('BM')" class="${lang === 'BM' ? 'text-black font-extrabold underline' : 'text-slate-500'}">BM</button>
@@ -1469,7 +1453,6 @@
             </div>
           </div>
 
-          <!-- 2 DROPDOWN FILTERS -->
           <div class="bg-pastel-peach/95 rounded-3xl p-4 border border-white/50 shadow-md space-y-3">
             <div>
               <label class="block text-xs font-bold mb-1 text-slate-800">${lang === 'BM' ? 'Penapis Kategori' : 'Filter by Categories'}</label>
@@ -1488,7 +1471,6 @@
             </div>
           </div>
 
-          <!-- Product Grid -->
           <div class="grid grid-cols-2 gap-3">
             ${activeProducts.length === 0 ? `<div class="col-span-2 text-center text-xs text-white py-8 font-semibold">${lang === 'BM' ? 'Tiada produk tersedia buat masa ini.' : 'No products available at the moment.'}</div>` : ''}
             ${activeProducts.map(p => {
@@ -1498,13 +1480,11 @@
               return `
                 <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md flex flex-col justify-between relative">
                   <div>
-                    <!-- IMAGE SLIDER CONTAINER: ARROWS HIDDEN BY DEFAULT, APPEAR AFTER CLICKING IMAGE -->
                     <div class="w-full h-28 bg-pastel-pink/40 rounded-xl overflow-hidden relative group"
                          ontouchstart="handleTouchStart(event)" 
                          ontouchend="handleTouchEnd(event, '${p.id}',${p.images.length})">
                       <img id="card-img-${p.id}" src="${activeImg}" onclick="handlePublicImageClick(event, '${p.id}', ${p.images.length},${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
                       
-                      <!-- Navigation Arrows (Hidden by default, shown via state after user clicks image) -->
                       ${p.images && p.images.length > 1 ? `
                         <div id="public-arrows-${p.id}" class="${showArrows ? '' : 'hidden'}">
                           <button type="button" onclick="prevCardImage(event, '${p.id}', ${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
