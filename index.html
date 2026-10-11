@@ -255,12 +255,34 @@
       document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
     })();
 
-    function getCurrentFormattedDate() {
+    function getCurrentShortFormattedDate() {
       const now = new Date();
-      const dd = String(now.getDate()).padStart(2, '0');
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const yyyy = now.getFullYear();
-      return `${dd}/${mm}/${yyyy}`;
+      const dd = now.getDate();
+      const mm = now.getMonth() + 1;
+      const yy = String(now.getFullYear()).slice(-2);
+      return `${dd}/${mm}/${yy}`;
+    }
+
+    function formatShortDate(dateStr) {
+      if (!dateStr) return '';
+      if (dateStr.includes('/')) {
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          const d = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10);
+          const y = parts[2].length === 4 ? parts[2].slice(-2) : parts[2];
+          return `${d}/${m}/${y}`;
+        }
+      } else if (dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          const y = parts[0].slice(-2);
+          const m = parseInt(parts[1], 10);
+          const d = parseInt(parts[2], 10);
+          return `${d}/${m}/${y}`;
+        }
+      }
+      return dateStr;
     }
 
     function getCurrentIsoDate() {
@@ -571,7 +593,7 @@
 
     function renderPage2MySales() {
       const lang = state.language;
-      const todayDate = getCurrentFormattedDate();
+      const todayDate = getCurrentShortFormattedDate();
       const currentYear = new Date().getFullYear();
 
       const now = new Date();
@@ -584,16 +606,23 @@
       let totalRevenue = 0;
 
       state.sales.forEach(s => {
-        const [d, m, y] = s.date.split('/').map(Number);
-        totalRevenue += Number(s.amount);
+        const parts = s.date.split('/');
+        if (parts.length === 3) {
+          const d = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10);
+          let y = parseInt(parts[2], 10);
+          if (y < 100) y += 2000;
 
-        if (m - 1 === currentMonthNum && y === currentYearNum) {
-          totalOrderThisMonth += 1;
-          totalSalesThisMonth += Number(s.amount);
-        }
+          totalRevenue += Number(s.amount);
 
-        if (d === now.getDate() && m - 1 === currentMonthNum && y === currentYearNum) {
-          salesAmountToday += Number(s.amount);
+          if (m - 1 === currentMonthNum && y === currentYearNum) {
+            totalOrderThisMonth += 1;
+            totalSalesThisMonth += Number(s.amount);
+          }
+
+          if (d === now.getDate() && m - 1 === currentMonthNum && y === currentYearNum) {
+            salesAmountToday += Number(s.amount);
+          }
         }
       });
 
@@ -602,9 +631,14 @@
 
       const monthlyTotals = new Array(12).fill(0);
       state.sales.forEach(s => {
-        const [d, m, y] = s.date.split('/').map(Number);
-        if (y === currentYearNum) {
-          monthlyTotals[m - 1] += Number(s.amount);
+        const parts = s.date.split('/');
+        if (parts.length === 3) {
+          const m = parseInt(parts[1], 10);
+          let y = parseInt(parts[2], 10);
+          if (y < 100) y += 2000;
+          if (y === currentYearNum) {
+            monthlyTotals[m - 1] += Number(s.amount);
+          }
         }
       });
 
@@ -679,7 +713,7 @@
 
     function renderPage3AddCatalogue() {
       const lang = state.language;
-      const todayDate = getCurrentFormattedDate();
+      const todayDate = getCurrentShortFormattedDate();
       
       const nextNum = state.products.length + 1;
       const autoOrderNo = `QS` + String(nextNum).padStart(3, '0');
@@ -937,7 +971,7 @@
         price,
         promo,
         totalPrice,
-        images: tempAddProductMedia.length > 0 ? [...tempAddProductMedia] : [], // Dibiarkan kosong/tiada jika tak muat naik
+        images: tempAddProductMedia.length > 0 ? [...tempAddProductMedia] : [],
         video: '',
         buyNowUrl,
         whatsappUrl,
@@ -968,7 +1002,7 @@
 
     function renderPage4ManageCatalogue() {
       const lang = state.language;
-      const todayDate = getCurrentFormattedDate();
+      const todayDate = getCurrentShortFormattedDate();
 
       let filteredProds = state.products;
       if (filterCategoryValue !== 'ALL') {
@@ -1148,7 +1182,7 @@
     // --- PAGE 5: SALES RECORD ---
     function renderPage5SalesRecord() {
       const lang = state.language;
-      const todayDate = getCurrentFormattedDate();
+      const todayDate = getCurrentShortFormattedDate();
       const todayIso = getCurrentIsoDate();
 
       return `
@@ -1189,14 +1223,14 @@
               ${state.sales.length === 0 ? `<div class="text-center text-xs text-slate-500 py-3">${lang === 'BM' ? 'Tiada rekod jualan.' : 'No sales record available.'}</div>` : ''}
               ${state.sales.map(s => `
                 <div class="bg-pastel-pink/60 rounded-xl p-2 text-[10px] font-semibold text-slate-800 grid grid-cols-6 text-center items-center border border-black/5">
-                  <div>${s.date}</div>
+                  <div>${formatShortDate(s.date)}</div>
                   <div class="font-bold truncate px-1">${s.customerName || '-'}</div>
                   <div class="font-bold">${s.orderNo}</div>
                   <div class="font-bold">RM ${Number(s.amount).toFixed(2)}</div>
                   <div class="bg-white/60 px-1 py-0.5 rounded-full border border-black/10 truncate">${s.source}</div>
-                  <div class="flex justify-center items-center space-x-1">
-                    <button onclick="editSaleRecord('${s.id}')" title="Edit" class="p-1 bg-white rounded-full border border-black/20 text-blue-700 hover:bg-blue-50">✎</button>
-                    <button onclick="removeSaleRecord('${s.id}')" title="Remove" class="p-1 bg-white rounded-full border border-black/20 text-red-600 hover:bg-red-50">🗑</button>
+                  <div class="flex flex-col items-center justify-center space-y-1">
+                    <button onclick="editSaleRecord('${s.id}')" title="Edit" class="p-1 bg-white rounded-full border border-black/20 text-blue-700 hover:bg-blue-50 text-[10px] leading-none">✎</button>
+                    <button onclick="removeSaleRecord('${s.id}')" title="Remove" class="p-1 bg-white rounded-full border border-black/20 text-red-600 hover:bg-red-50 text-[10px] leading-none">🗑</button>
                   </div>
                 </div>
               `).join('')}
@@ -1308,11 +1342,14 @@
     function handleSaveManualSale(e) {
       e.preventDefault();
       const rawDate = document.getElementById('manual-date').value; // YYYY-MM-DD from calendar
-      let dateFormatted = getCurrentFormattedDate();
+      let dateFormatted = getCurrentShortFormattedDate();
       if (rawDate) {
         const parts = rawDate.split('-');
         if (parts.length === 3) {
-          dateFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+          const y = parts[0].slice(-2);
+          const m = parseInt(parts[1], 10);
+          const d = parseInt(parts[2], 10);
+          dateFormatted = `${d}/${m}/${y}`;
         }
       }
       const customerName = document.getElementById('manual-customer').value.trim();
@@ -1339,7 +1376,7 @@
     // --- PAGE 6: SETTING ---
     function renderPage6Setting() {
       const lang = state.language;
-      const todayDate = getCurrentFormattedDate();
+      const todayDate = getCurrentShortFormattedDate();
       const entireCatalogueUrl = `https://syaaetelier.github.io/Scha-Digital-Hub/#/catalog`;
 
       return `
@@ -1596,7 +1633,7 @@
       setTimeout(() => {
         const autoSale = {
           id: 'SALE_' + Date.now(),
-          date: getCurrentFormattedDate(),
+          date: getCurrentShortFormattedDate(),
           customerName: 'Online Buyer',
           orderNo: orderNo,
           amount: amount,
