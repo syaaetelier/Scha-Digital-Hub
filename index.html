@@ -263,6 +263,14 @@
       return `${dd}/${mm}/${yyyy}`;
     }
 
+    function getCurrentIsoDate() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
     function switchLanguage(lang) {
       state.language = lang;
       saveDB(state);
@@ -374,7 +382,7 @@
       const prod = state.products.find(p => p.id === prodId);
       if (prod && imgEl) {
         const idx = window.cardImageIndices[prodId] || 0;
-        imgEl.src = prod.images[idx] || 'https://via.placeholder.com/150';
+        imgEl.src = prod.images[idx] || '';
         if (counterEl) {
           counterEl.innerText = `${idx + 1} / ${prod.images.length}`;
         }
@@ -383,6 +391,7 @@
 
     function handlePublicImageClick(event, prodId, maxLen, imagesArr) {
       event.stopPropagation();
+      if (!imagesArr || imagesArr.length === 0) return;
       window.publicShowArrows[prodId] = true;
       const arrowContainer = document.getElementById(`public-arrows-${prodId}`);
       if (arrowContainer) {
@@ -807,7 +816,6 @@
       container.innerHTML = html;
     }
 
-    // Fungsi Auto Mampat Imej di bawah 2MB Menggunakan Canvas
     function handleNativeImageUpload(e) {
       const files = Array.from(e.target.files);
       if (tempAddProductMedia.length + files.length > 6) {
@@ -822,7 +830,7 @@
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            const MAX_DIMENSION = 900; // Saiz optimum agar fail di bawah 2MB (biasanya sekitar 150KB - 400KB)
+            const MAX_DIMENSION = 900;
             let width = img.width;
             let height = img.height;
 
@@ -843,7 +851,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Mampat ke JPEG kualiti 0.75 (menjamin saiz di bawah 2MB & storan pelayar tidak penuh)
             const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
             tempAddProductMedia.push(compressedDataUrl);
             renderImageSlots();
@@ -930,7 +937,7 @@
         price,
         promo,
         totalPrice,
-        images: tempAddProductMedia.length > 0 ? [...tempAddProductMedia] : ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&auto=format&fit=crop'],
+        images: tempAddProductMedia.length > 0 ? [...tempAddProductMedia] : [], // Dibiarkan kosong/tiada jika tak muat naik
         video: '',
         buyNowUrl,
         whatsappUrl,
@@ -947,7 +954,6 @@
         return;
       }
       
-      // Kosongkan semula tatasusunan imej sementara untuk produk seterusnya
       tempAddProductMedia = [];
       const formEl = document.getElementById('add-product-form');
       if (formEl) formEl.reset();
@@ -1017,28 +1023,25 @@
               ${filteredProds.length === 0 ? `<div class="col-span-2 text-center text-xs text-slate-500 py-6">${lang === 'BM' ? 'Tiada produk tersedia. Sila tambah produk di halaman + Katalog.' : 'No products available. Please add products in + Catalog page.'}</div>` : ''}
               ${filteredProds.map(p => {
                 const currentIdx = window.cardImageIndices[p.id] || 0;
-                const activeImg = p.images[currentIdx] || p.images[0] || 'https://via.placeholder.com/150';
+                const hasImages = p.images && p.images.length > 0;
+                const activeImg = hasImages ? (p.images[currentIdx] || p.images[0]) : '';
                 return `
                   <div class="bg-pastel-softPink/80 p-3 rounded-2xl border border-black/10 shadow-sm flex flex-col justify-between">
                     <div>
-                      <!-- IMAGE SLIDER CONTAINER (MANAGE CATALOGUE) -->
-                      <div class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden relative group"
+                      <!-- IMAGE CONTAINER (MANAGE CATALOGUE) -->
+                      <div class="w-full h-28 bg-white rounded-xl border border-black/10 overflow-hidden relative group flex items-center justify-center"
                            ontouchstart="handleTouchStart(event)" 
-                           ontouchend="handleTouchEnd(event, '${p.id}',${p.images.length})">
-                        <img id="card-img-${p.id}" src="${activeImg}" onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
-                        
-                        <!-- High Opacity Navigation Arrows -->
-                        ${p.images && p.images.length > 1 ? `
-                          <button type="button" onclick="prevCardImage(event, '${p.id}', ${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
-                            ❮
-                          </button>
-                          <button type="button" onclick="nextCardImage(event, '${p.id}', ${p.images.length})" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
-                            ❯
-                          </button>
-                          <span id="card-counter-${p.id}" class="absolute bottom-1 right-1 bg-black/80 text-white font-bold text-[9px] px-1.5 py-0.5 rounded-full">
-                            ${currentIdx + 1} / ${p.images.length}
-                          </span>
-                        ` : ''}
+                           ontouchend="handleTouchEnd(event, '${p.id}',${hasImages ? p.images.length : 1})">
+                        ${hasImages ? `
+                          <img id="card-img-${p.id}" src="${activeImg}" onclick="openImageViewer(${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
+                          ${p.images.length > 1 ? `
+                            <button type="button" onclick="prevCardImage(event, '${p.id}',${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">❮</button>
+                            <button type="button" onclick="nextCardImage(event, '${p.id}',${p.images.length})" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">❯</button>
+                            <span id="card-counter-${p.id}" class="absolute bottom-1 right-1 bg-black/80 text-white font-bold text-[9px] px-1.5 py-0.5 rounded-full">${currentIdx + 1} /${p.images.length}</span>
+                          ` : ''}
+                        ` : `
+                          <span class="text-[10px] text-slate-400 font-bold">${lang === 'BM' ? 'Tiada Gambar' : 'No Image'}</span>
+                        `}
                       </div>
 
                       <div class="mt-2 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
@@ -1110,7 +1113,8 @@
     let currentViewerIdx = 0;
 
     function openImageViewer(imagesArr) {
-      currentViewerImages = imagesArr && imagesArr.length > 0 ? imagesArr : ['https://via.placeholder.com/300'];
+      if (!imagesArr || imagesArr.length === 0) return;
+      currentViewerImages = imagesArr;
       currentViewerIdx = 0;
       updateImageViewerContent();
       document.getElementById('image-viewer-modal').classList.remove('hidden');
@@ -1145,6 +1149,7 @@
     function renderPage5SalesRecord() {
       const lang = state.language;
       const todayDate = getCurrentFormattedDate();
+      const todayIso = getCurrentIsoDate();
 
       return `
         <div class="p-4 space-y-4">
@@ -1169,29 +1174,29 @@
               </button>
             </div>
 
-            <div class="bg-pastel-coral rounded-xl p-2.5 text-[11px] font-bold text-black grid grid-cols-5 text-center border border-black/10">
+            <!-- Table Header -->
+            <div class="bg-pastel-coral rounded-xl p-2.5 text-[10px] font-bold text-black grid grid-cols-6 text-center border border-black/10">
               <div>${lang === 'BM' ? 'Tarikh' : 'Date'}</div>
-              <div>${lang === 'BM' ? 'No. Pesanan' : 'Order No'}</div>
+              <div>${lang === 'BM' ? 'Pelanggan' : 'Customer'}</div>
+              <div>${lang === 'BM' ? 'Pesanan' : 'Order'}</div>
               <div>${lang === 'BM' ? 'Jumlah' : 'Amount'}</div>
               <div>${lang === 'BM' ? 'Sumber' : 'Source'}</div>
               <div>${lang === 'BM' ? 'Tindakan' : 'Action'}</div>
             </div>
 
+            <!-- Table Rows -->
             <div class="space-y-1.5 max-h-56 overflow-y-auto">
               ${state.sales.length === 0 ? `<div class="text-center text-xs text-slate-500 py-3">${lang === 'BM' ? 'Tiada rekod jualan.' : 'No sales record available.'}</div>` : ''}
               ${state.sales.map(s => `
-                <div class="bg-pastel-pink/60 rounded-xl p-2 text-xs font-semibold text-slate-800 grid grid-cols-5 text-center items-center border border-black/5">
-                  <div class="text-[10px]">${s.date}</div>
-                  <div class="font-bold text-[10px]">${s.orderNo}</div>
-                  <div class="font-bold text-[11px]">RM ${Number(s.amount).toFixed(2)}</div>
-                  <div class="text-[9px] bg-white/60 px-1 py-0.5 rounded-full border border-black/10 truncate">${s.source}</div>
-                  <div class="flex justify-center items-center space-x-1.5">
-                    <button onclick="editSaleRecord('${s.id}')" title="Edit" class="p-1 bg-white rounded-full border border-black/20 text-blue-700 hover:bg-blue-50">
-                      ✎
-                    </button>
-                    <button onclick="removeSaleRecord('${s.id}')" title="Remove" class="p-1 bg-white rounded-full border border-black/20 text-red-600 hover:bg-red-50">
-                      🗑
-                    </button>
+                <div class="bg-pastel-pink/60 rounded-xl p-2 text-[10px] font-semibold text-slate-800 grid grid-cols-6 text-center items-center border border-black/5">
+                  <div>${s.date}</div>
+                  <div class="font-bold truncate px-1">${s.customerName || '-'}</div>
+                  <div class="font-bold">${s.orderNo}</div>
+                  <div class="font-bold">RM ${Number(s.amount).toFixed(2)}</div>
+                  <div class="bg-white/60 px-1 py-0.5 rounded-full border border-black/10 truncate">${s.source}</div>
+                  <div class="flex justify-center items-center space-x-1">
+                    <button onclick="editSaleRecord('${s.id}')" title="Edit" class="p-1 bg-white rounded-full border border-black/20 text-blue-700 hover:bg-blue-50">✎</button>
+                    <button onclick="removeSaleRecord('${s.id}')" title="Remove" class="p-1 bg-white rounded-full border border-black/20 text-red-600 hover:bg-red-50">🗑</button>
                   </div>
                 </div>
               `).join('')}
@@ -1199,6 +1204,7 @@
 
             <hr class="border-black/10 my-4">
 
+            <!-- Manual Sales Section -->
             <div class="space-y-3">
               <h3 class="font-bold text-xs text-black">
                 ${lang === 'BM' ? 'Tambah jualan manual (pembeli beli luar bcl.my)' : 'Add sales manually if buyer buy product not from bcl payment gateway'}
@@ -1207,29 +1213,34 @@
               <form onsubmit="handleSaveManualSale(event)" class="space-y-3">
                 <div class="grid grid-cols-2 gap-2">
                   <div>
-                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Tarikh' : 'Date'}</label>
-                    <input type="text" id="manual-date" value="${todayDate}" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Tarikh (Pilih Kalendar)' : 'Date (Select Calendar)'}</label>
+                    <input type="date" id="manual-date" value="${todayIso}" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                   </div>
                   <div>
-                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'No. Pesanan' : 'Order No'}</label>
-                    <select id="manual-order" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
-                      ${state.products.length === 0 ? `<option value="QS000">${lang === 'BM' ? 'Tiada Produk' : 'No Products'}</option>` : ''}
-                      ${state.products.map(p => `<option value="${p.orderNo}">${p.orderNo} -${p.name.substring(0,12)}...</option>`).join('')}
-                    </select>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Nama Customer' : 'Customer Name'}</label>
+                    <input type="text" id="manual-customer" required placeholder="${lang === 'BM' ? 'Nama pembeli...' : 'Customer name...'}" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                   </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'No. Pesanan' : 'Order No'}</label>
+                    <select id="manual-order" required onchange="handleManualOrderChange(this.value)" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
+                      <option value="">-- ${lang === 'BM' ? 'Pilih Pesanan' : 'Select Order'} --</option>
+                      ${state.products.map(p => `<option value="${p.orderNo}">${p.orderNo} -${p.name.substring(0,10)}...</option>`).join('')}
+                    </select>
+                  </div>
                   <div>
                     <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Sumber' : 'Source'}</label>
                     <select id="manual-source" required class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
                       ${state.sources.map(src => `<option value="${src}">${src}</option>`).join('')}
                     </select>
                   </div>
-                  <div>
-                    <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Jumlah (RM)' : 'Amount (RM)'}</label>
-                    <input type="number" step="0.01" id="manual-amount" required placeholder="0.00" class="w-full bg-pastel-coral px-3 py-2 rounded-2xl text-xs font-bold">
-                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold mb-1">${lang === 'BM' ? 'Jumlah Harga (RM) - Auto Appear' : 'Amount (RM) - Auto Appear'}</label>
+                  <input type="number" step="0.01" id="manual-amount" required placeholder="0.00" class="w-full bg-pastel-coral/60 px-3 py-2 rounded-2xl text-xs font-bold text-black" readonly>
                 </div>
 
                 <div class="flex space-x-2 pt-1">
@@ -1247,6 +1258,16 @@
           </div>
         </div>
       `;
+    }
+
+    function handleManualOrderChange(orderNo) {
+      const prod = state.products.find(p => p.orderNo === orderNo);
+      const amountInput = document.getElementById('manual-amount');
+      if (prod && amountInput) {
+        amountInput.value = prod.totalPrice.toFixed(2);
+      } else if (amountInput) {
+        amountInput.value = '0.00';
+      }
     }
 
     function editSaleRecord(saleId) {
@@ -1286,14 +1307,23 @@
 
     function handleSaveManualSale(e) {
       e.preventDefault();
-      const date = document.getElementById('manual-date').value;
+      const rawDate = document.getElementById('manual-date').value; // YYYY-MM-DD from calendar
+      let dateFormatted = getCurrentFormattedDate();
+      if (rawDate) {
+        const parts = rawDate.split('-');
+        if (parts.length === 3) {
+          dateFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+      }
+      const customerName = document.getElementById('manual-customer').value.trim();
       const orderNo = document.getElementById('manual-order').value;
       const source = document.getElementById('manual-source').value;
       const amount = parseFloat(document.getElementById('manual-amount').value) || 0;
 
       const newSale = {
         id: 'SALE_' + Date.now(),
-        date,
+        date: dateFormatted,
+        customerName,
         orderNo,
         amount,
         source,
@@ -1490,29 +1520,28 @@
             ${activeProducts.length === 0 ? `<div class="col-span-2 text-center text-xs text-white py-8 font-semibold">${lang === 'BM' ? 'Tiada produk tersedia buat masa ini.' : 'No products available at the moment.'}</div>` : ''}
             ${activeProducts.map(p => {
               const currentIdx = window.cardImageIndices[p.id] || 0;
-              const activeImg = p.images[currentIdx] || p.images[0] || 'https://via.placeholder.com/150';
+              const hasImages = p.images && p.images.length > 0;
+              const activeImg = hasImages ? (p.images[currentIdx] || p.images[0]) : '';
               const showArrows = window.publicShowArrows[p.id] || false;
               return `
                 <div class="bg-pastel-peach p-3 rounded-2xl border border-white/60 shadow-md flex flex-col justify-between relative">
                   <div>
-                    <div class="w-full h-28 bg-pastel-pink/40 rounded-xl overflow-hidden relative group"
+                    <!-- IMAGE CONTAINER: DEFAULT KOSONG PUTIH JIKA SELLER TAK UPLOAD -->
+                    <div class="w-full h-28 bg-white rounded-xl overflow-hidden relative group flex items-center justify-center border border-black/5"
                          ontouchstart="handleTouchStart(event)" 
-                         ontouchend="handleTouchEnd(event, '${p.id}',${p.images.length})">
-                      <img id="card-img-${p.id}" src="${activeImg}" onclick="handlePublicImageClick(event, '${p.id}', ${p.images.length},${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
-                      
-                      ${p.images && p.images.length > 1 ? `
-                        <div id="public-arrows-${p.id}" class="${showArrows ? '' : 'hidden'}">
-                          <button type="button" onclick="prevCardImage(event, '${p.id}', ${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
-                            ❮
-                          </button>
-                          <button type="button" onclick="nextCardImage(event, '${p.id}', ${p.images.length})" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">
-                            ❯
-                          </button>
-                        </div>
-                        <span id="card-counter-${p.id}" class="absolute bottom-1 right-1 bg-black/80 text-white font-bold text-[9px] px-1.5 py-0.5 rounded-full">
-                          ${currentIdx + 1} / ${p.images.length}
-                        </span>
-                      ` : ''}
+                         ontouchend="handleTouchEnd(event, '${p.id}',${hasImages ? p.images.length : 1})">
+                      ${hasImages ? `
+                        <img id="card-img-${p.id}" src="${activeImg}" onclick="handlePublicImageClick(event, '${p.id}', ${p.images.length}, ${JSON.stringify(p.images).replace(/"/g, '&quot;')})" class="w-full h-full object-cover cursor-pointer">
+                        ${p.images.length > 1 ? `
+                          <div id="public-arrows-${p.id}" class="${showArrows ? '' : 'hidden'}">
+                            <button type="button" onclick="prevCardImage(event, '${p.id}',${p.images.length})" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">❮</button>
+                            <button type="button" onclick="nextCardImage(event, '${p.id}',${p.images.length})" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/90 text-white hover:bg-black p-1.5 rounded-full shadow-md z-10 font-extrabold text-xs">❯</button>
+                          </div>
+                          <span id="card-counter-${p.id}" class="absolute bottom-1 right-1 bg-black/80 text-white font-bold text-[9px] px-1.5 py-0.5 rounded-full">${currentIdx + 1} /${p.images.length}</span>
+                        ` : ''}
+                      ` : `
+                        <span class="text-[10px] text-slate-300 font-bold">${lang === 'BM' ? 'Tiada Gambar' : 'No Image'}</span>
+                      `}
                     </div>
 
                     <div class="flex justify-between items-start mt-2">
@@ -1568,6 +1597,7 @@
         const autoSale = {
           id: 'SALE_' + Date.now(),
           date: getCurrentFormattedDate(),
+          customerName: 'Online Buyer',
           orderNo: orderNo,
           amount: amount,
           source: 'bcl.my',
@@ -1599,6 +1629,7 @@
       if (!product) {
         return `<div class="p-8 text-center text-xs font-bold text-white">${lang === 'BM' ? 'Produk tidak ditemui.' : 'Product not found.'}</div>`;
       }
+      const hasImages = product.images && product.images.length > 0;
       return `
         <div class="bg-customer-gradient min-h-screen p-4 flex flex-col justify-center items-center">
           <div class="w-full max-w-sm bg-pastel-peach rounded-3xl p-5 border border-white/60 shadow-xl space-y-4">
@@ -1606,8 +1637,8 @@
               <span class="text-xs font-bold uppercase">${product.category}</span>
               <button onclick="openCustomerCatalog()" class="text-xs font-bold underline">${lang === 'BM' ? 'Lihat Semua Katalog' : 'View All Catalogue'}</button>
             </div>
-            <div class="w-full h-48 bg-white rounded-2xl overflow-hidden border border-black/10">
-              <img src="${product.images[0] || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover">
+            <div class="w-full h-48 bg-white rounded-2xl overflow-hidden border border-black/10 flex items-center justify-center">
+              ${hasImages ? `<img src="${product.images[0]}" class="w-full h-full object-cover">` : `<span class="text-xs text-slate-300 font-bold">${lang === 'BM' ? 'Tiada Gambar' : 'No Image'}</span>`}
             </div>
             <h2 class="font-bold text-base text-black">${product.name}</h2>
             <div class="font-bold text-lg text-red-600">RM ${product.totalPrice.toFixed(2)}</div>
