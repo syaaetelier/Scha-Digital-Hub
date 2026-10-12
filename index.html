@@ -785,9 +785,9 @@
 
               <div>
                 <label class="block text-xs font-bold mb-1">
-                  ${lang === 'BM' ? 'Muat Naik Gambar (Auto Mampat < 2MB, Maks 6 Gambar)' : 'Image Upload (Auto Compressed < 2MB, Max 6 Images)'}
+                  ${lang === 'BM' ? 'Muat Naik Gambar (PNG, JPG, JPEG, WebP - Auto Mampat, Maks 6 Gambar)' : 'Image Upload (PNG, JPG, JPEG, WebP - Auto Compressed, Max 6 Images)'}
                 </label>
-                <input type="file" id="media-picker" accept="image/*" multiple class="hidden" onchange="handleNativeImageUpload(event)">
+                <input type="file" id="media-picker" accept="image/png, image/jpeg, image/jpg, image/webp" multiple class="hidden" onchange="handleNativeImageUpload(event)">
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container"></div>
               </div>
 
