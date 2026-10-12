@@ -785,7 +785,7 @@
 
               <div>
                 <label class="block text-xs font-bold mb-1">
-                  ${lang === 'BM' ? 'Muat Naik Gambar (PNG, JPG, JPEG, WebP - Auto Mampat, Maks 6 Gambar)' : 'Image Upload (PNG, JPG, JPEG, WebP - Auto Compressed, Max 6 Images)'}
+                  ${lang === 'BM' ? 'Muat Naik Gambar (PNG, JPG, JPEG, WebP - Auto Mampat & Selamat Storan, Maks 6 Gambar)' : 'Image Upload (PNG, JPG, JPEG, WebP - Auto Compressed, Max 6 Images)'}
                 </label>
                 <input type="file" id="media-picker" accept="image/png, image/jpeg, image/jpg, image/webp" multiple class="hidden" onchange="handleNativeImageUpload(event)">
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2" id="image-slots-container"></div>
@@ -850,6 +850,7 @@
       container.innerHTML = html;
     }
 
+    // UPDATED COMPRESSION & UPLOAD HANDLER FOR PNG, JPG, JPEG, WEBP
     function handleNativeImageUpload(e) {
       const files = Array.from(e.target.files);
       if (tempAddProductMedia.length + files.length > 6) {
@@ -859,12 +860,20 @@
       }
 
       files.forEach(file => {
+        // Validasi format yang dibenarkan
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+          alert(state.language === 'BM' ? 'Format fail tidak disokong. Sila guna PNG, JPG, JPEG, atau WebP.' : 'Unsupported format. Please use PNG, JPG, JPEG, or WebP.');
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = function(evt) {
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            const MAX_DIMENSION = 900;
+            // Saiz maksimum dioptimumkan untuk mengelakkan storan penuh dan mempercepatkan muat naik
+            const MAX_DIMENSION = 800;
             let width = img.width;
             let height = img.height;
 
@@ -883,9 +892,14 @@
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
+            
+            // Untuk memastikan fail PNG/WebP mengekalkan latar belakang yang kemas atau dimampatkan efisien
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0, width, height);
 
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+            // Pemampatan automatik berkualiti tinggi (0.7)
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.70);
             tempAddProductMedia.push(compressedDataUrl);
             renderImageSlots();
           };
@@ -984,7 +998,7 @@
         saveDB(state);
       } catch (err) {
         state.products.pop();
-        alert(state.language === 'BM' ? 'Gagal menyimpan produk ke storan.' : 'Failed to save product to storage.');
+        alert(state.language === 'BM' ? 'Storan penuh. Sila kurangkan bilangan gambar atau saiznya.' : 'Storage full. Please reduce number of images or size.');
         return;
       }
       
